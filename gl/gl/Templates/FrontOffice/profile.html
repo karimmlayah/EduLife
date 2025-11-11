@@ -1,0 +1,339 @@
+{% extends 'evently/base.html' %}
+{% load static %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Avatar + variants */
+    .avatar { width: 78px; height: 78px; border-radius: 18px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size: 1.15rem; letter-spacing: .5px; }
+    .profile-avatar { position: relative; box-shadow: 0 12px 34px rgba(0,0,0,.18); }
+    .profile-avatar:after { content:''; position:absolute; inset:-4px; border-radius:22px; background: conic-gradient(from 180deg at 50% 50%, rgba(17,205,239,.55), rgba(94,114,228,.55), rgba(251,99,64,.55), rgba(45,206,137,.55), rgba(17,205,239,.55)); z-index:-1; filter: blur(8px); opacity:.55; }
+    .avatar-c0 { background: linear-gradient(135deg,#5e72e4 0%,#11cdef 100%); }
+    .avatar-c1 { background: linear-gradient(135deg,#11cdef 0%,#2dce89 100%); }
+    .avatar-c2 { background: linear-gradient(135deg,#2dce89 0%,#5e72e4 100%); }
+    .avatar-c3 { background: linear-gradient(135deg,#f5365c 0%,#fb6340 100%); }
+    .avatar-c4 { background: linear-gradient(135deg,#172b4d 0%,#5e72e4 100%); }
+    .avatar-c5 { background: linear-gradient(135deg,#11cdef 0%,#6a11cb 100%); }
+
+    /* Cards + sections */
+    .card { border-radius: 16px; border: 1px solid rgba(226,232,240,.7); }
+    .card .card-title { font-weight: 800; letter-spacing:.3px; display:flex; align-items:center; gap:.5rem; }
+    .card .card-title:after { content:''; height: 2px; flex:1; background: linear-gradient(90deg, rgba(37,117,252,.25), rgba(17,205,239,.25)); border-radius:2px; margin-left:.5rem; }
+    .card-header-actions{ display:flex; gap:.5rem; }
+    .btn-settings{ background:#5e72e4; color:#fff; border:0; padding:.4rem .75rem; font-weight:700; border-radius:10px; box-shadow: 0 8px 24px rgba(94,114,228,.25); }
+    .btn-settings:hover{ filter:brightness(1.05); }
+
+    /* Form polish */
+    .form-label { font-weight: 600; color: #4b5563; }
+    .form-control { border-radius: 12px; }
+    .form-control:focus { box-shadow: 0 0 0 .20rem rgba(17,205,239,.18); border-color: rgba(17,205,239,.55); }
+    .section-label{ font-size:.78rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.08rem; margin: .25rem 0 .5rem; }
+
+    /* Buttons */
+    .btn-primary { background: linear-gradient(135deg,#11cdef,#5e72e4); border:0; }
+    .btn-primary:hover { filter: brightness(1.03); box-shadow: 0 8px 24px rgba(17,205,239,.22); }
+    .btn-secondary { background: linear-gradient(135deg,#6c757d,#4b5563); border:0; }
+    .btn-secondary:hover { filter: brightness(1.06); box-shadow: 0 8px 24px rgba(75,85,99,.22); }
+
+    /* Alerts */
+    .alert { border-radius: 12px; border:0; box-shadow: 0 10px 24px rgba(0,0,0,.06); }
+
+    /* Hero header (like screenshot) */
+    .profile-hero{ position:relative; min-height:260px; background: url("{% static 'evently/img/events/gallery-3.webp' %}") center/cover no-repeat; border-radius:26px; overflow:hidden; }
+    .profile-hero:before{ content:''; position:absolute; inset:0; background: rgba(37,99,235,.65); backdrop-filter: blur(1px); }
+    .profile-hero .hero-content{ position:relative; z-index:1; color:#fff; padding:34px 40px; }
+    .hero-row{ display:flex; gap:24px; align-items:center; }
+    .hero-avatar{ position:relative; width:120px; height:120px; border-radius:50%; overflow:hidden; border:6px solid #fff; box-shadow: 0 18px 44px rgba(0,0,0,.35); flex: 0 0 auto; }
+    .hero-verified{ position:absolute; bottom:6px; left:-6px; background:#fff; color:#1d4ed8; padding:.25rem .6rem; border-radius:999px; font-weight:800; font-size:.82rem; display:flex; align-items:center; gap:.35rem; box-shadow: 0 8px 20px rgba(0,0,0,.2); }
+    .hero-title{ font-weight:900; letter-spacing:.4px; margin:0; font-size: clamp(1.8rem, 3.8vw, 3rem); }
+    .hero-subtitle{ margin:6px 0 12px; font-weight:700; opacity:.9; }
+    .hero-pills{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 12px; }
+    .hero-pill{ background: rgba(255,255,255,.22); color:#fff; padding:.45rem .9rem; border-radius:16px; font-weight:800; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+    .hero-stars{ color:#fbbf24; font-size:1.1rem; display:flex; align-items:center; gap:.35rem; }
+    .hero-actions{ margin-top:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .btn-contact{ background:#fff; color:#1e3a8a; font-weight:800; border:0; padding:.8rem 1.2rem; border-radius:28px; box-shadow: 0 16px 38px rgba(255,255,255,.25); }
+    .social-soft{ width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background: rgba(255,255,255,.25); color:#fff; backdrop-filter: blur(2px); }
+
+    /* Floating identity card */
+    .identity-card{ background:#fff; border-radius:16px; box-shadow: 0 14px 36px rgba(17,24,39,.14); transform: translateY(-46px); padding:14px 16px; display:flex; align-items:center; gap:12px; }
+    .identity-avatar{ width:52px; height:52px; border-radius:14px; object-fit:cover; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .identity-name{ font-size:1.05rem; font-weight:800; margin:0; }
+    .identity-role{ color:#64748b; margin:0; font-weight:600; font-size:.9rem; }
+
+    /* Right profile card cover */
+    .mini-cover{ height:160px; background: url("{% static 'evently/img/events/gallery-4.webp' %}") center/cover no-repeat; border-top-left-radius:16px; border-top-right-radius:16px; }
+    .mini-avatar{ margin-top:-36px; border:4px solid #fff; width:88px; height:88px; border-radius:50%; object-fit:cover; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    .stat{ text-align:center; }
+    .stat .num{ font-weight:800; font-size:1.05rem; }
+    .stat .lbl{ color:#64748b; font-size:.85rem; }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero header -->
+  <section class="profile-hero">
+    <div class="hero-content container">
+      <div class="hero-row">
+        <div class="hero-avatar">
+          {% if user_obj.avatar %}
+            <img src="{{ user_obj.avatar.url }}" alt="avatar" style="width:100%;height:100%;object-fit:cover;" />
+          {% else %}
+            <img src="{% static 'evently/img/person/person-m-8.webp' %}" alt="avatar" style="width:100%;height:100%;object-fit:cover;" />
+          {% endif %}
+          {% if user_obj.is_verified %}
+          <span class="hero-verified"><i class="bi bi-patch-check-fill"></i> Verified</span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1">
+          <h1 class="hero-title">{{ user_obj.get_full_name|default:user_obj.username }}</h1>
+          <div class="hero-subtitle">{% if user_obj.role %}{{ user_obj.role|title }}{% else %}Member{% endif %}</div>
+          <div class="hero-pills">
+            <span class="hero-pill">Ph.D. MIT</span>
+            <span class="hero-pill">10+ Years</span>
+            <span class="hero-pill">15,247 Students</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="hero-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+            </div>
+            <div style="font-weight:700;opacity:.95;">4.9 rating from 3,821 reviews</div>
+          </div>
+          <div class="hero-actions">
+            <a href="mailto:{{ user_obj.email }}" class="btn btn-contact"><i class="bi bi-envelope me-2"></i>Contact Instructor</a>
+            <a href="#" class="social-soft"><i class="bi bi-linkedin"></i></a>
+            <a href="#" class="social-soft"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="social-soft"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container my-4">
+    <div class="row g-4">
+      {% if messages %}
+      <div class="col-12">
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags %}{{ message.tags|default:'info' }}{% else %}info{% endif %} mb-0" role="alert">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body text-center">
+            {% if user_obj.avatar %}
+              <img src="{{ user_obj.avatar.url }}" class="avatar profile-avatar text-white mb-3 mx-auto" style="border-radius:18px; object-fit:cover;" alt="avatar">
+            {% else %}
+              {% with user_id=request.user.id|default:0 %}
+              <div class="avatar profile-avatar text-white mb-3 mx-auto {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}">
+                {% if user_obj.first_name and user_obj.last_name %}
+                  {{ user_obj.first_name|first }}{{ user_obj.last_name|first }}
+                {% elif user_obj.first_name %}
+                  {{ user_obj.first_name|first }}
+                {% elif user_obj.last_name %}
+                  {{ user_obj.last_name|first }}
+                {% else %}
+                  {{ user_obj.username|first|upper }}
+                {% endif %}
+              </div>
+              {% endwith %}
+            {% endif %}
+            <h5 class="mb-1">{{ user_obj.get_full_name|default:user_obj.username }}</h5>
+            <div class="text-muted">{% if user_obj.email %}{{ user_obj.email }}{% endif %}</div>
+            {% if user_obj.phone %}<div class="text-muted">{{ user_obj.phone }}</div>{% endif %}
+            <div class="mt-3">
+              <span class="badge bg-{% if user_obj.is_verified %}success{% else %}secondary{% endif %}">
+                <i class="bi bi-check2-circle"></i>
+                Email {% if user_obj.is_verified %}vérifié{% else %}non vérifié{% endif %}
+              </span>
+              {% with r=user_obj.role|default:'' %}
+                {% if r %}
+                  <span class="badge text-bg-warning ms-2" style="font-weight:700;">Rôle: {{ r }}</span>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-3 shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-shield-lock"></i> Sécurité</h6>
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold">Face ID</div>
+                <div class="text-muted small">Authentification biométrique</div>
+              </div>
+              {% if user_obj.face_id_enabled %}
+                <span class="badge bg-success">Activé</span>
+              {% else %}
+                <span class="badge bg-secondary">Désactivé</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <!-- Edit Profile FIRST (like the reference) -->
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h6 class="card-title mb-0"><i class="bi bi-pencil-square"></i> Edit Profile</h6>
+              <div class="card-header-actions">
+                <button type="button" class="btn btn-settings btn-sm">Settings</button>
+              </div>
+            </div>
+            <hr class="my-3" />
+            <form method="post" action="{% url 'profile_update' %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                  <div class="section-label">User Information</div>
+                  <div>
+                    <label class="form-label me-2" for="avatar">Avatar</label>
+                    <input id="avatar" name="avatar" type="file" accept="image/*" class="form-control" style="max-width:280px; display:inline-block;" />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="username">Username</label>
+                  <input id="username" name="username" class="form-control" value="{{ user_obj.username }}" disabled />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="email">Email address</label>
+                  <input id="email" name="email" class="form-control" value="{{ user_obj.email }}" disabled />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="first_name">First name</label>
+                  <input id="first_name" name="first_name" class="form-control" value="{{ user_obj.first_name }}" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="last_name">Last name</label>
+                  <input id="last_name" name="last_name" class="form-control" value="{{ user_obj.last_name }}" />
+                </div>
+
+                <div class="col-12 mt-2"><div class="section-label">Contact Information</div></div>
+                <div class="col-12">
+                  <label class="form-label" for="address">Address</label>
+                  <input id="address" name="address" class="form-control" placeholder="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09" value="{{ user_obj.address }}" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="city">City</label>
+                  <input id="city" name="city" class="form-control" placeholder="New York" value="{{ user_obj.city }}" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="country">Country</label>
+                  <input id="country" name="country" class="form-control" placeholder="United States" value="{{ user_obj.country }}" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="zip">Postal code</label>
+                  <input id="zip" name="zip" class="form-control" placeholder="437300" disabled />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="phone">Phone</label>
+                  <input id="phone" name="phone" class="form-control" value="{{ user_obj.phone }}" />
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                  <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Save changes</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Readonly account info (optional, secondary) -->
+        <div class="card shadow-sm mt-3">
+          <div class="card-body">
+            <h6 class="card-title mb-3"><i class="bi bi-person-badge"></i> Informations du compte</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Prénom</label>
+                <input class="form-control" value="{{ user_obj.first_name }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nom</label>
+                <input class="form-control" value="{{ user_obj.last_name }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nom d'utilisateur</label>
+                <input class="form-control" value="{{ user_obj.username }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input class="form-control" value="{{ user_obj.email }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Téléphone</label>
+                <input class="form-control" value="{{ user_obj.phone }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Statut</label>
+                <input class="form-control" value="{% if user_obj.is_active %}Actif{% else %}Inactif{% endif %}" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card shadow-sm mt-3">
+          <div class="card-body">
+            <h6 class="card-title mb-3"><i class="bi bi-key"></i> Changer le mot de passe</h6>
+            <form method="post" action="{% url 'profile_change_password' %}">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label" for="current_password">Ancien mot de passe</label>
+                  <input id="current_password" name="current_password" type="password" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="new_password1">Nouveau mot de passe</label>
+                  <input id="new_password1" name="new_password1" type="password" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="new_password2">Confirmer le nouveau</label>
+                  <input id="new_password2" name="new_password2" type="password" class="form-control" required />
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                  <button class="btn btn-secondary" type="submit"><i class="bi bi-key"></i> Mettre à jour</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <a href="{% url 'index' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+          <a href="{% url 'logout' %}" class="btn btn-danger ms-auto"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+        </div>
+      </div>
+
+      <!-- Right side user card -->
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="mini-cover"></div>
+          <div class="card-body text-center">
+            {% if user_obj.avatar %}
+              <img src="{{ user_obj.avatar.url }}" alt="avatar" class="mini-avatar">
+            {% else %}
+              <img src="{% static 'evently/img/person/person-m-8.webp' %}" alt="avatar" class="mini-avatar">
+            {% endif %}
+            <div class="d-flex justify-content-center gap-2 my-2">
+              <a href="#" class="btn btn-primary btn-sm">Connect</a>
+              <a href="#" class="btn btn-soft btn-sm">Message</a>
+            </div>
+            <div class="row g-3 my-2">
+              <div class="col-4 stat"><div class="num">22</div><div class="lbl">Amis</div></div>
+              <div class="col-4 stat"><div class="num">10</div><div class="lbl">Photos</div></div>
+              <div class="col-4 stat"><div class="num">89</div><div class="lbl">Commentaires</div></div>
+            </div>
+            <h6 class="mb-0">{{ user_obj.get_full_name|default:user_obj.username }}</h6>
+            <div class="text-muted">{% if user_obj.city or user_obj.country %}{{ user_obj.city }}{% if user_obj.city and user_obj.country %}, {% endif %}{{ user_obj.country }}{% else %}Bucharest, Romania{% endif %}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+

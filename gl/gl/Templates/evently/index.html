@@ -1,0 +1,915 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Index - EduLife Education Platform</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'evently/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'evently/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'evently/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'evently/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'evently/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'evently/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'evently/css/main.css' %}" rel="stylesheet">
+  <style>
+    .user-avatar-mini {display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 0 0 3px rgba(37,117,252,.18)}
+    .user-avatar-initials{font-size:.9rem;letter-spacing:.5px}
+    .avatar-c0{background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);box-shadow:0 0 0 3px rgba(17,205,239,.55)}
+    .avatar-c1{background:linear-gradient(135deg,#11cdef 0%,#2dce89 100%);box-shadow:0 0 0 3px rgba(45,206,137,.55)}
+    .avatar-c2{background:linear-gradient(135deg,#2dce89 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c3{background:linear-gradient(135deg,#f5365c 0%,#fb6340 100%);box-shadow:0 0 0 3px rgba(251,99,64,.55)}
+    .avatar-c4{background:linear-gradient(135deg,#172b4d 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c5{background:linear-gradient(135deg,#11cdef 0%,#6a11cb 100%);box-shadow:0 0 0 3px rgba(106,17,203,.45)}
+    /* Avatar dropdown styles */
+    .user-menu{ position: relative; display:inline-block; }
+    .user-dropdown{ position:absolute; right:0; top:46px; min-width:160px; background:rgba(16,23,42,.92); color:#fff; border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset; padding:6px; display:none; z-index:1050; backdrop-filter: blur(8px); }
+    .user-dropdown a{ display:block; padding:10px 12px; border-radius:8px; color:#e5e7eb; text-decoration:none; font-weight:600; font-size:.9rem; }
+    .user-dropdown a:hover{ background: rgba(59,130,246,.18); color:#fff; }
+    .user-menu.open .user-dropdown{ display:block; }
+  </style>
+
+  <!-- =======================================================
+  * Template Name: EduLife
+  * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="{% static 'evently/img/logo.webp' %}" alt=""> -->
+        <h1 class="sitename">EduLife</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="active">Home</a></li>
+          <li><a href="{% url 'index' %}" class="">Home</a></li>
+          <li><a href="{% url 'index' %}" class="">Home</a></li>
+          <li class="dropdown">
+            <a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+              <li><a href="{% url 'admin_tables' %}">Utilisateurs</a></li>
+            </ul>
+          </li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      {% if request.user.is_authenticated %}
+        {% with user_id=request.user.id|default:0 %}
+        <div class="user-menu" id="idxUserMenu">
+          <a href="#" onclick="return false;"
+             class="user-avatar-mini {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}"
+             title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}">
+            <span class="user-avatar-initials">
+              {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+            </span>
+          </a>
+          <div class="user-dropdown" id="idxUserDropdown">
+            <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+            <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+            {% if request.user.is_superuser %}
+              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+            {% endif %}
+            <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+            <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+          </div>
+        </div>
+        {% endwith %}
+      {% else %}
+        <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
+      {% endif %}
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section dark-background">
+      <div class="background-overlay"></div>
+      <div class="hero-content">
+        <div class="container">
+          <div class="row justify-content-center text-center">
+            <div class="col-lg-10">
+              <div class="hero-text">
+                <h1 class="hero-title">Transform Your Future with&nbsp;<br>EduLife Education</h1>
+                <p class="hero-subtitle">Discover innovative learning solutions, connect with expert educators, and unlock your potential through our comprehensive educational platform designed for lifelong learners.</p>
+                <div class="event-details">
+                  <div class="detail-item"><i class="bi bi-book"></i><span>1000+ Courses Available</span></div>
+                  <div class="detail-item"><i class="bi bi-people"></i><span>50,000+ Active Students</span></div>
+                </div>
+              </div>
+              <div class="countdown-section">
+                <h3 class="countdown-label">New Semester Starts In</h3>
+                <div class="countdown d-flex justify-content-center" data-count="2026/09/01">
+                  <div><h3 class="count-days">239</h3><h4>Days</h4></div>
+                  <div><h3 class="count-hours">8</h3><h4>Hours</h4></div>
+                  <div><h3 class="count-minutes">53</h3><h4>Minutes</h4></div>
+                  <div><h3 class="count-seconds">23</h3><h4>Seconds</h4></div>
+                </div>
+              </div>
+              <div class="cta-section">
+                <div class="cta-buttons">
+                  <a href="{% url 'evently_tickets' %}" class="btn btn-primary btn-cta">Start Learning Today</a>
+                  <a href="{% url 'evently_speakers' %}" class="btn btn-secondary btn-cta">Meet Our Instructors</a>
+                </div>
+                <p class="cta-note">Free trial available • Access to all courses • Certificate upon completion</p>
+              </div>
+            </div>
+          </div>
+          <div class="sponsors-section">
+            <p class="sponsors-label">Trusted by leading educational institutions</p>
+            <div class="sponsors-logos">
+              <img src="{% static 'evently/img/clients/clients-1.webp' %}" alt="Partner Logo" class="sponsor-logo">
+              <img src="{% static 'evently/img/clients/clients-3.webp' %}" alt="Partner Logo" class="sponsor-logo">
+              <img src="{% static 'evently/img/clients/clients-5.webp' %}" alt="Partner Logo" class="sponsor-logo">
+              <img src="{% static 'evently/img/clients/clients-7.webp' %}" alt="Partner Logo" class="sponsor-logo">
+              <img src="{% static 'evently/img/clients/clients-9.webp' %}" alt="Partner Logo" class="sponsor-logo">
+              <img src="{% static 'evently/img/clients/clients-11.webp' %}" alt="Partner Logo" class="sponsor-logo">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Hero Section -->
+
+    <!-- Intro Section -->
+    <section id="intro" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Your Gateway to Excellence in Education</h2>
+              <p class="lead">EduLife is a comprehensive online learning platform that brings together world-class educators, cutting-edge curriculum, and innovative teaching methods to help you achieve your educational goals.</p>
+              <p>Whether you're looking to advance your career, learn new skills, or pursue a passion, EduLife offers flexible, accessible, and engaging courses designed to fit your lifestyle. Join thousands of successful learners who have transformed their lives through education.</p>
+              <div class="stats-grid">
+                <div class="stat-item"><div class="stat-number">1000+</div><div class="stat-label">Courses</div></div>
+                <div class="stat-item"><div class="stat-number">200+</div><div class="stat-label">Instructors</div></div>
+                <div class="stat-item"><div class="stat-number">50K+</div><div class="stat-label">Students</div></div>
+                <div class="stat-item"><div class="stat-number">95%</div><div class="stat-label">Success Rate</div></div>
+              </div>
+              <div class="cta-section">
+                <a href="{% url 'evently_schedule' %}" class="btn btn-primary">Browse Courses</a>
+                <a href="{% url 'evently_speakers' %}" class="btn btn-outline">Meet Our Teachers</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="{% static 'evently/img/events/showcase-5.webp' %}" alt="EduLife Education" class="img-fluid">
+                <div class="gradient-overlay"></div>
+                <div class="floating-badge"><i class="bi bi-book"></i><span>New Courses Every Month</span></div>
+              </div>
+              <div class="highlight-cards">
+                <div class="highlight-card"><i class="bi bi-people-fill"></i><h4>Expert Instructors</h4><p>Learn from industry professionals and academic experts</p></div>
+                <div class="highlight-card"><i class="bi bi-award-fill"></i><h4>Certified Programs</h4><p>Earn recognized certificates upon course completion</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="founder-quote">
+          <div class="row align-items-center">
+            <div class="col-lg-3 text-center"><img src="{% static 'evently/img/person/person-m-8.webp' %}" alt="Sarah Johnson" class="founder-img"></div>
+            <div class="col-lg-9">
+              <blockquote>
+                <p>"Education is the most powerful weapon which you can use to change the world. At EduLife, we believe that quality education should be accessible to everyone, everywhere. Our platform empowers learners to achieve their dreams and unlock their full potential."</p>
+                <cite><strong>Dr. Sarah Johnson</strong><span>Founder &amp; Chief Education Officer</span></cite>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Intro Section -->
+
+    <!-- Featured Speakers Section -->
+    <section id="featured-speakers" class="featured-speakers section">
+      <div class="container section-title">
+        <h2>Featured Instructors</h2>
+        <p>Learn from world-class educators and industry experts who are passionate about sharing knowledge</p>
+      </div>
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-6">
+            <div class="speaker-card featured">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="speaker-image">
+                    <img src="{% static 'evently/img/events/speaker-8.webp' %}" alt="Emily Rodriguez" class="img-fluid">
+                    <div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="speaker-content">
+                    <span class="speaker-category">Lead Instructor</span>
+                    <h3 class="speaker-name">Dr. Emily Rodriguez</h3>
+                    <p class="speaker-title">Professor of Computer Science</p>
+                    <p class="speaker-company">EduLife University</p>
+                    <div class="speaker-session"><h4>Course: "Artificial Intelligence & Machine Learning"</h4></div>
+                    <a href="#" class="btn-speaker">View Profile</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="speaker-card featured">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="speaker-image">
+                    <img src="{% static 'evently/img/events/speaker-1.webp' %}" alt="Marcus Thompson" class="img-fluid">
+                    <div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="speaker-content">
+                    <span class="speaker-category">Senior Instructor</span>
+                    <h3 class="speaker-name">Dr. Marcus Thompson</h3>
+                    <p class="speaker-title">Business Strategy Expert</p>
+                    <p class="speaker-company">EduLife Business School</p>
+                    <div class="speaker-session"><h4>Course: "Digital Business Transformation"</h4></div>
+                    <a href="#" class="btn-speaker">View Profile</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gy-4 mt-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="{% static 'evently/img/events/speaker-11.webp' %}" alt="Sarah Chen" class="img-fluid">
+                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Sarah Chen</h4>
+                <p class="speaker-title">UX/UI Design Instructor</p>
+                <p class="speaker-company">EduLife Design Academy</p>
+                <span class="speaker-topic">"Design Thinking & Innovation"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="{% static 'evently/img/events/speaker-12.webp' %}" alt="David Wilson" class="img-fluid">
+                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Dr. David Wilson</h4>
+                <p class="speaker-title">Data Science Professor</p>
+                <p class="speaker-company">EduLife Data Institute</p>
+                <span class="speaker-topic">"Data Science & Analytics"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="{% static 'evently/img/events/speaker-3.webp' %}" alt="Lisa Martinez" class="img-fluid">
+                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Lisa Martinez</h4>
+                <p class="speaker-title">Marketing Instructor</p>
+                <p class="speaker-company">EduLife Marketing School</p>
+                <span class="speaker-topic">"Digital Marketing Mastery"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="{% static 'evently/img/events/speaker-9.webp' %}" alt="James Parker" class="img-fluid">
+                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">James Parker</h4>
+                <p class="speaker-title">Entrepreneurship Coach</p>
+                <p class="speaker-company">EduLife Entrepreneurship Lab</p>
+                <span class="speaker-topic">"Startup & Entrepreneurship"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-lg-8 mx-auto">
+            <div class="speaker-quote">
+              <blockquote>
+                <p>"EduLife has transformed the way I learn. The quality of instruction and the flexibility of the platform have allowed me to advance my career while balancing my personal life. I highly recommend it to anyone serious about their education."</p>
+              </blockquote>
+              <div class="quote-author">
+                <img src="{% static 'evently/img/events/speaker-2.webp' %}" alt="Emily Rodriguez" class="img-fluid">
+                <div class="author-info"><h5>Emily Rodriguez</h5><span>EduLife Student & Software Engineer</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Featured Speakers Section -->
+
+    <!-- Schedule Section -->
+    <section id="schedule" class="schedule section light-background">
+      <div class="container section-title">
+        <h2>Learning Paths</h2>
+        <p>Structured curriculum designed to guide you from beginner to expert in your chosen field</p>
+      </div>
+      <div class="container">
+        <div class="schedule-tabs">
+          <ul class="nav nav-pills justify-content-center mb-5">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#schedule-day1">Day 1 - March 15</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedule-day2">Day 2 - March 16</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedule-day3">Day 3 - March 17</button></li>
+          </ul>
+        </div>
+        <div class="tab-content schedule-content">
+          <div class="tab-pane fade show active" id="schedule-day1">
+            <div class="track-headers">
+              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
+              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
+              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
+            </div>
+            <div class="schedule-timeline">
+              <div class="time-slot">
+                <div class="time-label"><span class="time">9:00 AM</span><span class="duration">45 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card keynote" colspan="3">
+                    <div class="session-type"><i class="bi bi-megaphone"></i><span>Keynote</span></div>
+                    <h4>Future of Digital Innovation</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-1.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Dr. Sarah Johnson</h5><span>Chief Technology Officer, TechCorp</span></div>
+                    </div>
+                    <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <div class="session-meta"><span class="venue">Main Hall</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time-slot">
+                <div class="time-label"><span class="time">10:15 AM</span><span class="duration">60 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card development">
+                    <div class="session-type"><i class="bi bi-laptop"></i><span>Workshop</span></div>
+                    <h4>Advanced React Patterns</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-2.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Michael Chen</h5><span>Senior Developer</span></div>
+                    </div>
+                    <p>Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
+                    <div class="session-meta"><span class="venue">Room A</span><span class="level beginner">Beginner</span></div>
+                  </div>
+                  <div class="session-card design">
+                    <div class="session-type"><i class="bi bi-brush"></i><span>Talk</span></div>
+                    <h4>Design Systems at Scale</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-3.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Emily Rodriguez</h5><span>UX Director</span></div>
+                    </div>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.</p>
+                    <div class="session-meta"><span class="venue">Room B</span><span class="level intermediate">Intermediate</span></div>
+                  </div>
+                  <div class="session-card business">
+                    <div class="session-type"><i class="bi bi-people"></i><span>Panel</span></div>
+                    <h4>Scaling Tech Teams</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-4.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>David Park</h5><span>VP of Engineering</span></div>
+                    </div>
+                    <p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit.</p>
+                    <div class="session-meta"><span class="venue">Room C</span><span class="level advanced">Advanced</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time-slot break-slot">
+                <div class="time-label"><span class="time">11:15 AM</span><span class="duration">30 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card break">
+                    <div class="session-type"><i class="bi bi-cup-hot"></i><span>Break</span></div>
+                    <h4>Coffee Break &amp; Networking</h4>
+                    <div class="session-meta"><span class="venue">Main Lobby</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time-slot">
+                <div class="time-label"><span class="time">11:45 AM</span><span class="duration">45 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card development">
+                    <div class="session-type"><i class="bi bi-code"></i><span>Talk</span></div>
+                    <h4>Microservices Architecture</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-5.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Alex Thompson</h5><span>Solutions Architect</span></div>
+                    </div>
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+                    <div class="session-meta"><span class="venue">Room A</span><span class="level advanced">Advanced</span></div>
+                  </div>
+                  <div class="session-card design">
+                    <div class="session-type"><i class="bi bi-phone"></i><span>Workshop</span></div>
+                    <h4>Mobile-First Design</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-6.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Lisa Zhang</h5><span>Product Designer</span></div>
+                    </div>
+                    <p>Totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae.</p>
+                    <div class="session-meta"><span class="venue">Room B</span><span class="level beginner">Beginner</span></div>
+                  </div>
+                  <div class="session-card business">
+                    <div class="session-type"><i class="bi bi-graph-up"></i><span>Talk</span></div>
+                    <h4>Product Growth Strategies</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-7.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>James Wilson</h5><span>Growth Manager</span></div>
+                    </div>
+                    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia.</p>
+                    <div class="session-meta"><span class="venue">Room C</span><span class="level intermediate">Intermediate</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Day 1 -->
+          <div class="tab-pane fade" id="schedule-day2">
+            <div class="track-headers">
+              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
+              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
+              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
+            </div>
+            <div class="schedule-timeline">
+              <div class="time-slot">
+                <div class="time-label"><span class="time">9:30 AM</span><span class="duration">45 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card keynote">
+                    <div class="session-type"><i class="bi bi-megaphone"></i><span>Keynote</span></div>
+                    <h4>AI Revolution in Development</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-8.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Dr. Maria Santos</h5><span>AI Research Director</span></div>
+                    </div>
+                    <p>Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute.</p>
+                    <div class="session-meta"><span class="venue">Main Hall</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time-slot">
+                <div class="time-label"><span class="time">10:45 AM</span><span class="duration">60 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card development">
+                    <div class="session-type"><i class="bi bi-gear"></i><span>Workshop</span></div>
+                    <h4>DevOps Best Practices</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-9.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Robert Kim</h5><span>DevOps Engineer</span></div>
+                    </div>
+                    <p>Irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                    <div class="session-meta"><span class="venue">Room A</span><span class="level intermediate">Intermediate</span></div>
+                  </div>
+                  <div class="session-card design">
+                    <div class="session-type"><i class="bi bi-eye"></i><span>Talk</span></div>
+                    <h4>Accessibility in Design</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-10.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Anna Martinez</h5><span>Accessibility Expert</span></div>
+                    </div>
+                    <p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim.</p>
+                    <div class="session-meta"><span class="venue">Room B</span><span class="level beginner">Beginner</span></div>
+                  </div>
+                  <div class="session-card business">
+                    <div class="session-type"><i class="bi bi-currency-dollar"></i><span>Panel</span></div>
+                    <h4>Funding Strategies for Startups</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-11.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Thomas Brown</h5><span>Investment Partner</span></div>
+                    </div>
+                    <p>Ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation.</p>
+                    <div class="session-meta"><span class="venue">Room C</span><span class="level advanced">Advanced</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Day 2 -->
+          <div class="tab-pane fade" id="schedule-day3">
+            <div class="track-headers">
+              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
+              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
+              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
+            </div>
+            <div class="schedule-timeline">
+              <div class="time-slot">
+                <div class="time-label"><span class="time">10:00 AM</span><span class="duration">90 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card workshop">
+                    <div class="session-type"><i class="bi bi-tools"></i><span>Hands-on Workshop</span></div>
+                    <h4>Building Your First App</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-12.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Kevin Lee</h5><span>Full-stack Developer</span></div>
+                    </div>
+                    <p>Ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit.</p>
+                    <div class="session-meta"><span class="venue">Workshop Room</span><span class="level beginner">Beginner</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="time-slot">
+                <div class="time-label"><span class="time">12:00 PM</span><span class="duration">45 min</span></div>
+                <div class="sessions-row">
+                  <div class="session-card keynote">
+                    <div class="session-type"><i class="bi bi-award"></i><span>Closing Keynote</span></div>
+                    <h4>The Future is Collaborative</h4>
+                    <div class="speaker">
+                      <img src="{% static 'evently/img/events/speaker-13.webp' %}" alt="Speaker" class="speaker-image">
+                      <div class="speaker-details"><h5>Jennifer Adams</h5><span>CEO, FutureTech</span></div>
+                    </div>
+                    <p>In voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat.</p>
+                    <div class="session-meta"><span class="venue">Main Hall</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Day 3 -->
+        </div>
+        <div class="text-center">
+          <div class="download-cta">
+            <h4>Get the Complete Schedule</h4>
+            <p>Download the full agenda as PDF or add events to your calendar</p>
+            <div class="cta-buttons">
+              <a href="#" class="btn btn-primary"><i class="bi bi-download"></i> Download PDF</a>
+              <a href="#" class="btn btn-outline-primary"><i class="bi bi-calendar-plus"></i> Add to Calendar</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Schedule Section -->
+
+    <!-- Pricing Plans Section -->
+    <section id="tickets" class="tickets section">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-4 col-md-6">
+            <div class="ticket-card">
+              <div class="ticket-header">
+                <h3>Basic Plan</h3>
+                <div class="ticket-price"><span class="currency">$</span><span class="amount">29</span><span class="period">/month</span></div>
+                <p class="ticket-duration">Perfect for beginners</p>
+              </div>
+              <div class="ticket-body">
+                <ul class="ticket-features">
+                  <li><i class="bi bi-check-circle-fill"></i>Access to 50+ courses</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Certificate of completion</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Mobile app access</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Community support</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Downloadable resources</li>
+                </ul>
+              </div>
+              <div class="ticket-footer">
+                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Start Learning</a>
+                <p class="availability-info">7-day free trial</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="ticket-card featured">
+              <div class="popular-badge">Most Popular</div>
+              <div class="ticket-header">
+                <h3>Premium Plan</h3>
+                <div class="ticket-price"><span class="currency">$</span><span class="amount">79</span><span class="period">/month</span></div>
+                <p class="ticket-duration">Best value for professionals</p>
+              </div>
+              <div class="ticket-body">
+                <ul class="ticket-features">
+                  <li><i class="bi bi-check-circle-fill"></i>Access to all 1000+ courses</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Professional certificates</li>
+                  <li><i class="bi bi-check-circle-fill"></i>1-on-1 instructor support</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Live Q&A sessions</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Career counseling</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Priority support</li>
+                </ul>
+              </div>
+              <div class="ticket-footer">
+                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Get Premium</a>
+                <p class="availability-info">Save 20% with annual plan</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="ticket-card">
+              <div class="ticket-header">
+                <h3>Student Plan</h3>
+                <div class="ticket-price"><span class="original-price">$79</span><span class="currency">$</span><span class="amount">39</span><span class="period">/month</span></div>
+                <p class="ticket-duration">Special discount for students</p>
+              </div>
+              <div class="ticket-body">
+                <ul class="ticket-features">
+                  <li><i class="bi bi-check-circle-fill"></i>All Premium features</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Student networking events</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Internship opportunities</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Mentorship program</li>
+                  <li><i class="bi bi-check-circle-fill"></i>Student resource center</li>
+                </ul>
+              </div>
+              <div class="ticket-footer">
+                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Student Enrollment</a>
+                <p class="availability-info">Valid student ID required</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12">
+            <div class="ticket-info-bar">
+              <div class="countdown-info">
+                <h4><i class="bi bi-clock"></i> Limited Time Offer - 30% Off!</h4>
+                <div class="countdown d-flex justify-content-center" data-count="2026/12/15">
+                  <div><h3 class="count-days"></h3><h4>Days</h4></div>
+                  <div><h3 class="count-hours"></h3><h4>Hours</h4></div>
+                  <div><h3 class="count-minutes"></h3><h4>Minutes</h4></div>
+                  <div><h3 class="count-seconds"></h3><h4>Seconds</h4></div>
+                </div>
+              </div>
+              <div class="support-info">
+                <p><strong>Need help choosing a plan?</strong> Contact our support team</p>
+                <a href="mailto:info@edulife.com" class="contact-link">info@edulife.com</a>
+                <span class="divider">|</span>
+                <a href="tel:+15551234567" class="contact-link">+1 (555) 123-4567</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Pricing Plans Section -->
+
+    <!-- Partners Section -->
+    <section id="sponsors" class="sponsors section">
+      <div class="container">
+        <div class="section-title text-center mb-5">
+          <h2>Our Educational Partners</h2>
+          <p>Trusted by leading universities and educational institutions worldwide</p>
+        </div>
+        <div class="row g-0 clients-wrap">
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-1.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-2.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-3.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-4.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-5.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-6.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-7.webp' %}" class="img-fluid" alt="Partner University"></div>
+          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'evently/img/clients/clients-8.webp' %}" class="img-fluid" alt="Partner University"></div>
+        </div>
+      </div>
+    </section><!-- /Partners Section -->
+
+    <!-- Call To Action Section -->
+    <section id="call-to-action" class="call-to-action section dark-background">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <h2 class="display-4 mb-4">Ready to Transform Your Future?</h2>
+            <p class="lead mb-5">Join thousands of successful learners on EduLife. Start your educational journey today and unlock opportunities for career growth, personal development, and lifelong learning.</p>
+          </div>
+        </div>
+        <div class="row justify-content-center mb-5">
+          <div class="col-lg-10">
+            <div class="stats-wrapper">
+              <div class="row g-4">
+                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-people"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="50000" data-purecounter-duration="2">50000</div><div class="stat-label">Active Students</div></div></div>
+                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="200" data-purecounter-duration="2">200</div><div class="stat-label">Expert Instructors</div></div></div>
+                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-book"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="1000" data-purecounter-duration="2">1000</div><div class="stat-label">Available Courses</div></div></div>
+                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-award"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="95" data-purecounter-duration="2">95</div><div class="stat-label">Success Rate %</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="col-lg-6 text-center">
+            <div class="cta-content">
+              <h3 class="mb-4">Start Your Learning Journey Today</h3>
+              <p class="mb-4">Enroll now and get access to all courses. Special discount available for new students. Learn at your own pace with lifetime access to course materials.</p>
+              <div class="cta-buttons">
+                <a href="#" class="btn btn-primary btn-lg me-3">Enroll Now</a>
+                <a href="#" class="btn btn-outline-secondary btn-lg">View Course Catalog</a>
+              </div>
+              <div class="security-note mt-4">
+                <small><i class="bi bi-shield-check me-2"></i>Secure payment • 30-day money-back guarantee • Accredited certificates</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Call To Action Section -->
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials section">
+      <div class="container section-title">
+        <h2>Student Testimonials</h2>
+        <p>Hear from our students about their learning experience and success stories</p>
+      </div>
+      <div class="container">
+        <div class="testimonial-slider swiper init-swiper">
+          <script type="application/json" class="swiper-config">{"loop":true,"speed":600,"autoplay":{"delay":4000},"slidesPerView":1,"spaceBetween":30,"navigation":{"nextEl":".swiper-button-next","prevEl":".swiper-button-prev"},"breakpoints":{"768":{"slidesPerView":2},"1200":{"slidesPerView":3}}}</script>
+          <div class="swiper-wrapper">
+            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'evently/img/person/person-f-12.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit sed eiusmod tempor.</p></div><div class="testimonial-footer"><h5>Jessica Martinez</h5><span>UX Designer</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'evently/img/person/person-m-8.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa.</p></div><div class="testimonial-footer"><h5>David Rodriguez</h5><span>Software Engineer</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'evently/img/person/person-f-6.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud.</p></div><div class="testimonial-footer"><h5>Amanda Wilson</h5><span>Creative Director</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'evently/img/person/person-m-12.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis.</p></div><div class="testimonial-footer"><h5>Ryan Thompson</h5><span>Business Analyst</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'evently/img/person/person-f-10.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi.</p></div><div class="testimonial-footer"><h5>Rachel Chen</h5><span>Project Manager</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+          </div>
+          <div class="swiper-navigation"><div class="swiper-button-prev"></div><div class="swiper-button-next"></div></div>
+        </div>
+      </div>
+    </section><!-- /Testimonials Section -->
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery section">
+      <div class="container-fluid">
+        <div class="row gy-4 justify-content-center">
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-1.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-1.webp' %}" title="Gallery 1" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-2.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-2.webp' %}" title="Gallery 2" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-3.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-3.webp' %}" title="Gallery 3" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-4.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-4.webp' %}" title="Gallery 4" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-5.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-5.webp' %}" title="Gallery 5" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-6.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-6.webp' %}" title="Gallery 6" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-7.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-7.webp' %}" title="Gallery 7" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="{% static 'evently/img/events/gallery-8.webp' %}" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{% static 'evently/img/events/gallery-8.webp' %}" title="Gallery 8" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
+                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Gallery Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+            <span class="sitename">EduLife</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>A108 Adam Street</p>
+            <p>New York, NY 535022</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+            <p><strong>Email:</strong> <span>info@edulife.com</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'evently_about' %}">About us</a></li>
+            <li><a href="{% url 'evently_schedule' %}">Courses</a></li>
+            <li><a href="{% url 'evently_terms' %}">Terms of service</a></li>
+            <li><a href="{% url 'evently_privacy' %}">Privacy policy</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Programs</h4>
+          <ul>
+            <li><a href="#">Online Courses</a></li>
+            <li><a href="#">Certification Programs</a></li>
+            <li><a href="#">Professional Development</a></li>
+            <li><a href="#">Corporate Training</a></li>
+            <li><a href="#">Student Resources</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Learning Paths</h4>
+          <ul>
+            <li><a href="#">Technology & IT</a></li>
+            <li><a href="#">Business & Management</a></li>
+            <li><a href="#">Design & Creative</a></li>
+            <li><a href="#">Data Science</a></li>
+            <li><a href="#">Languages</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="{% url 'evently_contact' %}">Contact Us</a></li>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Student Portal</a></li>
+            <li><a href="#">Instructor Resources</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">EduLife</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'evently/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'evently/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'evently/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'evently/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'evently/js/main.js' %}"></script>
+  <script>
+    // Dropdown for avatar (index page)
+    (function(){
+      const menu = document.getElementById('idxUserMenu');
+      if (!menu) return;
+      const toggle = menu.querySelector('.user-avatar-mini');
+      function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+      toggle.addEventListener('click', function(){
+        menu.classList.toggle('open');
+        if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+      });
+    })();
+  </script>
+</body>
+</html>

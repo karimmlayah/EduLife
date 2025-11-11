@@ -1,0 +1,67 @@
+:root{
+  --learner-primary: #1e3a8a;
+  --learner-secondary: #3b82f6;
+}
+
+body, input, select, textarea{
+  font-family: 'Roboto', 'Raleway', system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+#header{
+  background: linear-gradient(135deg, var(--learner-primary), var(--learner-secondary));
+  border-bottom: none;
+}
+
+#header a:link, #header a:visited{
+  color: #fff;
+}
+
+.learner-admin-brand{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff !important;
+}
+.learner-admin-brand .brand-logo{
+  height: 32px;
+  width: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.learner-admin-brand .brand-title{
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.learner-admin-nav{
+  display: inline-flex;
+  gap: 14px;
+}
+.learner-admin-nav a{
+  color: #fff !important;
+  opacity: .9;
+}
+.learner-admin-nav a:hover{ opacity: 1; }
+
+#content-related .module h2, .module caption, .inline-group h2{
+  background: linear-gradient(135deg, rgba(30,58,138,.08), rgba(59,130,246,.08));
+}
+
+.button, input[type=submit], input[type=button], .submit-row input{
+  background: var(--learner-secondary);
+  border-color: var(--learner-secondary);
+}
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover{
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.breadcrumbs{
+  background: #f8fafc;
+}
+
+.dashboard .module table th{
+  font-weight: 600;
+}
+
