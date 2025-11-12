@@ -1,0 +1,401 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>About - EduLife Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+
+  <style>
+    /* Centrer la dernière carte dans la grille */
+    .stats-grid .stat-card-center {
+      grid-column: 1 / -1;
+      justify-self: center;
+      max-width: calc(50% - 0.75rem);
+    }
+    @media (max-width: 991px) {
+      .stats-grid .stat-card-center {
+        max-width: 100%;
+      }
+    }
+    /* Dropdown menu styles */
+    .navmenu .dropdown {
+      position: relative;
+    }
+    .navmenu .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      padding: 8px 0;
+      margin-top: 8px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+    .navmenu .dropdown:hover .dropdown-menu {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .navmenu .dropdown-item {
+      padding: 10px 20px;
+      color: #333;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s ease;
+    }
+    .navmenu .dropdown-item:hover {
+      background: #f8f9fa;
+      color: #ff6b35;
+      padding-left: 25px;
+    }
+  </style>
+
+  <!-- =======================================================
+ * Template Name: EduLife
+ * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="about-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="assets/img/logo.webp" alt=""> -->
+        <h1 class="sitename">EduLife</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'about' %}" class="active">About</a></li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{% url 'dashboard' %}">Login</a>
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>About</h1>
+        <p>The all-in-one platform that supports students at every step — internships, housing, carpooling, events, and startup opportunities</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li class="current">About</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+
+      <div class="container">
+
+        <div class="row gy-5 align-items-center">
+
+          <div class="col-lg-6">
+            <div class="content">
+              <h3>Transforming Student Life Into Success</h3>
+              <p class="lead">We are an educational platform designed to simplify and enhance every aspect of student life. Our comprehensive ecosystem provides everything students need to thrive academically, professionally, and personally.</p>
+
+              <p>Our mission is to create a seamless experience for students by offering five essential services that address the most critical needs during their educational journey. From finding internships and startup opportunities to securing housing, organizing transportation, and discovering events, we've got you covered.</p>
+
+              <div class="quote-section">
+                <blockquote>
+                  <p>"Education is not just about learning in the classroom. It's about having access to opportunities, resources, and support systems that help you grow and succeed. That's what we provide."</p>
+                  <cite>— Our Mission</cite>
+                </blockquote>
+              </div>
+
+              <div class="cta-buttons">
+                <a href="{% url 'internships' %}" class="btn-primary">Explore Internships</a>
+                <a href="{% url 'contact' %}" class="btn-secondary">Get in Touch</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="stats-grid">
+
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-briefcase"></i>
+                </div>
+                <div class="stat-content">
+                  <h4>Internship</h4>
+                  <p>Find professional opportunities and gain real-world experience</p>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-building"></i>
+                </div>
+                <div class="stat-content">
+                  <h4>Startup</h4>
+                  <p>Discover startup opportunities and entrepreneurial resources</p>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="stat-content">
+                  <h4>Events</h4>
+                  <p>Discover educational events, workshops, and networking opportunities</p>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-house-door"></i>
+                </div>
+                <div class="stat-content">
+                  <h4>Housing</h4>
+                  <p>Find safe and affordable accommodation near your campus</p>
+                </div>
+              </div>
+
+              <div class="stat-card stat-card-center">
+                <div class="stat-icon">
+                  <i class="bi bi-car-front"></i>
+                </div>
+                <div class="stat-content">
+                  <h4>Ride Sharing</h4>
+                  <p>Connect with fellow students for convenient transportation</p>
+                </div>
+              </div>
+
+            </div><!-- End Stats Grid -->
+          </div>
+
+        </div><!-- End Row -->
+
+        <div class="row mt-5">
+          <div class="col-12">
+            <div class="audience-section">
+              <h3>Our Services</h3>
+              <p class="text-center">We offer five comprehensive services designed to simplify and enhance your educational journey. Everything you need, all in one place.</p>
+
+              <div class="row gy-4 mt-4">
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h5>Internship</h5>
+                    <p>Find and apply for internships that match your career goals</p>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-building"></i>
+                    </div>
+                    <h5>Startup</h5>
+                    <p>Explore startup opportunities and entrepreneurial resources</p>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-house-door"></i>
+                    </div>
+                    <h5>Housing</h5>
+                    <p>Search for safe and affordable student accommodation</p>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-car-front"></i>
+                    </div>
+                    <h5>Ride Sharing</h5>
+                    <p>Connect with students for convenient and cost-effective rides</p>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <h5>Events</h5>
+                    <p>Discover educational events, workshops, and networking opportunities</p>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 col-6">
+                  <div class="audience-item">
+                    <div class="audience-icon">
+                      <i class="bi bi-mortarboard"></i>
+                    </div>
+                    <h5>All Students</h5>
+                    <p>Designed for every student seeking to enhance their educational experience</p>
+                  </div>
+                </div>
+
+              </div><!-- End Audience Grid -->
+            </div><!-- End Audience Section -->
+          </div>
+        </div><!-- End Row -->
+
+      </div>
+
+    </section><!-- /About Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+            <span class="sitename">EduLife</span>
+          </a>
+          <p class="mt-3">Complete educational platform to facilitate student life. Find internships, startup opportunities, housing, carpooling and events in one place.</p>
+          <div class="footer-contact pt-3">
+            <p><strong>Email:</strong> <span>contact@edulife.tn</span></p>
+            <p><strong>Phone:</strong> <span>+216 XX XXX XXX</span></p>
+            <p class="mt-2"><strong>Address:</strong> <span>Tunisia</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href="#" title="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" title="Twitter"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" title="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'about' %}">About Us</a></li>
+            <li><a href="{% url 'internships' %}">Internships</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'my_applications' %}">My Applications</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="{% url 'internships' %}">Internship</a></li>
+            <li><a href="#">Startup</a></li>
+            <li><a href="#">Housing</a></li>
+            <li><a href="#">Ride Sharing</a></li>
+            <li><a href="#">Events</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Student Resources</h4>
+          <ul>
+            <li><a href="{% url 'my_applications' %}">My Applications</a></li>
+            <li><a href="{% url 'my_interviews' %}">My Interviews</a></li>
+            <li><a href="{% url 'internships' %}">Browse Internships</a></li>
+            <li><a href="#">Explore Startups</a></li>
+            <li><a href="#">Find Housing</a></li>
+            <li><a href="#">Ride Sharing</a></li>
+            <li><a href="#">Upcoming Events</a></li>
+            <li><a href="{% url 'about' %}">How It Works</a></li>
+            <li><a href="{% url 'contact' %}">Help & Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="{% url 'contact' %}">Support</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">EduLife</strong> <span>All Rights Reserved</span></p>
+      <p class="text-muted mt-2">Empowering students with opportunities and resources for a brighter future</p>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>

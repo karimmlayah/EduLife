@@ -1,0 +1,987 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Internships - EduLife Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  
+  <style>
+    .nav-pills .nav-link {
+      transition: all 0.3s ease;
+      border-radius: 8px;
+    }
+    .nav-pills .nav-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .nav-pills .nav-link.active {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+    }
+    .tab-pane {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Dropdown menu styles */
+    .navmenu .dropdown {
+      position: relative;
+    }
+    .navmenu .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      padding: 8px 0;
+      margin-top: 8px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+    .navmenu .dropdown:hover .dropdown-menu,
+    .navmenu .dropdown.show .dropdown-menu {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .navmenu .dropdown-item {
+      padding: 10px 20px;
+      color: #333;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s ease;
+    }
+    .navmenu .dropdown-item:hover {
+      background: #f8f9fa;
+      color: #ff6b35;
+      padding-left: 25px;
+    }
+    .navmenu .dropdown-toggle::after {
+      display: none;
+    }
+    /* Animation for details */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        max-height: 1000px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        transform: translateY(0);
+      }
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 1;
+        max-height: 1000px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transform: translateY(-10px);
+      }
+    }
+    .offer-full-description {
+      overflow: hidden;
+      transition: all 0.3s ease-out;
+    }
+    /* Uniformiser la taille des cartes */
+    .offre-card-wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .offre-card {
+      flex: 1;
+      min-height: 200px;
+      height: 100%;
+    }
+    .offre-image {
+      height: 200px;
+      min-height: 200px;
+      max-height: 200px;
+    }
+    .offre-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    /* Assurer que toutes les colonnes ont la même hauteur */
+    .row.gy-4 > [class*="col-"] {
+      display: flex;
+    }
+    /* Toutes les images ont la même hauteur */
+    .offre-image img {
+      height: 200px !important;
+      max-height: 200px !important;
+    }
+    /* Styles pour la navigation des offres */
+    .offres-navigation-wrapper {
+      position: relative;
+      padding: 0 60px;
+      overflow: visible;
+    }
+    .offres-scroll-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+      padding-bottom: 10px;
+      margin-left: 0;
+      margin-right: 0;
+      width: 100%;
+    }
+    .offres-scroll-container #offresRow {
+      display: flex;
+      flex-wrap: nowrap;
+      margin: 0;
+      padding-left: 0;
+      padding-right: 20px;
+      width: max-content;
+    }
+    .offres-scroll-container #offresRow > [class*="col-"] {
+      flex: 0 0 auto;
+      min-width: 500px;
+      max-width: 500px;
+      margin-right: 20px;
+      margin-left: 0;
+    }
+    .offres-scroll-container #offresRow > [class*="col-"]:first-child {
+      margin-left: 0;
+      padding-left: 0;
+    }
+    /* S'assurer que le conteneur scrollable ne commence pas sous le bouton */
+    .offres-navigation-wrapper .offres-scroll-container {
+      position: relative;
+      z-index: 1;
+    }
+    .offres-nav-btn {
+      z-index: 10;
+    }
+    @media (max-width: 768px) {
+      .offres-scroll-container #offresRow > [class*="col-"] {
+        min-width: 300px;
+        max-width: 300px;
+        margin-right: 15px;
+      }
+    }
+    .offres-scroll-container::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    .offres-nav-btn {
+      position: absolute;
+      bottom: -30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #ff6b35;
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+    .offres-nav-btn:hover {
+      background: #ff8533;
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+    }
+    .offres-nav-btn:active {
+      transform: scale(0.95);
+    }
+    .offres-nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .offres-nav-prev {
+      left: 88%;
+      transform: translateX(calc(-100% - 15px));
+    }
+    .offres-nav-next {
+      left: 88%;
+      transform: translateX(15px);
+    }
+    .offres-nav-prev:hover {
+      transform: translateX(calc(-100% - 15px)) scale(1.1);
+    }
+    .offres-nav-next:hover {
+      transform: translateX(15px) scale(1.1);
+    }
+    .offres-nav-prev:active {
+      transform: translateX(calc(-100% - 15px)) scale(0.95);
+    }
+    .offres-nav-next:active {
+      transform: translateX(15px) scale(0.95);
+    }
+    @media (max-width: 768px) {
+      .offres-navigation-wrapper {
+        padding: 0 50px;
+      }
+      .offres-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+    }
+    /* Styles spécifiques pour le footer - Annuler le display flex pour les colonnes */
+    #footer .row.gy-4 > [class*="col-"] {
+      display: block !important;
+      width: 100%;
+      float: none;
+    }
+    @media (min-width: 768px) {
+      #footer .row.gy-4 > .col-md-3 {
+        width: 25%;
+        float: left;
+      }
+      #footer .row.gy-4 > .col-md-6 {
+        width: 50%;
+        float: left;
+      }
+    }
+    @media (min-width: 992px) {
+      #footer .row.gy-4 > .col-lg-2 {
+        width: 16.66666667%;
+        float: left;
+      }
+      #footer .row.gy-4 > .col-lg-4 {
+        width: 33.33333333%;
+        float: left;
+      }
+    }
+    #footer .footer-links {
+      width: 100%;
+      padding: 0 15px;
+      box-sizing: border-box;
+    }
+    #footer .footer-links h4 {
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #footer .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #footer .footer-links ul li {
+      margin-bottom: 8px;
+    }
+    #footer .footer-links ul li a {
+      display: block;
+      white-space: normal;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+    #footer .footer-about {
+      padding: 0 15px;
+      box-sizing: border-box;
+    }
+    #footer .footer-about p {
+      line-height: 1.6;
+      word-wrap: break-word;
+    }
+    #footer .row.gy-4::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
+  
+  <script>
+    // Variable pour éviter les appels multiples simultanés
+    let isToggling = false;
+    
+    function toggleDetails(offreId) {
+      // Empêcher les appels multiples simultanés
+      if (isToggling) {
+        return false;
+      }
+      isToggling = true;
+      
+      // Convertir l'ID en string pour éviter les problèmes de comparaison
+      const targetId = 'details-' + String(offreId);
+      
+      // Trouver l'élément cible
+      const detailsDiv = document.getElementById(targetId);
+      if (!detailsDiv) {
+        console.error('Element ' + targetId + ' not found');
+        isToggling = false;
+        return false;
+      }
+      
+      // Vérifier l'état actuel de cet élément AVANT de fermer les autres
+      const currentDisplay = window.getComputedStyle(detailsDiv).display;
+      const isCurrentlyVisible = currentDisplay === 'block';
+      
+      // Fermer TOUS les autres détails IMMÉDIATEMENT (sans animation)
+      const allDetails = document.querySelectorAll('.offer-full-description');
+      allDetails.forEach(function(detail) {
+        // Vérifier que l'élément a un ID et que ce n'est pas celui qu'on veut ouvrir
+        const detailId = detail.getAttribute('id');
+        if (detailId && detailId !== targetId) {
+          // Fermer immédiatement sans animation
+          detail.style.display = 'none';
+          detail.style.animation = 'none';
+          detail.style.opacity = '0';
+        }
+      });
+      
+      // Toggle le détail de la carte cliquée après un court délai
+      setTimeout(function() {
+        if (isCurrentlyVisible) {
+          // Fermer avec animation
+          detailsDiv.style.animation = 'slideUp 0.3s ease-out';
+          setTimeout(() => {
+            detailsDiv.style.display = 'none';
+            detailsDiv.style.opacity = '0';
+            isToggling = false;
+          }, 300);
+        } else {
+          // Ouvrir avec animation
+          detailsDiv.style.display = 'block';
+          detailsDiv.style.opacity = '1';
+          // Forcer le reflow pour que l'animation fonctionne
+          void detailsDiv.offsetHeight;
+          detailsDiv.style.animation = 'slideDown 0.3s ease-out';
+          setTimeout(() => {
+            isToggling = false;
+          }, 300);
+        }
+      }, 10);
+      
+      return false;
+    }
+    
+    function validateCV(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedExtensions = ['.pdf', '.doc', '.docx'];
+        const fileName = file.name.toLowerCase();
+        
+        // Vérifier l'extension
+        const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        if (!hasValidExtension) {
+          alert('Format de fichier non supporté. Veuillez choisir un fichier PDF, DOC ou DOCX.');
+          input.value = '';
+          return false;
+        }
+        
+        // Vérifier la taille
+        if (file.size > maxSize) {
+          alert('Le fichier CV est trop volumineux. Taille maximum: 10MB.');
+          input.value = '';
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    // Validation du formulaire de postulation
+    document.querySelectorAll('form[id^="postulerForm"]').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const emailInput = form.querySelector('input[name="email"]');
+        const lettreInput = form.querySelector('textarea[name="lettre_motivation"]');
+        const cvInput = form.querySelector('input[name="cv"]');
+        
+        const email = emailInput ? emailInput.value.trim() : '';
+        const lettre = lettreInput ? lettreInput.value.trim() : '';
+        
+        // Validation email
+        if (!email) {
+          e.preventDefault();
+          alert('Email address is required.');
+          if (emailInput) emailInput.focus();
+          return false;
+        }
+        const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+        if (!emailPattern.test(email)) {
+          e.preventDefault();
+          alert('Please enter a valid email address.');
+          if (emailInput) emailInput.focus();
+          return false;
+        }
+        
+        // Validation lettre de motivation
+        if (!lettre || lettre.length < 50) {
+          e.preventDefault();
+          alert('Motivation letter is required and must contain at least 50 characters.');
+          if (lettreInput) lettreInput.focus();
+          return false;
+        }
+        // Vérifier qu'il y a du texte significatif (au moins 10 lettres)
+        const letterPattern = /[a-zA-ZÀ-ÿ]{10,}/;
+        if (!letterPattern.test(lettre)) {
+          e.preventDefault();
+          alert('Motivation letter must contain meaningful text (at least 10 letters).');
+          if (lettreInput) lettreInput.focus();
+          return false;
+        }
+        
+        // Validation CV (optionnel mais si fourni, vérifier)
+        if (cvInput && cvInput.files && cvInput.files.length > 0) {
+          if (!validateCV(cvInput)) {
+            e.preventDefault();
+            return false;
+          }
+        }
+        
+        return true;
+      });
+    });
+    
+    // Navigation des offres avec les boutons
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.getElementById('offresContainer');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      if (!container || !prevBtn || !nextBtn) {
+        return; // Éléments non trouvés, sortir
+      }
+      
+      function updateButtons() {
+        // Vérifier si on peut faire défiler vers la gauche
+        if (container.scrollLeft <= 0) {
+          prevBtn.disabled = true;
+        } else {
+          prevBtn.disabled = false;
+        }
+        
+        // Vérifier si on peut faire défiler vers la droite
+        if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 10) {
+          nextBtn.disabled = true;
+        } else {
+          nextBtn.disabled = false;
+        }
+      }
+      
+      // Fonction pour faire défiler
+      function scrollOffres(direction) {
+        const scrollAmount = container.clientWidth * 0.8; // Défiler de 80% de la largeur visible
+        const currentScroll = container.scrollLeft;
+        const targetScroll = direction === 'next' 
+          ? currentScroll + scrollAmount 
+          : currentScroll - scrollAmount;
+        
+        container.scrollTo({
+          left: targetScroll,
+          behavior: 'smooth'
+        });
+      }
+      
+      // Événements sur les boutons
+      prevBtn.addEventListener('click', function() {
+        scrollOffres('prev');
+      });
+      
+      nextBtn.addEventListener('click', function() {
+        scrollOffres('next');
+      });
+      
+      // Mettre à jour les boutons lors du défilement
+      container.addEventListener('scroll', updateButtons);
+      
+      // Mettre à jour les boutons au chargement
+      updateButtons();
+      
+      // Mettre à jour les boutons lors du redimensionnement de la fenêtre
+      window.addEventListener('resize', function() {
+        setTimeout(updateButtons, 100);
+      });
+    });
+  </script>
+
+  <!-- =======================================================
+ * Template Name: EduLife
+ * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="schedule-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="{% static 'assets/img/logo.webp' %}" alt=""> -->
+        <h1 class="sitename">EduLife</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="active">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{% url 'dashboard' %}">Login</a>
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'assets/img/Working at Mecanoo.jpeg' %});">
+      <div class="container position-relative">
+        <h1>Internships</h1>
+        <p>Your one-stop platform for everything students need: internships, opportunities, and resources to build your future</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li class="current">Internships</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Schedule Section -->
+    <section id="schedule" class="schedule section light-background">
+
+      <!-- Section Title -->
+      <div class="container section-title">
+        <h2>Internships</h2>
+        <p>Explore our latest internship opportunities below</p>
+      </div><!-- End Section Title -->
+
+      <div class="container">
+
+        <!-- Messages de succès uniquement -->
+        {% if messages %}
+          {% for message in messages %}
+            {% if message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <!-- Duration Filter -->
+        <div class="schedule-tabs">
+          <ul class="nav nav-pills justify-content-center mb-5">
+            <li class="nav-item">
+              <a href="?duree=" class="nav-link {% if not duree_filter %}active{% endif %}">All</a>
+            </li>
+            <li class="nav-item">
+              <a href="?duree=less_than_3" class="nav-link {% if duree_filter == 'less_than_3' %}active{% endif %}">Less than 3 months</a>
+            </li>
+            <li class="nav-item">
+              <a href="?duree=more_than_3" class="nav-link {% if duree_filter == 'more_than_3' %}active{% endif %}">More than 3 months</a>
+            </li>
+            <li class="nav-item">
+              <a href="?duree=more_than_6" class="nav-link {% if duree_filter == 'more_than_6' %}active{% endif %}">More than 6 months</a>
+            </li>
+          </ul>
+        </div>
+
+            <!-- Track Headers -->
+        <div class="track-headers mb-4">
+              <div class="track-header development">
+            <i class="bi bi-compass"></i>
+            <span>Discover your next opportunity!</span>
+              </div>
+              <div class="track-header design">
+            <i class="bi bi-rocket-takeoff"></i>
+            <span>Start your journey with us!</span>
+              </div>
+              <div class="track-header business">
+            <i class="bi bi-person-check"></i>
+            <span>Find the internship that fits you</span>
+              </div>
+            </div>
+
+        <!-- Navigation Buttons and Scrollable Container -->
+        <div class="offres-navigation-wrapper" style="position: relative; margin-bottom: 30px;">
+          <button class="offres-nav-btn offres-nav-prev" id="prevBtn" aria-label="Previous offers">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <div class="offres-scroll-container" id="offresContainer">
+            <div class="row gy-4 justify-content-center" id="offresRow">
+          {% if offres %}
+            <!-- Debug: Nombre d'offres: {{ offres|length }} -->
+            {% for offre in offres %}
+            <!-- Offre de Stage Card -->
+            <div class="col-lg-6 col-md-6 mb-4 d-flex">
+              <div class="offre-card-wrapper" style="background: #f8f9fa; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; display: flex; flex-direction: column;">
+                <div class="offre-card" style="display: flex; flex: 1; min-height: 200px; height: 100%;">
+                  <div class="offre-image" style="width: 35%; flex-shrink: 0; position: relative; height: 200px; display: flex; align-items: stretch;">
+                    {% if offre.image %}
+                    <img src="{{ offre.image.url }}" alt="{{ offre.titre }}" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                    {% else %}
+                    <img src="{% static 'assets/img/events/showcase-9.webp' %}" alt="{{ offre.titre }}" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                    {% endif %}
+                    <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 8px;">
+                      <a href="#" style="background: rgba(255, 107, 53, 0.9); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px;"><i class="bi bi-linkedin"></i></a>
+                      <a href="#" style="background: rgba(255, 107, 53, 0.9); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px;"><i class="bi bi-twitter"></i></a>
+                    </div>
+                  </div>
+                  <div class="offre-content" style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; background: white; min-width: 0; overflow: hidden; height: 100%;">
+                    <div>
+                      <span style="background: #ff6b35; color: white; padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; text-transform: uppercase; display: inline-block; margin-bottom: 12px;">{{ offre.etat }}</span>
+                      <h3 style="font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; line-height: 1.3;">{{ offre.titre }}</h3>
+                      <div style="display: flex; gap: 12px; margin-bottom: 10px; color: #7f8c8d; font-size: 13px;">
+                        <span>{{ offre.domaine }}</span>
+                        <span>•</span>
+                        <span>{{ offre.lieu }}</span>
+                      </div>
+                      <p style="color: #555; font-size: 13px; line-height: 1.5; margin-bottom: 0;">{{ offre.description|truncatewords:15 }}</p>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; flex-wrap: wrap; gap: 10px;">
+                      <div style="display: flex; gap: 15px; color: #555; font-size: 12px; flex-wrap: wrap;">
+                        <span style="white-space: nowrap;"><i class="bi bi-clock"></i> {{ offre.duree }} weeks</span>
+                        <span style="white-space: nowrap;"><i class="bi bi-cash"></i> {{ offre.remuneration }} DT</span>
+                      </div>
+                      <div style="display: flex; gap: 10px; align-items: center; flex-shrink: 0;">
+                        <a href="javascript:void(0);" style="color: #ff6b35; text-decoration: none; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap;" onclick="event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation(); toggleDetails({{ offre.id_offre }}); return false;">See details</a>
+                        <button type="button" class="btn btn-sm" style="background: #ff6b35; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#postulerModal{{ offre.id_offre }}">Apply</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="details-{{ offre.id_offre }}" class="offer-full-description" style="display: none; padding: 20px; background: #f8f9fa; border-top: 1px solid #e9ecef; border-radius: 0 0 12px 12px;">
+                  <h5 style="color: #2c3e50; margin-bottom: 15px; font-weight: 700;">Full Description</h5>
+                  <p style="color: #555; line-height: 1.8; margin-bottom: 0;">{{ offre.description }}</p>
+                </div>
+              </div>
+            </div><!-- End Offre Card -->
+            {% endfor %}
+          {% else %}
+            <div class="col-12">
+              <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <p class="lead">Aucune offre de stage disponible pour le moment.</p>
+                <p class="text-muted">Veuillez créer des offres depuis le backoffice pour qu'elles apparaissent ici.</p>
+                <a href="{% url 'offres_stage' %}" class="btn btn-primary mt-3">Accéder au Backoffice</a>
+                      </div>
+                    </div>
+          {% endif %}
+                    </div>
+                  </div>
+          <button class="offres-nav-btn offres-nav-next" id="nextBtn" aria-label="Next offers">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+                    </div>
+
+                      </div>
+
+    </section><!-- /Schedule Section -->
+
+    <!-- Application Modals -->
+    {% for offre in offres %}
+    <div class="modal fade" id="postulerModal{{ offre.id_offre }}" tabindex="-1" aria-labelledby="postulerModalLabel{{ offre.id_offre }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+          <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 20px 30px;">
+            <h5 class="modal-title" id="postulerModalLabel{{ offre.id_offre }}" style="font-size: 24px; font-weight: 600;">Apply for: {{ offre.titre }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+          <div class="modal-body" style="padding: 30px;">
+            <div class="ticket-form-wrapper">
+              <div class="event-info mb-4" style="background: #fdfaf6; border: 2px solid #ff9933; border-radius: 12px; padding: 20px;">
+                <h4 style="color: #333; font-weight: bold; font-size: 1.5em; margin-bottom: 10px;">{{ offre.titre }}</h4>
+                <p style="color: #666; font-size: 1em; margin-bottom: 15px;">{{ offre.description|truncatewords:20 }}</p>
+                <div class="event-details">
+                  <div class="event-meta mb-3 d-flex flex-wrap gap-2">
+                    <span style="background: #f5e8d8; color: #666; padding: 8px 16px; border-radius: 20px; font-size: 0.9em;">
+                      <i class="bi bi-briefcase me-2"></i>{{ offre.domaine }}
+                    </span>
+                    <span style="background: #f5e8d8; color: #666; padding: 8px 16px; border-radius: 20px; font-size: 0.9em;">
+                      <i class="bi bi-geo-alt me-2"></i>{{ offre.lieu }}
+                    </span>
+                    <span style="background: #f5e8d8; color: #666; padding: 8px 16px; border-radius: 20px; font-size: 0.9em;">
+                      <i class="bi bi-clock me-2"></i>{{ offre.duree }} weeks
+                    </span>
+                      <span style="background: #f5e8d8; color: #666; padding: 8px 16px; border-radius: 20px; font-size: 0.9em;">
+                        <i class="bi bi-cash me-2"></i>{{ offre.remuneration }} DT
+                      </span>
+                  </div>
+                </div>
+              </div>
+
+              <form method="post" action="{% url 'postuler' %}" enctype="multipart/form-data" class="ticket-form" id="postulerForm{{ offre.id_offre }}">
+                {% csrf_token %}
+                <input type="hidden" name="offre" value="{{ offre.id_offre }}">
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="email{{ offre.id_offre }}">Email Address *</label>
+                      <input type="email" name="email" id="email{{ offre.id_offre }}" class="form-control" placeholder="your.email@example.com" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+                      <small class="form-text text-muted">Enter a valid email address</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="cv{{ offre.id_offre }}">CV (PDF, DOC, DOCX)</label>
+                  <input type="file" name="cv" id="cv{{ offre.id_offre }}" class="form-control" accept=".pdf,.doc,.docx" onchange="validateCV(this)">
+                  <small class="form-text text-muted">Upload your CV in PDF, DOC, or DOCX format (max 10MB) - Optional</small>
+              </div>
+
+                <div class="form-group">
+                  <label for="lettre_motivation{{ offre.id_offre }}">Motivation Letter *</label>
+                  <textarea name="lettre_motivation" id="lettre_motivation{{ offre.id_offre }}" rows="5" class="form-control" placeholder="Write your motivation letter here. Explain why you are interested in this position and how your skills match the requirements..." required minlength="50" maxlength="5000"></textarea>
+                  <small class="form-text text-muted">Minimum 50 characters. Explain your motivation and how your skills match the requirements.</small>
+                </div>
+
+                <div class="form-submit d-flex justify-content-between align-items-center mt-4">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #ff9933 0%, #ff6b35 100%); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 153, 51, 0.3);">
+                    <i class="bi bi-send me-2"></i>
+                    Submit Application
+                  </button>
+                    </div>
+              </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+    </div>
+    {% endfor %}
+
+    <!-- Who Should Apply Section -->
+    <section id="who-should-apply" class="section light-background" style="padding: 80px 0;">
+      <div class="container">
+        
+        <div class="section-title text-center mb-5">
+          <h2 style="color: #2c3e50; font-weight: 700; margin-bottom: 15px;">Who Should Apply?</h2>
+          <p style="color: #666; font-size: 16px; max-width: 700px; margin: 0 auto;">
+            Our internship program is designed for ambitious individuals looking to gain real-world experience and kickstart their professional journey.
+          </p>
+            </div>
+
+        <div class="row gy-4 mt-4">
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-code-slash"></i>
+              </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Developers</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">Software engineering and technical students</p>
+            </div>
+              </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-briefcase"></i>
+              </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Business Students</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">Management and entrepreneurship majors</p>
+            </div>
+                </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-palette"></i>
+                    </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Designers</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">UX/UI and graphic design students</p>
+                      </div>
+                    </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-megaphone"></i>
+              </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Marketers</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">Digital marketing and communication students</p>
+                      </div>
+                    </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-graph-up"></i>
+              </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Analysts</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">Data science and analytics students</p>
+            </div>
+        </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="attendee-category text-center">
+              <div class="category-icon mb-3" style="font-size: 48px; color: #2c3e50;">
+                <i class="bi bi-mortarboard"></i>
+              </div>
+              <h5 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Students</h5>
+              <p style="color: #666; font-size: 14px; margin: 0;">Aspiring professionals and recent graduates</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section><!-- /Who Should Apply Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+            <span class="sitename">EduLife</span>
+          </a>
+          <p class="mt-3">Complete educational platform to facilitate student life. Find internships, startup opportunities, housing, carpooling and events in one place.</p>
+          <div class="footer-contact pt-3">
+            <p><strong>Email:</strong> <span>contact@edulife.tn</span></p>
+            <p><strong>Phone:</strong> <span>+216 XX XXX XXX</span></p>
+            <p class="mt-2"><strong>Address:</strong> <span>Tunisia</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href="#" title="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" title="Twitter"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" title="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'about' %}">About Us</a></li>
+            <li><a href="{% url 'internships' %}">Internships</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'my_applications' %}">My Applications</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="{% url 'internships' %}">Internship</a></li>
+            <li><a href="#">Startup</a></li>
+            <li><a href="#">Housing</a></li>
+            <li><a href="#">Ride Sharing</a></li>
+            <li><a href="#">Events</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Student Resources</h4>
+          <ul>
+            <li><a href="{% url 'my_applications' %}">My Applications</a></li>
+            <li><a href="{% url 'my_interviews' %}">My Interviews</a></li>
+            <li><a href="{% url 'internships' %}">Browse Internships</a></li>
+            <li><a href="#">Explore Startups</a></li>
+            <li><a href="#">Find Housing</a></li>
+            <li><a href="#">Ride Sharing</a></li>
+            <li><a href="#">Upcoming Events</a></li>
+            <li><a href="{% url 'about' %}">How It Works</a></li>
+            <li><a href="{% url 'contact' %}">Help & Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="{% url 'contact' %}">Support</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">EduLife</strong> <span>All Rights Reserved</span></p>
+      <p class="text-muted mt-2">Empowering students with opportunities and resources for a brighter future</p>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>

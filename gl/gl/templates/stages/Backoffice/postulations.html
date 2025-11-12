@@ -1,0 +1,142 @@
+{% extends 'stages/Backoffice/base_dashboard.html' %}
+
+{% block title %}Applications - Backoffice{% endblock %}
+{% block breadcrumb %}Applications{% endblock %}
+{% block page_title %}Applications{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-header pb-0">
+        <h6>Applications List</h6>
+      </div>
+      <!-- Barre de recherche et filtres -->
+      <div class="card-body px-4 pt-3 pb-2 border-bottom">
+        <form method="get" action="{% url 'postulations' %}" class="row g-3">
+          <div class="col-md-5">
+            <div class="input-group">
+              <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
+              <input type="text" name="search" class="form-control" placeholder="Search by email, offer..." value="{{ search_query }}">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select name="statut" class="form-control">
+              <option value="">All Status</option>
+              <option value="en_attente" {% if statut_filter == 'en_attente' %}selected{% endif %}>Pending</option>
+              <option value="acceptee" {% if statut_filter == 'acceptee' %}selected{% endif %}>Accepted</option>
+              <option value="refusee" {% if statut_filter == 'refusee' %}selected{% endif %}>Rejected</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select name="sort" class="form-control">
+              <option value="-date_postulation" {% if sort_by == '-date_postulation' %}selected{% endif %}>Newest</option>
+              <option value="date_postulation" {% if sort_by == 'date_postulation' %}selected{% endif %}>Oldest</option>
+              <option value="email" {% if sort_by == 'email' %}selected{% endif %}>Email A-Z</option>
+              <option value="-email" {% if sort_by == '-email' %}selected{% endif %}>Email Z-A</option>
+              <option value="offre" {% if sort_by == 'offre' %}selected{% endif %}>Offer A-Z</option>
+              <option value="-offre" {% if sort_by == '-offre' %}selected{% endif %}>Offer Z-A</option>
+            </select>
+          </div>
+          <div class="col-md-12 d-flex gap-2">
+            <button type="submit" class="btn btn-dashboard-primary">Search</button>
+            <a href="{% url 'postulations' %}" class="btn btn-dashboard-secondary">Reset</a>
+          </div>
+        </form>
+      </div>
+      <div class="card-body px-4 pt-3 pb-2">
+        <div class="mb-2">
+          <span class="text-sm text-secondary">
+            <strong>{{ postulations.count }}</strong> application{{ postulations.count|pluralize }} found
+            {% if search_query or statut_filter %}
+            <a href="{% url 'postulations' %}" class="ms-2 text-primary">View all</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Offer</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CV</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cover Letter</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for postulation in postulations %}
+              <tr>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">#{{ postulation.id_postulation }}</h6>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <p class="text-xs font-weight-bold mb-0">{{ postulation.offre.titre }}</p>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  <span class="text-secondary text-xs font-weight-bold">{{ postulation.email }}</span>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  <span class="text-secondary text-xs font-weight-bold">{{ postulation.date_postulation|date:"d/m/Y" }}</span>
+                </td>
+                <td class="align-middle text-center">
+                  {% if postulation.statut == 'en_attente' %}
+                  <span class="badge badge-sm bg-gradient-warning">Pending</span>
+                  {% elif postulation.statut == 'acceptee' %}
+                  <span class="badge badge-sm bg-gradient-success">Accepted</span>
+                  {% elif postulation.statut == 'refusee' %}
+                  <span class="badge badge-sm bg-gradient-danger">Rejected</span>
+                  {% endif %}
+                </td>
+                <td class="align-middle text-center">
+                  {% if postulation.cv %}
+                  <a href="{{ postulation.cv.url }}" class="text-xs font-weight-bold mb-0" target="_blank">Download</a>
+                  {% else %}
+                  <span class="text-secondary text-xs">Not provided</span>
+                  {% endif %}
+                </td>
+                <td class="align-middle text-center">
+                  <span class="text-xs">{{ postulation.lettre_motivation|truncatewords:20 }}</span>
+                </td>
+                <td class="align-middle text-center">
+                  {% if postulation.statut == 'en_attente' %}
+                  <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to accept this application?');">
+                    {% csrf_token %}
+                    <button type="submit" name="accepter" value="{{ postulation.id_postulation }}" class="btn btn-dashboard-primary mb-0 me-1">
+                      Accept
+                    </button>
+                  </form>
+                  {% endif %}
+                  <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this application?');">
+                    {% csrf_token %}
+                    <button type="submit" name="supprimer" value="{{ postulation.id_postulation }}" class="btn btn-dashboard-secondary mb-0">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center">
+                  <p class="text-xs text-secondary mb-0">No applications at the moment</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
