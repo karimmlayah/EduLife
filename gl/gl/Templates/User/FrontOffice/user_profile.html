@@ -1,0 +1,620 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Profil - {{ profile_user.get_full_name|default:profile_user.username }}{% endblock %}
+
+{% block body_class %}user-profile-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .user-profile-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .user-profile-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Make header transparent over hero */
+    body.user-profile-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.user-profile-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      background: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Ensure header text is visible on transparent background */
+    body.user-profile-hero-page #header.header,
+    body.user-profile-hero-page #header.header .logo h1,
+    body.user-profile-hero-page #header.header .navmenu a {
+      color: #ffffff !important;
+    }
+
+    .user-profile-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .user-profile-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .user-profile-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .user-profile-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .user-profile-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .user-profile-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .user-profile-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .user-profile-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .user-profile-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .user-profile-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .user-profile-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .user-profile-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .user-profile-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .user-profile-main-content {
+      background: var(--background-color);
+      padding: 60px 0;
+    }
+
+    .user-profile-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .user-profile-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .user-profile-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .user-profile-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    .profile-container {
+      max-width: 1128px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    
+    .profile-header {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .profile-cover {
+      height: 200px;
+      background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+      position: relative;
+    }
+    
+    .profile-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-avatar-section {
+      padding: 0 24px 16px;
+      margin-top: -80px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .profile-avatar {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .btn-connect {
+      background: #0a66c2;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-connect:hover {
+      background: #004182;
+    }
+    
+    .btn-message {
+      background: #fff;
+      color: #0a66c2;
+      border: 1px solid #0a66c2;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-message:hover {
+      background: #e6f2ff;
+    }
+    
+    .profile-info {
+      padding: 0 24px 24px;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 2rem;
+      padding: 1rem 0;
+      border-top: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
+      margin: 1rem 0;
+    }
+
+    .profile-stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .profile-stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0a66c2;
+    }
+
+    .profile-stat-label {
+      font-size: 0.875rem;
+      color: #666;
+    }
+    
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .profile-headline {
+      font-size: 1.25rem;
+      color: #666;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .profile-location {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0.5rem 0;
+    }
+    
+    .profile-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+    
+    .profile-card-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: #000;
+      margin: 0 0 1rem 0;
+    }
+    
+    .post-item {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+    
+    .post-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .post-author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .post-author-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .post-author-info {
+      flex: 1;
+    }
+    
+    .post-author-name {
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 2px 0;
+      font-size: 0.9375rem;
+    }
+    
+    .post-time {
+      font-size: 0.75rem;
+      color: #666;
+      margin: 0;
+    }
+    
+    .post-content {
+      color: #000;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    
+    .post-media {
+      margin-bottom: 12px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .post-media img, .post-media video {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+    
+    .connection-status {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .connection-status.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .connection-status.accepted {
+      background: #d1fae5;
+      color: #065f46;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="user-profile-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Profil</h1>
+              <p class="hero-subtitle">Découvrez le profil de {{ profile_user.get_full_name|default:profile_user.username }}.</p>
+            </div>
+            <div class="user-profile-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Profil</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="user-profile-main-content">
+    <div class="user-profile-content-header">
+      <h2 class="user-profile-content-title">Profil</h2>
+      <p class="user-profile-content-description">
+        Découvrez les publications et les informations de {{ profile_user.get_full_name|default:profile_user.username }}.
+      </p>
+    </div>
+
+    <div class="profile-container">
+      <!-- Profile Header -->
+      <div class="profile-header">
+    <div class="profile-cover">
+      {% if profile_user.cover_photo %}
+        <img src="{{ profile_user.cover_photo.url }}" alt="Cover" />
+      {% else %}
+        <img src="{% static 'User/evently/img/default-cover.svg' %}" alt="Cover" />
+      {% endif %}
+    </div>
+    <div class="profile-avatar-section">
+      <div>
+        <div class="profile-avatar">
+          {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" />
+          {% else %}
+            <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" />
+          {% endif %}
+        </div>
+      </div>
+      <div class="profile-actions">
+        {% if connection_status == 'accepted' %}
+          <span class="connection-status accepted">
+            <i class="bi bi-check-circle"></i> Connecté
+          </span>
+          <a href="{% url 'messages_conversation' profile_user.id %}" class="btn-message">
+            <i class="bi bi-envelope"></i> Message
+          </a>
+        {% elif connection_status == 'pending' %}
+          {% if is_request_sender %}
+            <span class="connection-status pending">
+              <i class="bi bi-clock"></i> Demande en attente
+            </span>
+          {% else %}
+            <span class="connection-status pending">
+              <i class="bi bi-clock"></i> Demande reçue - Vérifiez vos notifications
+            </span>
+          {% endif %}
+        {% elif connection_status == 'rejected' %}
+          {% if is_request_sender %}
+            <form method="post" action="{% url 'send_connection' profile_user.id %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-connect">
+                <i class="bi bi-arrow-clockwise"></i> Réessayer
+              </button>
+            </form>
+          {% else %}
+            <span class="connection-status" style="background: #fee; color: #c33; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+              <i class="bi bi-x-circle"></i> Demande refusée
+            </span>
+          {% endif %}
+        {% else %}
+          <form method="post" action="{% url 'send_connection' profile_user.id %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-connect">
+              <i class="bi bi-person-plus"></i> Se connecter
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ profile_user.get_full_name|default:profile_user.username }}{% if profile_user.age %}, {{ profile_user.age }}{% endif %}</h1>
+      {% if profile_user.headline %}
+        <p class="profile-headline">{{ profile_user.headline }}</p>
+      {% endif %}
+      {% if profile_user.location %}
+        <p class="profile-location"><i class="bi bi-geo-alt"></i> {{ profile_user.location }}</p>
+      {% endif %}
+      
+      <!-- Statistics -->
+      <div class="profile-stats">
+        <div class="profile-stat-item">
+          <span class="profile-stat-number">{{ connections_count }}</span>
+          <span class="profile-stat-label">Connexions</span>
+        </div>
+        <div class="profile-stat-item">
+          <span class="profile-stat-number">{{ posts_count }}</span>
+          <span class="profile-stat-label">Publications</span>
+        </div>
+        <div class="profile-stat-item">
+          <span class="profile-stat-number">{{ comments_count }}</span>
+          <span class="profile-stat-label">Commentaires</span>
+        </div>
+      </div>
+
+      {% if profile_user.bio %}
+        <p style="color: #666; line-height: 1.6; margin-top: 1rem;">{{ profile_user.bio|linebreaks }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %}" style="margin-bottom: 1rem; padding: 1rem; border-radius: 8px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Posts -->
+  <div class="profile-card">
+    <h2 class="profile-card-title">Publications</h2>
+    {% if posts %}
+      {% for post in posts %}
+      <div class="post-item">
+        <div class="post-header">
+          <div class="post-author-avatar">
+            {% if post.author.avatar %}
+              <img src="{{ post.author.avatar.url }}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+            {% else %}
+              <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+            {% endif %}
+          </div>
+          <div class="post-author-info">
+            <h3 class="post-author-name">{{ post.author.get_full_name|default:post.author.username }}</h3>
+            <p class="post-time">{{ post.created_at|timesince }} ago</p>
+          </div>
+        </div>
+        <div class="post-content">{{ post.content }}</div>
+        {% if post.get_media_url %}
+        <div class="post-media">
+          {% with media_url=post.get_media_url %}
+            {% if media_url|slice:"-4:" == ".jpg" or media_url|slice:"-4:" == ".png" or media_url|slice:"-5:" == ".jpeg" or media_url|slice:"-4:" == ".gif" or media_url|slice:"-4:" == ".webp" %}
+              <img src="{{ media_url }}" alt="Post media" />
+            {% else %}
+              <video controls>
+                <source src="{{ media_url }}" type="video/mp4">
+              </video>
+            {% endif %}
+          {% endwith %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="text-align: center; padding: 2rem; color: #999;">
+        <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
+        <p>Aucun post pour le moment.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div style="margin-top: 1rem;">
+    <a href="{% url 'evently_schedule' %}" class="btn-message" style="display: inline-flex;">
+      <i class="bi bi-arrow-left"></i> Retour au fil d'actualité
+    </a>
+  </div>
+    </div>
+  </section>
+{% endblock %}
+

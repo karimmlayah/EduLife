@@ -1,0 +1,22 @@
+# Environnements
+venv/
+env/
+
+# Fichiers compilés
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configs locales
+*.sqlite3
+*.env
+*.log
+
+# Django
+/staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/

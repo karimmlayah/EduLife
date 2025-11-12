@@ -1,0 +1,904 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Messages - {{ other_user.get_full_name|default:other_user.username }}{% endblock %}
+
+{% block body_class %}messages-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .messages-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Make header transparent over hero */
+    body.messages-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.messages-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      background: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Ensure header text is visible on transparent background */
+    body.messages-hero-page #header.header,
+    body.messages-hero-page #header.header .logo h1,
+    body.messages-hero-page #header.header .navmenu a {
+      color: #ffffff !important;
+    }
+
+    .messages-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .messages-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .messages-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .messages-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .messages-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .messages-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .messages-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .messages-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .messages-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .messages-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .messages-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .messages-main-content {
+      background: var(--background-color);
+      padding: 60px 0;
+    }
+
+    .messages-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .messages-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .messages-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .messages-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    .messages-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1.5rem;
+      min-height: 60vh;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+      max-height: 800px;
+    }
+
+    @media (max-width: 992px) {
+      .messages-container {
+        grid-template-columns: 1fr;
+      }
+      .conversations-sidebar {
+        display: none;
+      }
+    }
+
+    .conversations-sidebar {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      overflow-y: auto;
+    }
+
+    .conversations-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .conversations-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .conversation-item {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .conversation-item:hover {
+      background: #f5f5f5;
+    }
+
+    .conversation-item.active {
+      background: #e6f2ff;
+    }
+
+    .conversation-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .conversation-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-name {
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 0.25rem 0;
+      font-size: 0.95rem;
+    }
+
+    .conversation-preview {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-unread {
+      background: #0a66c2;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      height: 100%;
+    }
+
+    .chat-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .chat-header-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .chat-header-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .chat-header-info h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message-item {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 70%;
+    }
+
+    .message-item.sent {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-item.received {
+      align-self: flex-start;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .message-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .message-content {
+      background: #f5f5f5;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      word-wrap: break-word;
+    }
+
+    .message-item.sent .message-content {
+      background: #0a66c2;
+      color: white;
+    }
+
+    .message-item.received .message-content {
+      background: #f5f5f5;
+      color: #1e293b;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+      text-align: right;
+    }
+
+    .message-item.received .message-time {
+      text-align: left;
+    }
+
+    .chat-input-container {
+      padding: 1.5rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .chat-input-form {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      resize: none;
+      font-family: inherit;
+      min-height: 44px;
+      max-height: 120px;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: #0a66c2;
+      box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
+    }
+
+    .chat-send-btn {
+      background: #0a66c2;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chat-send-btn:hover {
+      background: #004182;
+    }
+
+    .empty-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #64748b;
+    }
+
+    .empty-chat i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .message-action-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #666;
+      transition: all 0.2s;
+    }
+
+    .message-action-btn:hover {
+      background: white;
+      color: #0a66c2;
+    }
+
+    .message-item:hover .message-actions {
+      display: flex !important;
+    }
+
+    .message-file {
+      display: flex;
+      align-items: center;
+    }
+
+    .chat-action-btn {
+      background: #f0f0f0;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chat-action-btn:hover {
+      background: #e0e0e0;
+      color: #0a66c2;
+    }
+
+    .chat-action-btn.recording {
+      background: #dc3545;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="messages-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Messages</h1>
+              <p class="hero-subtitle">Discutez et échangez avec les membres de la communauté EduLife.</p>
+            </div>
+            <div class="messages-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Messages</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="messages-main-content">
+    <div class="messages-content-header">
+      <h2 class="messages-content-title">Messages</h2>
+      <p class="messages-content-description">
+        Communiquez avec les membres de la communauté et restez connecté.
+      </p>
+    </div>
+
+    <div class="messages-container">
+    <!-- Conversations Sidebar -->
+    <div class="conversations-sidebar">
+      <div class="conversations-header">
+        <h2><i class="bi bi-chat-dots"></i> Messages</h2>
+      </div>
+      <a href="{% url 'messages' %}" style="display: block; padding: 1rem 1.5rem; color: #0a66c2; text-decoration: none; font-weight: 600; border-bottom: 1px solid #e0e0e0;">
+        <i class="bi bi-arrow-left"></i> Toutes les conversations
+      </a>
+      <a href="{% url 'user_profile' other_user.id %}" style="display: block; padding: 1rem 1.5rem; color: #0a66c2; text-decoration: none; font-weight: 600; border-bottom: 1px solid #e0e0e0;">
+        <i class="bi bi-person"></i> Voir le profil
+      </a>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-header-avatar">
+          {% if other_user.avatar %}
+            <img src="{{ other_user.avatar.url }}" alt="{{ other_user.get_full_name|default:other_user.username }}" />
+          {% else %}
+            <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ other_user.get_full_name|default:other_user.username }}" />
+          {% endif %}
+        </div>
+        <div class="chat-header-info">
+          <h3>{{ other_user.get_full_name|default:other_user.username }}</h3>
+          <a href="{% url 'user_profile' other_user.id %}" style="color: #0a66c2; text-decoration: none; font-size: 0.9rem;">Voir le profil</a>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        {% if messages_list %}
+          {% for message in messages_list %}
+          <div class="message-item {% if message.sender == request.user %}sent{% else %}received{% endif %}" data-message-id="{{ message.id }}">
+            <div class="message-avatar">
+              {% if message.sender.avatar %}
+                <img src="{{ message.sender.avatar.url }}" alt="{{ message.sender.get_full_name|default:message.sender.username }}" />
+              {% else %}
+                <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ message.sender.get_full_name|default:message.sender.username }}" />
+              {% endif %}
+            </div>
+            <div style="flex: 1; position: relative;">
+              {% if message.sender == request.user %}
+              <div class="message-actions" style="position: absolute; top: -5px; right: 0; display: none; gap: 0.5rem;">
+                <button class="message-action-btn" onclick="speakMessage('{{ message.text|escapejs }}')" title="Lire le message">
+                  <i class="bi bi-volume-up"></i>
+                </button>
+                <button class="message-action-btn" onclick="openEditMessageModal({{ message.id }}, '{{ message.text|escapejs }}')" title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <form method="post" action="{% url 'delete_message' message.id %}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce message ?');">
+                  {% csrf_token %}
+                  <button type="submit" class="message-action-btn" style="color: #dc3545;" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+              {% else %}
+              <div class="message-actions" style="position: absolute; top: -5px; right: 0; display: none;">
+                <button class="message-action-btn" onclick="speakMessage('{{ message.text|escapejs }}')" title="Lire le message">
+                  <i class="bi bi-volume-up"></i>
+                </button>
+              </div>
+              {% endif %}
+              <div class="message-content">
+                {% if message.is_connection_request %}
+                <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; font-size: 0.85rem;">
+                  <i class="bi bi-info-circle"></i> <strong>Message de demande de connexion</strong>
+                </div>
+                {% endif %}
+                {% if message.text %}
+                  {{ message.text|linebreaks }}
+                {% endif %}
+                {% if message.get_file_url %}
+                <div class="message-file" style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(0,0,0,0.05); border-radius: 8px;">
+                  <a href="{{ message.get_file_url }}" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none;">
+                    <i class="bi bi-file-earmark"></i>
+                    <span>{{ message.get_file_name }}</span>
+                    <i class="bi bi-download" style="margin-left: auto;"></i>
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+              <div class="message-time">
+                {{ message.sent_at|date:"H:i" }}
+                {% if message.updated_at != message.sent_at %}
+                  <span style="font-size: 0.7rem; opacity: 0.7;">(modifié)</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-chat">
+            <i class="bi bi-chat-left"></i>
+            <p>Aucun message pour le moment. Commencez la conversation !</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="chat-input-container">
+        {% if is_connected %}
+        <form method="post" action="{% url 'send_message' other_user.id %}" class="chat-input-form" id="message-form" enctype="multipart/form-data" onsubmit="return sendMessage(this);">
+          {% csrf_token %}
+          <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+            <input type="file" name="file" id="file-input" accept="*/*" style="display: none;" onchange="handleFileSelect(this)">
+            <button type="button" class="chat-action-btn" onclick="document.getElementById('file-input').click()" title="Joindre un fichier">
+              <i class="bi bi-paperclip"></i>
+            </button>
+            <button type="button" class="chat-action-btn" id="speech-to-text-btn" onclick="toggleSpeechRecognition()" title="Dictée vocale">
+              <i class="bi bi-mic"></i>
+            </button>
+            <textarea name="text" class="chat-input" placeholder="Tapez votre message ou utilisez la dictée vocale..." rows="1" id="message-input"></textarea>
+            <button type="submit" class="chat-send-btn">
+              <i class="bi bi-send"></i> Envoyer
+            </button>
+          </div>
+          <div id="file-preview" style="display: none; margin-top: 0.5rem; padding: 0.5rem; background: #f0f0f0; border-radius: 8px; font-size: 0.875rem;">
+            <span id="file-name"></span>
+            <button type="button" onclick="clearFile()" style="margin-left: 0.5rem; color: #dc3545; background: none; border: none; cursor: pointer;">×</button>
+          </div>
+        </form>
+        {% else %}
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; border-radius: 8px; text-align: center;">
+          <p style="margin: 0; color: #856404;">
+            <i class="bi bi-info-circle"></i> Vous devez être connecté avec {{ other_user.get_full_name|default:other_user.username }} pour envoyer des messages.
+            <br>
+            <a href="{% url 'user_profile' other_user.id %}" style="color: #0a66c2; text-decoration: none; font-weight: 600; margin-top: 0.5rem; display: inline-block;">
+              Voir le profil et envoyer une demande de connexion
+            </a>
+          </p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Modal pour modifier un message -->
+      <div id="edit-message-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+          <div class="modal-header">
+            <h2>Modifier le message</h2>
+            <button type="button" onclick="closeEditMessageModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+          </div>
+          <form method="post" action="" id="edit-message-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <textarea name="text" id="edit-message-text" class="chat-input" rows="3" style="width: 100%; margin-bottom: 1rem;"></textarea>
+            <input type="file" name="file" id="edit-file-input" accept="*/*" style="margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+              <button type="button" onclick="closeEditMessageModal()" style="padding: 0.5rem 1rem; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Annuler</button>
+              <button type="submit" style="padding: 0.5rem 1rem; background: #0a66c2; color: white; border: none; border-radius: 4px; cursor: pointer;">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <script>
+    // Auto-resize textarea
+    const textarea = document.getElementById('message-input');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Scroll to bottom of messages
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Send message function
+    function sendMessage(form) {
+      const input = document.getElementById('message-input');
+      const text = input.value.trim();
+      const fileInput = document.getElementById('file-input');
+      const hasFile = fileInput && fileInput.files.length > 0;
+      
+      if (!text && !hasFile) {
+        alert('Veuillez saisir un message ou joindre un fichier.');
+        return false;
+      }
+      return true;
+    }
+
+    // Auto-scroll on new messages
+    const form = document.getElementById('message-form');
+    if (form) {
+      form.addEventListener('submit', function() {
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 100);
+      });
+    }
+
+    // File handling
+    function handleFileSelect(input) {
+      if (input.files && input.files[0]) {
+        const fileName = input.files[0].name;
+        document.getElementById('file-name').textContent = fileName;
+        document.getElementById('file-preview').style.display = 'block';
+      }
+    }
+
+    function clearFile() {
+      document.getElementById('file-input').value = '';
+      document.getElementById('file-preview').style.display = 'none';
+    }
+
+    // Text-to-Speech
+    function speakMessage(text) {
+      if (!text) return;
+      
+      if ('speechSynthesis' in window) {
+        // Arrêter toute synthèse en cours
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert('Votre navigateur ne supporte pas la synthèse vocale.');
+      }
+    }
+
+    // Speech-to-Text
+    let recognition = null;
+    let isRecording = false;
+
+    function toggleSpeechRecognition() {
+      const btn = document.getElementById('speech-to-text-btn');
+      const input = document.getElementById('message-input');
+
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Votre navigateur ne supporte pas la reconnaissance vocale.');
+        return;
+      }
+
+      if (!recognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+          isRecording = true;
+          btn.classList.add('recording');
+          btn.innerHTML = '<i class="bi bi-stop-circle"></i>';
+        };
+
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          input.value = (input.value + ' ' + transcript).trim();
+          input.style.height = 'auto';
+          input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        };
+
+        recognition.onerror = function(event) {
+          console.error('Erreur de reconnaissance vocale:', event.error);
+          btn.classList.remove('recording');
+          btn.innerHTML = '<i class="bi bi-mic"></i>';
+          isRecording = false;
+        };
+
+        recognition.onend = function() {
+          btn.classList.remove('recording');
+          btn.innerHTML = '<i class="bi bi-mic"></i>';
+          isRecording = false;
+        };
+      }
+
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    // Edit message modal
+    function openEditMessageModal(messageId, messageText) {
+      const modal = document.getElementById('edit-message-modal');
+      const form = document.getElementById('edit-message-form');
+      const textarea = document.getElementById('edit-message-text');
+      
+      form.action = `/messages/${messageId}/update/`;
+      textarea.value = messageText;
+      modal.style.display = 'block';
+    }
+
+    function closeEditMessageModal() {
+      document.getElementById('edit-message-modal').style.display = 'none';
+      document.getElementById('edit-message-form').reset();
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('edit-message-modal');
+      if (event.target == modal) {
+        closeEditMessageModal();
+      }
+    }
+  </script>
+{% endblock %}
+

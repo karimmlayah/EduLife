@@ -1,0 +1,12 @@
+<h1>Paiement réussi ✅</h1>
+
+<h3>Événement : {{ event.name }}</h3>
+
+<p>Vos sièges :</p>
+<ul>
+  {% for s in seats %}
+  <li>Siège {{ s }}</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'event_home' %}">Retour à l’accueil</a>

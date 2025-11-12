@@ -1,0 +1,280 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}{{ binome_request.title }} • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .binome-detail-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .binome-detail-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .binome-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .binome-detail-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .binome-detail-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .binome-detail-user-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #1f2937;
+    }
+
+    .binome-detail-user-info p {
+      margin: 0.5rem 0 0 0;
+      color: #6b7280;
+    }
+
+    .binome-detail-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .binome-detail-description {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #374151;
+      margin-bottom: 2rem;
+      white-space: pre-wrap;
+    }
+
+    .binome-detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .binome-detail-info-item {
+      padding: 1.5rem;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .binome-detail-info-item-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .binome-detail-info-item-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .binome-detail-info-item-value.budget {
+      color: #667eea;
+    }
+
+    .binome-detail-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .btn-contact-detail {
+      flex: 1;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-contact-detail:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      color: white;
+    }
+
+    .btn-back-detail {
+      padding: 14px 24px;
+      background: #f3f4f6;
+      color: #374151;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .btn-back-detail:hover {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+
+    .logement-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: all 0.3s;
+    }
+
+    .logement-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Détails de la demande</h1>
+              <p class="hero-subtitle">{{ binome_request.title }}</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'binome_search' %}">Chercher un binôme</a>
+              <span>/</span>
+              <span class="current">Détails</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="binome-detail-container">
+        <div class="binome-detail-card">
+          <div class="binome-detail-header">
+            <div class="binome-detail-avatar">
+              {% if binome_request.user.avatar %}
+                <img src="{{ binome_request.user.avatar.url }}" alt="{{ binome_request.user.get_full_name|default:binome_request.user.username }}">
+              {% else %}
+                {{ binome_request.user.first_name|default:binome_request.user.username|make_list|first|upper }}{% if binome_request.user.last_name %}{{ binome_request.user.last_name|make_list|first|upper }}{% endif %}
+              {% endif %}
+            </div>
+            <div class="binome-detail-user-info">
+              <h2>{{ binome_request.user.get_full_name|default:binome_request.user.username }}</h2>
+              <p>Publié le {{ binome_request.created_at|date:"d/m/Y à H:i" }}</p>
+            </div>
+          </div>
+
+          <h1 class="binome-detail-title">{{ binome_request.title }}</h1>
+          <div class="binome-detail-description">{{ binome_request.description|linebreaks }}</div>
+
+          <div class="binome-detail-info-grid">
+            <div class="binome-detail-info-item">
+              <div class="binome-detail-info-item-label">Ville recherchée</div>
+              <div class="binome-detail-info-item-value">
+                <i class="bi bi-geo-alt"></i> {{ binome_request.city }}
+              </div>
+            </div>
+            <div class="binome-detail-info-item">
+              <div class="binome-detail-info-item-label">Budget maximum</div>
+              <div class="binome-detail-info-item-value budget">
+                <i class="bi bi-cash-stack"></i> {{ binome_request.budget_max|floatformat:0 }} DZD/mois
+              </div>
+            </div>
+            <div class="binome-detail-info-item">
+              <div class="binome-detail-info-item-label">Statut</div>
+              <div class="binome-detail-info-item-value">
+                <span class="badge badge-sm bg-gradient-{% if binome_request.status == 'PENDING' %}warning{% elif binome_request.status == 'ACCEPTED' %}success{% elif binome_request.status == 'REJECTED' %}danger{% else %}info{% endif %}" style="border-radius:12px;">
+                  {{ binome_request.get_status_display }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {% if binome_request.logement %}
+            <div style="padding: 1.5rem; background: #f9fafb; border-radius: 8px; margin-bottom: 2rem;">
+              <h3 style="margin: 0 0 1rem 0; color: #1f2937;">Logement associé</h3>
+              <p style="margin: 0 0 1rem 0; color: #6b7280;">Cette demande est liée à un logement spécifique.</p>
+              <a href="{% url 'logement_detail' binome_request.logement.id %}" class="logement-link">
+                <i class="bi bi-house"></i> Voir le logement
+              </a>
+            </div>
+          {% endif %}
+
+          {% if request.user != binome_request.user %}
+            <div class="binome-detail-actions">
+              <a href="{% url 'binome_search' %}" class="btn-back-detail">
+                <i class="bi bi-arrow-left"></i> Retour
+              </a>
+              <a href="{% url 'binome_contact' binome_request.id %}" class="btn-contact-detail">
+                <i class="bi bi-chat-dots"></i> Contacter
+              </a>
+            </div>
+          {% else %}
+            <div class="binome-detail-actions">
+              <a href="{% url 'binome_search' %}" class="btn-back-detail" style="flex: 1;">
+                <i class="bi bi-arrow-left"></i> Retour à mes demandes
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
