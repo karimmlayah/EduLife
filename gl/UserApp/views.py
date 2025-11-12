@@ -7,16 +7,19 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.utils import timezone
 import json
 
 from .forms import SignUpForm, LoginForm
-from .models import CustomUser, Post, Comment
+from .models import CustomUser, Post, Comment, Connection, Message, PasswordResetCode
+from django.core.mail import send_mail
+from datetime import timedelta
 
 # Create your views here.
 def index_view(request):
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect('/admin/')
-    return render(request, 'evently/index.html')
+    return render(request, 'User/evently/index.html')
 
 def login_view(request):
     """
@@ -88,11 +91,214 @@ def login_view(request):
                     for error in errors:
                         messages.error(request, f'{field}: {error}')
     
-    return render(request, 'FrontOffice/Login/login.html', {
+    return render(request, 'User/FrontOffice/Login/login.html', {
         'login_form': login_form,
         'signup_form': signup_form,
         'show_login': show_login,
     })
+
+
+def forgot_password_view(request):
+    """
+    Vue pour afficher le formulaire de mot de passe oublié
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    return render(request, 'User/FrontOffice/Login/forgot_password.html')
+
+
+@require_POST
+def forgot_password_submit_view(request):
+    """
+    Vue pour traiter la demande de réinitialisation de mot de passe
+    Vérifie si l'email existe et envoie un code de vérification
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    email = request.POST.get('email', '').strip()
+    
+    if not email:
+        messages.error(request, 'Veuillez entrer votre adresse email.')
+        return redirect('forgot_password')
+    
+    # Vérifier si l'email existe
+    try:
+        user = CustomUser.objects.get(email=email)
+        
+        # Générer un code de 6 chiffres
+        code = PasswordResetCode.generate_code()
+        
+        # Marquer les anciens codes comme utilisés
+        PasswordResetCode.objects.filter(user=user, used=False).update(used=True)
+        
+        # Créer un nouveau code avec expiration de 15 minutes
+        reset_code = PasswordResetCode.objects.create(
+            user=user,
+            code=code,
+            expires_at=timezone.now() + timedelta(minutes=15)
+        )
+        
+        # Envoyer l'email avec le code
+        try:
+            send_mail(
+                subject='Code de réinitialisation de mot de passe - EduLife',
+                message=f'''Bonjour {user.get_full_name() or user.username},
+
+Vous avez demandé à réinitialiser votre mot de passe sur EduLife.
+
+Votre code de vérification est : {code}
+
+Ce code est valide pendant 15 minutes.
+
+Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
+
+Cordialement,
+L'équipe EduLife''',
+                from_email=None,  # Utilise DEFAULT_FROM_EMAIL
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            messages.success(request, f'Un code de vérification a été envoyé à {email}. Veuillez vérifier votre boîte de réception.')
+            # Rediriger vers la page de vérification du code
+            request.session['reset_email'] = email
+            return redirect('verify_reset_code')
+        except Exception as e:
+            messages.error(request, f'Erreur lors de l\'envoi de l\'email: {str(e)}. Veuillez réessayer plus tard.')
+            return redirect('forgot_password')
+            
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Aucun compte n\'est associé à cette adresse email.')
+        return redirect('forgot_password')
+
+
+def verify_reset_code_view(request):
+    """
+    Vue pour afficher le formulaire de vérification du code
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    # Vérifier si l'email est en session
+    if 'reset_email' not in request.session:
+        messages.error(request, 'Session expirée. Veuillez recommencer.')
+        return redirect('forgot_password')
+    
+    return render(request, 'User/FrontOffice/Login/verify_reset_code.html', {
+        'email': request.session.get('reset_email', '')
+    })
+
+
+@require_POST
+def verify_reset_code_submit_view(request):
+    """
+    Vue pour vérifier le code de réinitialisation
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    email = request.session.get('reset_email')
+    if not email:
+        messages.error(request, 'Session expirée. Veuillez recommencer.')
+        return redirect('forgot_password')
+    
+    # Récupérer le code depuis les 6 champs ou le champ complet
+    code = request.POST.get('code', '').strip()
+    
+    # Si le code n'est pas dans le champ complet, le construire depuis les 6 champs
+    if not code or len(code) != 6:
+        code = ''.join([
+            request.POST.get('code1', '').strip(),
+            request.POST.get('code2', '').strip(),
+            request.POST.get('code3', '').strip(),
+            request.POST.get('code4', '').strip(),
+            request.POST.get('code5', '').strip(),
+            request.POST.get('code6', '').strip(),
+        ])
+    
+    if not code or len(code) != 6:
+        messages.error(request, 'Veuillez entrer un code de 6 chiffres.')
+        return redirect('verify_reset_code')
+    
+    try:
+        user = CustomUser.objects.get(email=email)
+        reset_code = PasswordResetCode.objects.filter(
+            user=user,
+            code=code,
+            used=False
+        ).order_by('-created_at').first()
+        
+        if reset_code and reset_code.is_valid():
+            # Code valide - marquer comme utilisé et rediriger vers la réinitialisation
+            reset_code.used = True
+            reset_code.save()
+            request.session['reset_code_verified'] = True
+            request.session['reset_user_id'] = user.id
+            return redirect('reset_password')
+        else:
+            messages.error(request, 'Code invalide ou expiré. Veuillez réessayer.')
+            return redirect('verify_reset_code')
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Erreur: utilisateur introuvable.')
+        return redirect('forgot_password')
+
+
+def reset_password_view(request):
+    """
+    Vue pour afficher le formulaire de réinitialisation du mot de passe
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    # Vérifier si le code a été vérifié
+    if not request.session.get('reset_code_verified') or not request.session.get('reset_user_id'):
+        messages.error(request, 'Veuillez d\'abord vérifier votre code.')
+        return redirect('forgot_password')
+    
+    return render(request, 'User/FrontOffice/Login/reset_password.html')
+
+
+@require_POST
+def reset_password_submit_view(request):
+    """
+    Vue pour réinitialiser le mot de passe
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    # Vérifier si le code a été vérifié
+    if not request.session.get('reset_code_verified') or not request.session.get('reset_user_id'):
+        messages.error(request, 'Session expirée. Veuillez recommencer.')
+        return redirect('forgot_password')
+    
+    user_id = request.session.get('reset_user_id')
+    password = request.POST.get('password', '').strip()
+    password_confirm = request.POST.get('password_confirm', '').strip()
+    
+    if not password or len(password) < 8:
+        messages.error(request, 'Le mot de passe doit contenir au moins 8 caractères.')
+        return redirect('reset_password')
+    
+    if password != password_confirm:
+        messages.error(request, 'Les mots de passe ne correspondent pas.')
+        return redirect('reset_password')
+    
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        user.set_password(password)
+        user.save()
+        
+        # Nettoyer la session
+        del request.session['reset_email']
+        del request.session['reset_code_verified']
+        del request.session['reset_user_id']
+        
+        messages.success(request, 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.')
+        return redirect('login')
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Erreur: utilisateur introuvable.')
+        return redirect('forgot_password')
 
 
 @login_required
@@ -108,7 +314,7 @@ def logout_view(request):
 @login_required
 def account_settings_view(request):
     """Account settings page (edit profile, password, etc.)."""
-    return render(request, 'FrontOffice/profile.html', {
+    return render(request, 'User/FrontOffice/profile.html', {
         'user_obj': request.user,
     })
 
@@ -116,12 +322,446 @@ def account_settings_view(request):
 @login_required
 def profile_view(request):
     """Public-facing profile header page (hero style)."""
+    from .models import Comment
+    
     # Récupérer les posts de l'utilisateur
     posts = Post.objects.filter(author=request.user).order_by('-created_at')[:10]
-    return render(request, 'FrontOffice/profile_public.html', {
+    
+    # Calculer les statistiques
+    connections_count = Connection.objects.filter(
+        Q(from_user=request.user, status='accepted') | Q(to_user=request.user, status='accepted')
+    ).count()
+    posts_count = Post.objects.filter(author=request.user).count()
+    comments_count = Comment.objects.filter(author=request.user).count()
+    
+    return render(request, 'User/FrontOffice/profile_public.html', {
         'user_obj': request.user,
         'posts': posts,
+        'connections_count': connections_count,
+        'posts_count': posts_count,
+        'comments_count': comments_count,
     })
+
+
+def schedule_view(request):
+    """Page pour voir tous les posts (style LinkedIn) - Accessible aux utilisateurs non connectés"""
+    # Récupérer tous les posts de tous les utilisateurs, triés par date
+    posts = Post.objects.select_related('author').prefetch_related('comments').order_by('-created_at')
+    
+    # Récupérer les connexions de l'utilisateur pour afficher le statut (seulement si connecté)
+    user_connections = {}
+    if request.user.is_authenticated:
+        connections = Connection.objects.filter(
+            Q(from_user=request.user) | Q(to_user=request.user),
+            status='accepted'
+        )
+        for conn in connections:
+            other_user = conn.to_user if conn.from_user == request.user else conn.from_user
+            user_connections[other_user.id] = True
+    
+    return render(request, 'User/evently/schedule.html', {
+        'posts': posts,
+        'user_connections': user_connections,
+    })
+
+
+@login_required
+def user_profile_view(request, user_id):
+    """Voir le profil d'un autre utilisateur"""
+    profile_user = get_object_or_404(CustomUser, id=user_id)
+    
+    # Ne pas permettre de voir son propre profil via cette vue
+    if profile_user == request.user:
+        return redirect('profile')
+    
+    # Récupérer les posts de l'utilisateur
+    posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:10]
+    
+    # Vérifier le statut de connexion
+    connection_status = None
+    connection = Connection.objects.filter(
+        Q(from_user=request.user, to_user=profile_user) |
+        Q(from_user=profile_user, to_user=request.user)
+    ).first()
+    
+    if connection:
+        connection_status = connection.status
+    elif request.user == profile_user:
+        connection_status = 'self'
+    
+    # Vérifier si connectés
+    is_connected = connection and connection.status == 'accepted'
+    
+    # Déterminer qui a envoyé la demande (pour afficher le bon message)
+    is_request_sender = connection and connection.from_user == request.user if connection else False
+    
+    # Calculer les statistiques
+    from .models import Comment
+    connections_count = Connection.objects.filter(
+        Q(from_user=profile_user, status='accepted') | Q(to_user=profile_user, status='accepted')
+    ).count()
+    posts_count = Post.objects.filter(author=profile_user).count()
+    comments_count = Comment.objects.filter(author=profile_user).count()
+    
+    return render(request, 'User/FrontOffice/user_profile.html', {
+        'user_obj': request.user,
+        'profile_user': profile_user,
+        'posts': posts,
+        'connection_status': connection_status,
+        'is_connected': is_connected,
+        'is_request_sender': is_request_sender,
+        'connections_count': connections_count,
+        'posts_count': posts_count,
+        'comments_count': comments_count,
+    })
+
+
+@login_required
+@require_POST
+def send_connection_request(request, user_id):
+    """Envoyer une demande de connexion"""
+    from .models import Notification
+    
+    to_user = get_object_or_404(CustomUser, id=user_id)
+    
+    if to_user == request.user:
+        messages.error(request, "Vous ne pouvez pas vous connecter à vous-même.")
+        return redirect('user_profile', user_id=user_id)
+    
+    # Vérifier si une connexion existe déjà
+    existing = Connection.objects.filter(
+        Q(from_user=request.user, to_user=to_user) |
+        Q(from_user=to_user, to_user=request.user)
+    ).first()
+    
+    if existing:
+        if existing.status == 'accepted':
+            messages.info(request, f"Vous êtes déjà connecté avec {to_user.get_full_name() or to_user.username}.")
+        elif existing.status == 'pending':
+            messages.info(request, "Une demande de connexion est déjà en attente.")
+        elif existing.status == 'rejected':
+            # Permettre de réessayer en créant une nouvelle demande
+            existing.status = 'pending'
+            existing.save()
+            # Créer une notification pour l'utilisateur qui reçoit la demande
+            try:
+                notification = Notification.objects.create(
+                    user=to_user,
+                    verb='connection_request',
+                    data={
+                        'connection_id': existing.id,
+                        'from_user_id': request.user.id,
+                        'from_user_name': request.user.get_full_name() or request.user.username,
+                    }
+                )
+                print(f"DEBUG: Notification créée (réessai) - ID: {notification.id}, User: {to_user.id}, Verb: {notification.verb}")
+                messages.success(request, f"Demande de connexion renvoyée à {to_user.get_full_name() or to_user.username}.")
+            except Exception as e:
+                print(f"DEBUG: Erreur lors de la création de la notification (réessai): {e}")
+                messages.error(request, f"Erreur lors de l'envoi de la demande: {e}")
+        elif existing.status == 'blocked':
+            messages.error(request, "Cette connexion est bloquée.")
+    else:
+        connection = Connection.objects.create(
+            from_user=request.user,
+            to_user=to_user,
+            status='pending'
+        )
+        # Créer une notification pour l'utilisateur qui reçoit la demande
+        try:
+            notification = Notification.objects.create(
+                user=to_user,
+                verb='connection_request',
+                data={
+                    'connection_id': connection.id,
+                    'from_user_id': request.user.id,
+                    'from_user_name': request.user.get_full_name() or request.user.username,
+                }
+            )
+            print(f"DEBUG: Notification créée - ID: {notification.id}, User: {to_user.id}, Verb: {notification.verb}")
+            messages.success(request, f"Demande de connexion envoyée à {to_user.get_full_name() or to_user.username}.")
+        except Exception as e:
+            print(f"DEBUG: Erreur lors de la création de la notification: {e}")
+            messages.error(request, f"Erreur lors de l'envoi de la demande: {e}")
+    
+    return redirect('user_profile', user_id=user_id)
+
+
+@login_required
+@require_POST
+def accept_connection_request(request, connection_id):
+    """Accepter une demande de connexion"""
+    from .models import Notification
+    
+    connection = get_object_or_404(Connection, id=connection_id, to_user=request.user)
+    
+    if connection.status == 'pending':
+        connection.status = 'accepted'
+        connection.save()
+        # Marquer la notification comme lue
+        Notification.objects.filter(
+            user=request.user,
+            verb='connection_request',
+            data__connection_id=connection_id
+        ).update(read=True)
+        # Créer une notification pour l'utilisateur qui a envoyé la demande
+        Notification.objects.create(
+            user=connection.from_user,
+            verb='connection_accepted',
+            data={
+                'connection_id': connection.id,
+                'from_user_id': request.user.id,
+                'from_user_name': request.user.get_full_name() or request.user.username,
+            }
+        )
+        messages.success(request, f"Vous êtes maintenant connecté avec {connection.from_user.get_full_name() or connection.from_user.username}.")
+    else:
+        messages.error(request, "Cette demande de connexion n'est plus valide.")
+    
+    return redirect(request.META.get('HTTP_REFERER', 'notifications'))
+
+
+@login_required
+@require_POST
+def reject_connection_request(request, connection_id):
+    """Refuser une demande de connexion"""
+    from .models import Notification
+    
+    connection = get_object_or_404(Connection, id=connection_id, to_user=request.user)
+    
+    if connection.status == 'pending':
+        connection.status = 'rejected'
+        connection.save()
+        # Marquer la notification comme lue
+        Notification.objects.filter(
+            user=request.user,
+            verb='connection_request',
+            data__connection_id=connection_id
+        ).update(read=True)
+        messages.info(request, "Demande de connexion refusée.")
+    else:
+        messages.error(request, "Cette demande de connexion n'est plus valide.")
+    
+    return redirect('notifications')
+
+
+@login_required
+def notifications_view(request):
+    """Voir toutes les notifications"""
+    from .models import Notification
+    
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Marquer toutes les notifications non lues comme lues quand on visite la page
+    unread_notifications = notifications.filter(read=False)
+    if unread_notifications.exists():
+        unread_notifications.update(read=True)
+    
+    return render(request, 'User/FrontOffice/notifications.html', {
+        'notifications': notifications,
+    })
+
+
+@login_required
+@require_POST
+def mark_notification_read(request, notification_id):
+    """Marquer une notification comme lue"""
+    from .models import Notification
+    
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.read = True
+    notification.save()
+    
+    return redirect('notifications')
+
+
+@login_required
+def messages_view(request, user_id=None):
+    """Page de messagerie"""
+    if user_id:
+        # Conversation avec un utilisateur spécifique
+        other_user = get_object_or_404(CustomUser, id=user_id)
+        if other_user == request.user:
+            return redirect('messages')
+        
+        # Vérifier le statut de la connexion
+        connection = Connection.objects.filter(
+            Q(from_user=request.user, to_user=other_user) |
+            Q(from_user=other_user, to_user=request.user)
+        ).first()
+        
+        # Vérifier si les utilisateurs sont connectés (status = 'accepted')
+        is_connected = connection and connection.status == 'accepted'
+        connection_status = connection.status if connection else None
+        
+        # Si pas connecté, rediriger vers le profil
+        if not is_connected:
+            if connection and connection.status == 'rejected':
+                messages.error(request, "Votre demande de connexion a été refusée. Vous pouvez réessayer d'envoyer une demande depuis le profil.")
+            elif connection and connection.status == 'pending':
+                messages.info(request, "Votre demande de connexion est en attente. Vous devez attendre que la personne accepte avant de pouvoir voir la conversation.")
+            else:
+                messages.info(request, "Vous devez être connecté avec cette personne pour voir la conversation. Envoyez d'abord une demande de connexion.")
+            return redirect('user_profile', user_id=user_id)
+        
+        # Récupérer les messages personnels entre les deux utilisateurs (non supprimés, sans logement)
+        messages_list = Message.objects.filter(
+            Q(sender=request.user, receiver=other_user) |
+            Q(sender=other_user, receiver=request.user),
+            deleted=False,
+            logement__isnull=True  # Seulement les messages personnels
+        ).order_by('sent_at')
+        
+        # Marquer les messages comme lus
+        Message.objects.filter(
+            sender=other_user, 
+            receiver=request.user, 
+            read=False
+        ).update(read=True)
+        
+        return render(request, 'User/FrontOffice/messages.html', {
+            'other_user': other_user,
+            'messages_list': messages_list,
+            'is_connected': is_connected,
+        })
+    else:
+        # Liste des conversations
+        # Récupérer tous les utilisateurs avec qui on a échangé des messages personnels (non supprimés, sans logement)
+        sent_messages = Message.objects.filter(sender=request.user, deleted=False, logement__isnull=True).values_list('receiver', flat=True).distinct()
+        received_messages = Message.objects.filter(receiver=request.user, deleted=False, logement__isnull=True).values_list('sender', flat=True).distinct()
+        user_ids = set(list(sent_messages) + list(received_messages))
+        
+        conversations = []
+        for uid in user_ids:
+            user = CustomUser.objects.get(id=uid)
+            last_message = Message.objects.filter(
+                Q(sender=request.user, receiver=user) |
+                Q(sender=user, receiver=request.user),
+                deleted=False,
+                logement__isnull=True  # Seulement les messages personnels
+            ).order_by('-sent_at').first()
+            
+            unread_count = Message.objects.filter(sender=user, receiver=request.user, read=False, deleted=False, logement__isnull=True).count()
+            
+            conversations.append({
+                'user': user,
+                'last_message': last_message,
+                'unread_count': unread_count,
+            })
+        
+        conversations.sort(key=lambda x: x['last_message'].sent_at if x['last_message'] else timezone.now(), reverse=True)
+        
+        return render(request, 'User/FrontOffice/messages_list.html', {
+            'conversations': conversations,
+        })
+
+
+@login_required
+@require_POST
+def send_message_view(request, user_id):
+    """Envoyer un message - seulement si connecté"""
+    receiver = get_object_or_404(CustomUser, id=user_id)
+    
+    if receiver == request.user:
+        messages.error(request, "Vous ne pouvez pas vous envoyer un message à vous-même.")
+        return redirect('messages')
+    
+    # Vérifier le statut de la connexion
+    connection = Connection.objects.filter(
+        Q(from_user=request.user, to_user=receiver) |
+        Q(from_user=receiver, to_user=request.user)
+    ).first()
+    
+    # Vérifier si les utilisateurs sont connectés (status = 'accepted')
+    is_connected = connection and connection.status == 'accepted'
+    
+    # Si pas connecté ou connexion refusée, bloquer l'envoi
+    if not is_connected:
+        if connection and connection.status == 'rejected':
+            messages.error(request, f"Votre demande de connexion a été refusée. Vous ne pouvez pas envoyer de message. Vous pouvez réessayer d'envoyer une demande de connexion depuis le profil.")
+        elif connection and connection.status == 'pending':
+            messages.error(request, "Votre demande de connexion est en attente. Vous devez attendre que la personne accepte avant de pouvoir envoyer des messages.")
+        else:
+            messages.error(request, "Vous devez être connecté avec cette personne pour lui envoyer un message. Envoyez d'abord une demande de connexion depuis son profil.")
+        return redirect('user_profile', user_id=user_id)
+    
+    text = request.POST.get('text', '').strip()
+    file = request.FILES.get('file', None)
+    
+    if not text and not file:
+        messages.error(request, "Le message ne peut pas être vide.")
+        return redirect('messages_conversation', user_id=user_id)
+    
+    message = Message.objects.create(
+        sender=request.user,
+        receiver=receiver,
+        text=text if text else None
+    )
+    
+    if file:
+        message.file = file
+        message.save()
+    
+    messages.success(request, "Message envoyé.")
+    return redirect('messages_conversation', user_id=user_id)
+
+
+@login_required
+@require_POST
+def update_message_view(request, message_id):
+    """Modifier un message"""
+    message = get_object_or_404(Message, id=message_id, sender=request.user)
+    
+    text = request.POST.get('text', '').strip()
+    file = request.FILES.get('file', None)
+    
+    # Vérifier qu'il y a au moins du texte ou un fichier
+    if not text and not file:
+        # Si le message actuel n'a ni texte ni fichier, erreur
+        if not message.text and not message.file:
+            messages.error(request, "Le message ne peut pas être vide.")
+            return redirect('messages_conversation', user_id=message.receiver.id)
+        # Sinon, on garde l'ancien contenu
+    
+    try:
+        if text:
+            message.text = text
+        elif not message.text:
+            message.text = None
+        
+        if file:
+            if message.file:
+                message.file.delete()
+            message.file = file
+        
+        message.save()
+        messages.success(request, "Message modifié avec succès.")
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la modification du message: {e}")
+    
+    return redirect('messages_conversation', user_id=message.receiver.id)
+
+
+@login_required
+@require_POST
+def delete_message_view(request, message_id):
+    """Supprimer un message"""
+    message = get_object_or_404(Message, id=message_id)
+    
+    # Seul l'expéditeur peut supprimer le message
+    if message.sender != request.user:
+        messages.error(request, "Vous n'avez pas la permission de supprimer ce message.")
+        return redirect('messages_conversation', user_id=message.receiver.id if message.sender == request.user else message.sender.id)
+    
+    try:
+        # Marquer comme supprimé au lieu de supprimer définitivement
+        message.deleted = True
+        message.save()
+        messages.success(request, "Message supprimé avec succès.")
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression du message: {e}")
+    
+    return redirect('messages_conversation', user_id=message.receiver.id)
 
 
 @login_required
@@ -145,6 +785,51 @@ def create_post_view(request):
         messages.success(request, 'Post créé avec succès.')
     except Exception as e:
         messages.error(request, f"Erreur lors de la création du post: {e}")
+    return redirect('profile')
+
+
+@login_required
+@require_POST
+def update_post_view(request, post_id):
+    """Modifier un post existant"""
+    try:
+        post = Post.objects.get(id=post_id, author=request.user)
+    except Post.DoesNotExist:
+        messages.error(request, 'Post introuvable ou vous n\'avez pas la permission de le modifier.')
+        return redirect('profile')
+    
+    content = request.POST.get('content', '').strip()
+    if not content:
+        messages.error(request, 'Le contenu du post ne peut pas être vide.')
+        return redirect('profile')
+    
+    try:
+        post.content = content
+        # Gérer le fichier média si présent
+        if 'media' in request.FILES:
+            # Supprimer l'ancien média si existant
+            if post.media:
+                post.media.delete()
+            post.media = request.FILES['media']
+        post.save()
+        messages.success(request, 'Post modifié avec succès.')
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la modification du post: {e}")
+    return redirect('profile')
+
+
+@login_required
+@require_POST
+def delete_post_view(request, post_id):
+    """Supprimer un post"""
+    try:
+        post = Post.objects.get(id=post_id, author=request.user)
+        post.delete()
+        messages.success(request, 'Post supprimé avec succès.')
+    except Post.DoesNotExist:
+        messages.error(request, 'Post introuvable ou vous n\'avez pas la permission de le supprimer.')
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression du post: {e}")
     return redirect('profile')
 
 
@@ -260,12 +945,17 @@ def profile_update_public_view(request):
     # Uploads de fichiers
     if 'avatar' in request.FILES:
         user.avatar = request.FILES['avatar']
+        messages.success(request, 'Avatar mis à jour avec succès.')
     if 'cover_photo' in request.FILES:
         user.cover_photo = request.FILES['cover_photo']
+        messages.success(request, 'Photo de couverture mise à jour avec succès.')
     
+    # Sauvegarder l'utilisateur
     try:
         user.save()
-        messages.success(request, 'Profil mis à jour avec succès.')
+        # Si aucun message de succès n'a été ajouté (pas d'upload de fichier), ajouter un message générique
+        if 'avatar' not in request.FILES and 'cover_photo' not in request.FILES:
+            messages.success(request, 'Profil mis à jour avec succès.')
     except Exception as e:
         messages.error(request, f"Erreur lors de la mise à jour du profil: {e}")
     return redirect('profile')
@@ -302,7 +992,8 @@ def profile_change_password_view(request):
 
 # --- Evently pages (squelettes) ---
 def evently_index(request):
-    return render(request, 'evently/index.html')
+    """Page d'accueil"""
+    return render(request, 'User/evently/index.html')
 
 def evently_template(request, page: str):
     allowed = {
@@ -311,8 +1002,8 @@ def evently_template(request, page: str):
         'terms', 'privacy', 'contact', 'sponsors', 'starter-page'
     }
     if page in allowed:
-        return render(request, f'evently/{page}.html')
-    return render(request, 'evently/404.html', status=404)
+        return render(request, f'User/evently/{page}.html')
+    return render(request, 'User/evently/404.html', status=404)
 
 @user_passes_test(lambda u: u.is_superuser)
 def manage_users_view(request):

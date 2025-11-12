@@ -72,6 +72,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                    'UserApp.context_processors.unread_messages_count',
+                'UserApp.context_processors.unread_notifications_count',
             ],
         },
     },
@@ -138,4 +140,13 @@ AUTH_USER_MODEL = 'UserApp.CustomUser'
 # Auth redirects
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Pour Gmail, changez selon votre fournisseur
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'karimmlayah14@gmail.com'  # Remplacez par votre email
+EMAIL_HOST_PASSWORD = 'mooz ozdw jhzr jszp'  # Remplacez par votre mot de passe d'application
+DEFAULT_FROM_EMAIL = 'karimmlayah14@gmail.com'  # Remplacez par votre email
 

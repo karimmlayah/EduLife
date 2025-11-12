@@ -2,6 +2,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
 from django.utils import timezone
+import secrets
 
 # Create your models here.
 class CustomUser(AbstractUser):
@@ -186,6 +187,15 @@ class Post(models.Model):
         verbose_name="Date de modification"
     )
     
+    def get_media_url(self):
+        """Retourne l'URL du média si disponible, sinon None"""
+        try:
+            if self.media and self.media.name:
+                return self.media.url
+        except (ValueError, AttributeError):
+            pass
+        return None
+    
     class Meta:
         verbose_name = "Publication"
         verbose_name_plural = "Publications"
@@ -245,16 +255,59 @@ class Message(models.Model):
         verbose_name="Destinataire"
     )
     text = models.TextField(
+        blank=True,
+        null=True,
         verbose_name="Message"
+    )
+    file = models.FileField(
+        upload_to='messages/files/',
+        blank=True,
+        null=True,
+        verbose_name="Fichier"
     )
     sent_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Date d'envoi"
     )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Date de modification"
+    )
     read = models.BooleanField(
         default=False,
         verbose_name="Lu"
     )
+    deleted = models.BooleanField(
+        default=False,
+        verbose_name="Supprimé"
+    )
+    is_connection_request = models.BooleanField(
+        default=False,
+        verbose_name="Message de demande de connexion"
+    )
+    logement = models.ForeignKey(
+        'LogementApp.Logement',
+        on_delete=models.CASCADE,
+        related_name='messages',
+        blank=True,
+        null=True,
+        verbose_name="Logement (Marketplace)"
+    )
+    
+    def get_file_url(self):
+        """Retourne l'URL du fichier si disponible, sinon None"""
+        try:
+            if self.file and self.file.name:
+                return self.file.url
+        except (ValueError, AttributeError):
+            pass
+        return None
+    
+    def get_file_name(self):
+        """Retourne le nom du fichier"""
+        if self.file and self.file.name:
+            return self.file.name.split('/')[-1]
+        return None
     
     class Meta:
         verbose_name = "Message"
@@ -300,3 +353,47 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"Notification for {self.user}: {self.verb}"
+
+
+class PasswordResetCode(models.Model):
+    """
+    Modèle pour stocker les codes de réinitialisation de mot de passe
+    """
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='password_reset_codes',
+        verbose_name="Utilisateur"
+    )
+    code = models.CharField(
+        max_length=6,
+        verbose_name="Code de vérification"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date de création"
+    )
+    expires_at = models.DateTimeField(
+        verbose_name="Date d'expiration"
+    )
+    used = models.BooleanField(
+        default=False,
+        verbose_name="Utilisé"
+    )
+    
+    class Meta:
+        verbose_name = "Code de réinitialisation"
+        verbose_name_plural = "Codes de réinitialisation"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Code for {self.user.email}: {self.code}"
+    
+    def is_valid(self):
+        """Vérifie si le code est valide (non utilisé et non expiré)"""
+        return not self.used and timezone.now() < self.expires_at
+    
+    @staticmethod
+    def generate_code():
+        """Génère un code de 6 chiffres"""
+        return ''.join([str(secrets.randbelow(10)) for _ in range(6)])

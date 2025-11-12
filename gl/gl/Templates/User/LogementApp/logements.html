@@ -1,0 +1,374 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Logements • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Main Content */
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .logement-content-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* Add Logement Button */
+    .add-logement-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-bottom: 2rem;
+    }
+
+    .add-logement-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    /* Logements Grid */
+    .logements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .logement-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .logement-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .logement-card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .logement-card-content {
+      padding: 1.5rem;
+    }
+
+    .logement-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .logement-card-location {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logement-card-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .logement-card-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .logement-card-details {
+      display: flex;
+      gap: 1rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .logement-card-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .logement-card-type {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Message Button */
+    .btn-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .btn-message:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    .btn-message i {
+      font-size: 1rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Logements</h1>
+              <p class="hero-subtitle">Trouvez ou proposez un logement dans notre communauté</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Logements</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="logement-main-content">
+    <div class="container">
+      <h2 class="logement-content-title">Liste des logements disponibles</h2>
+      
+      {% if request.user.is_authenticated %}
+      <div style="text-align: center;">
+        <a href="{% url 'logement_add' %}" class="add-logement-btn">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un logement
+        </a>
+      </div>
+      {% else %}
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <p style="color: #6b7280; margin-bottom: 1rem;">Connectez-vous pour ajouter un logement</p>
+        <a href="{% url 'login' %}" class="add-logement-btn">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Se connecter
+        </a>
+      </div>
+      {% endif %}
+
+      {% if logements_with_connection %}
+      <div class="logements-grid">
+        {% for item in logements_with_connection %}
+        {% with logement=item.logement is_connected=item.is_connected %}
+        <div class="logement-card">
+          <div class="logement-card-image-wrapper" onclick="window.location.href='{% url 'logement_detail' logement.id %}'" style="cursor: pointer;">
+            {% if logement.image %}
+              <img src="{{ logement.image.url }}" alt="{{ logement.title }}" class="logement-card-image">
+            {% else %}
+              <div class="logement-card-image" style="display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                <i class="bi bi-house"></i>
+              </div>
+            {% endif %}
+          </div>
+          <div class="logement-card-content">
+            <div onclick="window.location.href='{% url 'logement_detail' logement.id %}'" style="cursor: pointer;">
+              <span class="logement-card-type">{{ logement.get_type_logement_display }}</span>
+              <h3 class="logement-card-title">{{ logement.title }}</h3>
+              <div class="logement-card-location">
+                <i class="bi bi-geo-alt"></i>
+                {{ logement.address }}, {{ logement.city }}
+              </div>
+              <div class="logement-card-info">
+                <div class="logement-card-price">{{ logement.price|floatformat:0 }} DZD</div>
+                <div class="logement-card-details">
+                  <span><i class="bi bi-rulers"></i> {{ logement.surface }} m²</span>
+                  <span><i class="bi bi-door-open"></i> {{ logement.rooms }} pièces</span>
+                  <span><i class="bi bi-droplet"></i> {{ logement.bathrooms }} sdb</span>
+                </div>
+              </div>
+            </div>
+            {% if request.user.is_authenticated and request.user != logement.owner %}
+              <div class="logement-card-message-btn" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <a href="{% url 'logement_messages' logement.id %}" class="btn-message" onclick="event.stopPropagation();">
+                  <i class="bi bi-chat-dots"></i> Envoyer un message
+                </a>
+              </div>
+            {% elif not request.user.is_authenticated %}
+              <div class="logement-card-message-btn" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <a href="{% url 'login' %}" class="btn-message" onclick="event.stopPropagation();">
+                  <i class="bi bi-box-arrow-in-right"></i> Se connecter pour envoyer un message
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-house"></i>
+        </div>
+        <h3>Aucun logement disponible</h3>
+        <p>Il n'y a pas encore de logements disponibles. {% if request.user.is_authenticated %}<a href="{% url 'logement_add' %}">Soyez le premier à en ajouter un !</a>{% else %}<a href="{% url 'login' %}">Connectez-vous</a> pour ajouter un logement.{% endif %}</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

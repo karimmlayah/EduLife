@@ -19,11 +19,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from LogementApp.views import dashboard, argon_page, tables
+from LogementApp.views import dashboard, argon_page, tables, dashboard_logements, manage_logements, approve_logement, reject_logement
 
 urlpatterns = [
     path('admin/', dashboard, name='admin_dashboard'),
     path('admin/tables/', tables, name='admin_tables'),
+    path('admin/logements/dashboard/', dashboard_logements, name='dashboard_logements'),
+    path('admin/logements/', manage_logements, name='manage_logements'),
+    path('admin/logements/<int:logement_id>/approve/', approve_logement, name='approve_logement'),
+    path('admin/logements/<int:logement_id>/reject/', reject_logement, name='reject_logement'),
     path('admin/<str:page>/', argon_page, name='admin_page'),
     path('dj-admin/', admin.site.urls),
     path('Logement/', include('LogementApp.urls')),

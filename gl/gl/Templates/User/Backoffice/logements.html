@@ -1,0 +1,772 @@
+{% load static %}
+
+<!--
+=========================================================
+* Argon Dashboard 3 - v2.1.0
+=========================================================
+* Product Page: https://www.creative-tim.com/product/argon-dashboard
+* Copyright 2024 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://www.creative-tim.com/license)
+* Coded by Creative Tim
+=========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'User/argon/assets/img/apple-icon.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'User/argon/assets/img/favicon.png' %}">
+  <title>
+    Argon Dashboard 3 by Creative Tim
+  </title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link id="pagestyle" href="{% static 'User/argon/assets/css/argon-dashboard.css' %}?v=2.1.0" rel="stylesheet" />
+  <style>
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    
+    .toast-notification {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-width: 300px;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      animation: slideInRight 0.3s ease-out;
+      border-left: 4px solid;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .toast-notification.success {
+      border-left-color: #28a745;
+      background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+    }
+    
+    .toast-notification.error {
+      border-left-color: #dc3545;
+      background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
+    }
+    
+    .toast-notification.warning {
+      border-left-color: #ffc107;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+    }
+    
+    .toast-notification.info {
+      border-left-color: #17a2b8;
+      background: linear-gradient(135deg, #d1ecf1 0%, #ffffff 100%);
+    }
+    
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .toast-notification.success .toast-icon {
+      color: #28a745;
+    }
+    
+    .toast-notification.error .toast-icon {
+      color: #dc3545;
+    }
+    
+    .toast-notification.warning .toast-icon {
+      color: #ffc107;
+    }
+    
+    .toast-notification.info .toast-icon {
+      color: #17a2b8;
+    }
+    
+    .toast-content {
+      flex: 1;
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .toast-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .toast-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: #333;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .toast-notification.hiding {
+      animation: slideOutRight 0.3s ease-out forwards;
+    }
+
+    /* Top menu polishing */
+    /* Actions buttons */
+    .actions { gap: .5rem; }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 600;
+      border: 0;
+      text-decoration: none !important;
+    }
+    .btn-action:hover { filter: brightness(1.05); box-shadow: 0 4px 14px rgba(17,205,239,.15); }
+    .btn-action--info { background: rgba(17,205,239,.15); color: #11cdef; }
+    .btn-action--success { background: rgba(45,206,137,.15); color: #2dce89; }
+    .btn-action--danger { background: rgba(245,54,92,.12); color: #f5365c; }
+    .btn-action--warning { background: rgba(251,99,64,.12); color: #fb6340; }
+    .topmenu .nav-link {
+      color: #fff;
+      padding: .4rem .8rem;
+      border-radius: .5rem;
+      transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+      position: relative;
+    }
+    .topmenu .nav-link:hover { background: rgba(255,255,255,0.12); }
+    .topmenu .nav-link.active {
+      background: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,255,255,.12));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+      color: #fff !important;
+    }
+    .topmenu .nav-item + .nav-item { margin-left: .35rem; }
+
+    /* Search pill styling (white) */
+    .top-search.input-group { border-radius: 999px; overflow: hidden; max-width: 240px; }
+    .top-search .input-group-text {
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      border-right: 0;
+      color: #495057;
+    }
+    .top-search .form-control {
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      border-left: 0;
+      color: #212529;
+    }
+    .top-search .form-control::placeholder { color: #6c757d; }
+
+    @media (max-width: 991.98px) {
+      .top-search.input-group { max-width: 200px; }
+    }
+
+    /* User avatar (gradient + neon ring) */
+    .user-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      box-shadow:
+        0 0 0 3px rgba(45, 255, 241, .85),
+        0 0 10px 2px rgba(45, 255, 241, .35);
+      color: #fff;
+      font-weight: 700;
+    }
+    .user-avatar-initial { font-size: .9rem; line-height: 1; }
+
+    /* Avatar color variants (Argon palette) */
+    .user-avatar.avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17,205,239,.85), 0 0 10px 2px rgba(17,205,239,.35); }
+    .user-avatar.avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45,206,137,.85), 0 0 10px 2px rgba(45,206,137,.35); }
+    .user-avatar.avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+    .user-avatar.avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.85), 0 0 10px 2px rgba(251,99,64,.35); }
+    .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+    .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
+    /* Sidebar footer: pin logout lower with icon + animation */
+    #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
+    .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+    .btn-logout i { font-size: .875rem; }
+    .btn-logout { transition: transform .15s ease, box-shadow .3s ease; }
+    .btn-logout:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(17,205,239,.25); }
+    @keyframes subtle-pulse { 0% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } 50% { box-shadow: 0 0 12px 2px rgba(17,205,239,.35); } 100% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } }
+    .btn-logout:focus-visible { animation: subtle-pulse 1.2s ease-out; }
+  </style>
+</head>
+
+<body class="g-sidenav-show   bg-gray-100">
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 " id="sidenav-main">
+
+    <div class="sidenav-header">
+
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+
+      <a class="navbar-brand m-0" href="{% url 'dashboard_logements' %}">
+
+        <img src="../assets/img/logo-ct-dark.png" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo">
+
+        <span class="ms-1 font-weight-bold">Creative Tim</span> <span class="user-circle ms-2"></span></a>
+
+    </div>
+
+    <hr class="horizontal dark mt-0">
+
+    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+
+      <ul class="navbar-nav">
+
+        <li class="nav-item">
+
+          <a class="nav-link " href="{% url 'dashboard_logements' %}">
+
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+
+              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+
+            </div>
+
+            <span class="nav-link-text ms-1">Dashboard</span> <span class="user-circle ms-2"></span></a>
+
+        </li>
+
+
+        <li class="nav-item">
+
+          <a class="nav-link active" href="{% url 'manage_logements' %}">
+
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+
+              <i class="ni ni-building text-dark text-sm opacity-10"></i>
+
+            </div>
+
+            <span class="nav-link-text ms-1">Logements</span> <span class="user-circle ms-2"></span></a>
+
+        </li>
+
+      </ul>
+
+    </div>
+
+  <div class="sidenav-footer mx-3 ">
+    <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout"><i class="ni ni-button-power"></i><span>Déconnexion</span></a>
+  </div>
+
+  </aside>
+  
+  <main class="main-content position-relative border-radius-lg ">
+
+    <!-- Navbar -->
+
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur" data-scroll="false">
+
+      <div class="container-fluid py-1 px-3">
+
+        <nav aria-label="breadcrumb">
+
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
+
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Logements</li>
+
+          </ol>
+
+          <h6 class="font-weight-bolder text-white mb-0">Logements</h6>
+
+        </nav>
+
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+          <div class="d-flex align-items-center w-100 pe-md-3">
+            <!-- ✓ MENUS SUPPLÉMENTAIRES (gauche) -->
+      <ul class="navbar-nav d-flex flex-row align-items-center me-auto topmenu">
+              <li class="nav-item mx-2">
+                <a href="{% url 'admin_dashboard' %}" data-match="/admin/" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %} active{% endif %}" {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %}aria-current="page"{% endif %}>
+                  <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="{% url 'manage_logements' %}" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'manage_logements' or request.resolver_match.url_name == 'approve_logement' or request.resolver_match.url_name == 'reject_logement' %} active{% endif %}">
+                  <i class="ni ni-building text-white me-1"></i> Logements
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="#" data-match="/admin/events/" class="nav-link text-white fw-bold">
+                  <i class="ni ni-calendar-grid-58 text-white me-1"></i>
+                  Événements
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="#" data-match="/admin/career/" class="nav-link text-white fw-bold">
+                  <i class="ni ni-briefcase-24 text-white me-1"></i> Carrière
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="#" data-match="/admin/carpool/" class="nav-link text-white fw-bold">
+                  <i class="ni ni-delivery-fast text-white me-1"></i> Covoiturage
+                </a>
+              </li>
+            </ul>
+
+            <!-- ✓ BARRE DE RECHERCHE (droite) -->
+            <div class="top-search input-group input-group-sm ms-auto me-3">
+              <span class="input-group-text text-body">
+                <i class="fas fa-search" aria-hidden="true"></i>
+              </span>
+              <input type="text" class="form-control form-control-sm" placeholder="Rechercher..." />
+            </div>
+          </div>
+        </div>
+
+
+          <ul class="navbar-nav  justify-content-end">
+            <li class="nav-item d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                {% with user_id=request.user.id|default:0 %}
+                <span class="user-avatar me-2 {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}">
+                  {% if request.user.is_authenticated %}
+                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+                  {% else %}
+                    ?
+                  {% endif %}
+                </span>
+                {% endwith %}
+                <span class="d-none">
+                  {% if request.user.is_authenticated %}
+                    {{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}
+                  {% else %}
+                    Utilisateur
+                  {% endif %}
+                </span>
+              </a>
+            </li>
+
+            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+
+              <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
+
+                <div class="sidenav-toggler-inner">
+
+                  <i class="sidenav-toggler-line bg-white"></i>
+
+                  <i class="sidenav-toggler-line bg-white"></i>
+
+                  <i class="sidenav-toggler-line bg-white"></i>
+
+                </div>
+
+              </a>
+
+            </li>
+
+            <li class="nav-item px-3 d-flex align-items-center">
+
+              <a href="javascript:;" class="nav-link text-white p-0">
+
+                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+
+              </a>
+
+            </li>
+
+            <li class="nav-item dropdown pe-2 d-flex align-items-center">
+
+              <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+
+                <i class="fa fa-bell cursor-pointer"></i>
+
+              </a>
+
+              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+
+                <li class="mb-2">
+
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+
+                    <div class="d-flex py-1">
+
+                      <div class="my-auto">
+
+                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
+
+                      </div>
+
+                      <div class="d-flex flex-column justify-content-center">
+
+                        <h6 class="text-sm font-weight-normal mb-1">
+
+                          <span class="font-weight-bold">New message</span> from Laur
+
+                        </h6>
+
+                        <p class="text-xs text-secondary mb-0">
+
+                          <i class="fa fa-clock me-1"></i>
+
+                          13 minutes ago
+
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </a>
+
+                </li>
+
+                <li class="mb-2">
+
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+
+                    <div class="d-flex py-1">
+
+                      <div class="my-auto">
+
+                        <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark  me-3 ">
+
+                      </div>
+
+                      <div class="d-flex flex-column justify-content-center">
+
+                        <h6 class="text-sm font-weight-normal mb-1">
+
+                          <span class="font-weight-bold">New album</span> by Travis Scott
+
+                        </h6>
+
+                        <p class="text-xs text-secondary mb-0">
+
+                          <i class="fa fa-clock me-1"></i>
+
+                          1 day
+
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </a>
+
+                </li>
+
+                <li>
+
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+
+                    <div class="d-flex py-1">
+
+                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
+
+                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+                          <title>credit-card</title>
+
+                          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+
+                            <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
+
+                              <g transform="translate(1716.000000, 291.000000)">
+
+                                <g transform="translate(453.000000, 454.000000)">
+
+                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
+
+                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
+
+                                </g>
+
+                              </g>
+
+                            </g>
+
+                          </g>
+
+                        </svg>
+
+                      </div>
+
+                      <div class="d-flex flex-column justify-content-center">
+
+                        <h6 class="text-sm font-weight-normal mb-1">
+
+                          Payment successfully completed
+
+                        </h6>
+
+                        <p class="text-xs text-secondary mb-0">
+
+                          <i class="fa fa-clock me-1"></i>
+
+                          2 days
+
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </a>
+
+                </li>
+
+              </ul>
+
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </nav>
+
+    <!-- End Navbar -->
+
+    <div class="container-fluid py-4">
+
+      <div class="row">
+
+        <div class="col-12">
+
+          <div class="card mb-4">
+
+            <div class="card-header pb-0">
+
+              <h6 class="mb-0">Logements</h6>
+              <p class="text-sm text-secondary mb-0">Approuvez ou rejetez les logements soumis par les utilisateurs</p>
+
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <!-- Filter Tabs -->
+              <div class="px-4 pt-3 pb-2">
+                <div class="d-flex gap-2 flex-wrap">
+                  <a href="{% url 'manage_logements' %}?status=all" class="btn btn-sm {% if status_filter == 'all' %}bg-gradient-primary{% else %}btn-outline-primary{% endif %} mb-0">
+                    Tous ({{ total_count }})
+                  </a>
+                  <a href="{% url 'manage_logements' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}bg-gradient-warning{% else %}btn-outline-warning{% endif %} mb-0">
+                    En attente ({{ pending_count }})
+                  </a>
+                  <a href="{% url 'manage_logements' %}?status=approved" class="btn btn-sm {% if status_filter == 'approved' %}bg-gradient-success{% else %}btn-outline-success{% endif %} mb-0">
+                    Approuvés ({{ approved_count }})
+                  </a>
+                  <a href="{% url 'manage_logements' %}?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}bg-gradient-danger{% else %}btn-outline-danger{% endif %} mb-0">
+                    Rejetés ({{ rejected_count }})
+                  </a>
+                </div>
+              </div>
+
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Logement</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Localisation</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Détails</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Propriétaire</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for logement in logements %}
+                    <tr>
+                      <td>
+                        <div class="d-flex px-2 py-1">
+                          <div>
+                            {% if logement.image %}
+                              <img src="{{ logement.image.url }}" alt="{{ logement.title }}" class="avatar avatar-sm me-3" style="width:48px;height:48px;border-radius:8px;object-fit:cover;">
+                            {% else %}
+                              <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white" style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);font-weight:700;font-size:1.2rem;">
+                                <i class="ni ni-building"></i>
+                              </span>
+                            {% endif %}
+                          </div>
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ logement.title }}</h6>
+                            <p class="text-xs text-secondary mb-0">{{ logement.get_type_logement_display }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="align-middle">
+                        <span class="text-secondary text-xs font-weight-bold">{{ logement.city }}</span>
+                        <p class="text-xs text-secondary mb-0">{{ logement.address|truncatewords:5 }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        <div class="d-inline-flex flex-column align-items-center">
+                          <span class="text-xs text-secondary mb-1">{{ logement.surface }} m²</span>
+                          <span class="text-xs text-secondary">{{ logement.rooms }} pièces</span>
+                          <span class="text-xs text-secondary">{{ logement.bathrooms }} sdb</span>
+                        </div>
+                      </td>
+                      <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">{{ logement.owner.get_full_name|default:logement.owner.username }}</span>
+                        <p class="text-xs text-secondary mb-0">{{ logement.owner.email }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        {% if logement.rejected %}
+                          <span class="badge badge-sm bg-gradient-danger" style="border-radius:12px;">Rejeté</span>
+                        {% elif logement.approved %}
+                          <span class="badge badge-sm bg-gradient-success" style="border-radius:12px;">Approuvé</span>
+                        {% else %}
+                          <span class="badge badge-sm bg-gradient-warning" style="border-radius:12px;">En attente</span>
+                        {% endif %}
+                      </td>
+                      <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">{{ logement.created_at|date:"d/m/y" }}</span>
+                      </td>
+                      <td class="align-middle">
+                        <div class="d-flex align-items-center actions">
+                          {% if not logement.approved and not logement.rejected %}
+                            <a href="{% url 'approve_logement' logement.id %}" class="btn-action btn-action--success" onclick="return confirm('Êtes-vous sûr de vouloir approuver ce logement ?');">
+                              <i class="ni ni-check-bold"></i><span>Approuver</span>
+                            </a>
+                            <a href="{% url 'reject_logement' logement.id %}" class="btn-action btn-action--danger" onclick="return confirm('Êtes-vous sûr de vouloir rejeter ce logement ?');">
+                              <i class="ni ni-fat-remove"></i><span>Rejeter</span>
+                            </a>
+                          {% endif %}
+                          <a href="{% url 'logement_detail' logement.id %}" class="btn-action btn-action--info" target="_blank">
+                            <i class="ni ni-bulb-61"></i><span>Voir</span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="7" class="text-center text-secondary text-xs py-4">Aucun logement trouvé</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'User/argon/assets/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/plugins/chartjs.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/argon-dashboard.min.js' %}?v=2.1.0"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+
+  <!-- Django Messages as Toast Notifications -->
+  {% if messages %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.getElementById('toast-container');
+      const messages = [
+        {% for message in messages %}
+        {
+          text: '{{ message|escapejs }}',
+          level: '{{ message.tags|default:"info" }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      const iconMap = {
+        'success': '<i class="fas fa-check-circle"></i>',
+        'error': '<i class="fas fa-times-circle"></i>',
+        'warning': '<i class="fas fa-exclamation-triangle"></i>',
+        'info': '<i class="fas fa-info-circle"></i>',
+        'debug': '<i class="fas fa-bug"></i>'
+      };
+
+      messages.forEach(function(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification ' + (msg.level === 'error' ? 'error' : msg.level === 'warning' ? 'warning' : msg.level === 'success' ? 'success' : 'info');
+        
+        const icon = iconMap[msg.level] || iconMap['info'];
+        
+        toast.innerHTML = `
+          <span class="toast-icon">${icon}</span>
+          <span class="toast-content">${msg.text}</span>
+          <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(function() {
+          toast.classList.add('hiding');
+          setTimeout(function() {
+            if (toast.parentElement) {
+              toast.remove();
+            }
+          }, 300);
+        }, 5000);
+      });
+    });
+  </script>
+  {% endif %}
+</body>
+</html>
+

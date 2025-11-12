@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login/Signup Form</title>
+  <link href="{% static 'User/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'User/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+  <link rel="stylesheet" href="{% static 'User/assets/css/login.css' %}">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <style>
+    /* Ajoute ceci à ton CSS principal ou ici directement */
+    .background-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Pour être derrière le contenu */
+      border: none;
+      pointer-events: none; /* Empêche de cliquer sur l'iframe */
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1; /* Pour que ton formulaire soit au-dessus */
+    }
+
+    .background-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border: none;
+    pointer-events: none; /* pour rendre le fond non cliquable */
+}
+
+    /* Hide Spline badge (covered by glass chip) */
+    .spline-badge-hide {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      width: 140px;  /* approx Spline badge width */
+      height: 44px;  /* approx Spline badge height */
+      border-radius: 14px;
+      background: rgba(10, 15, 30, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+      z-index: 1; /* above iframe, below floating icon */
+      pointer-events: none; /* visual cover only */
+    }
+
+    /* Optional floating icon button */
+    .floating-icon {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(59,130,246,0.8), rgba(30,58,138,0.9));
+      box-shadow: 0 8px 22px rgba(0,0,0,.35);
+      text-decoration: none;
+      z-index: 2;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .floating-icon:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.45); }
+    .floating-icon i { font-size: 22px; }
+
+  </style>
+
+  
+</head>
+
+  <body>
+
+  <!-- 🌀 Iframe du fond -->
+  <iframe
+    src='https://my.spline.design/motiontrails-ajUiPLY8qZ2gzdS6SAHoTKdJ/'
+    class="background-iframe"
+    frameborder="0">
+    position: fixed;
+    top: -2000; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+  </iframe>
+
+  <!-- Cover Spline badge and add a small floating icon -->
+  <div class="spline-badge-hide"></div>
+  <a class="floating-icon" href="{% url 'index' %}" title="Accueil">
+    <i class='bx bx-rocket'></i>
+  </a>
+
+  <!-- Messages Django -->
+  {% if messages %}
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="padding: 15px; margin-bottom: 10px; border-radius: 12px; background: {% if message.tags == 'error' %}rgba(248, 215, 218, 0.9){% elif message.tags == 'success' %}rgba(212, 237, 218, 0.9){% else %}rgba(209, 236, 241, 0.9){% endif %}; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: {% if message.tags == 'error' %}#721c24{% elif message.tags == 'success' %}#155724{% else %}#0c5460{% endif %}; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Ton contenu -->
+  <div class="container{% if show_login %} active{% endif %}">
+    <div class="form-box login">
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="login">
+        <h1>Login</h1>
+        
+        {% if login_form.non_field_errors %}
+          <div style="color: #ff6b6b; margin-bottom: 15px; background: rgba(220, 53, 69, 0.2); backdrop-filter: blur(5px); padding: 10px; border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.4); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+            {{ login_form.non_field_errors }}
+          </div>
+        {% endif %}
+        
+        <div class="input-box">
+          <input type="text" name="username" placeholder="Username or Email" required value="{% if login_form.username.value %}{{ login_form.username.value }}{% endif %}">
+          <i class='bx bxs-user'></i>
+          {% if login_form.username.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ login_form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="input-box">
+          <input type="password" name="password" placeholder="Password" required>
+          <i class='bx bxs-lock-alt'></i>
+          {% if login_form.password.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ login_form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="forgot-link">
+          <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <p>or login with</p>
+        <div class="social-icons">
+          <button type="button" class="face-id-btn" id="faceIdLoginBtn" title="Face ID Login">
+            <i class='bx bx-face'></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-box register">
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="signup">
+        <h1>Registration</h1>
+        
+        {% if signup_form.non_field_errors %}
+          <div style="color: #ff6b6b; margin-bottom: 15px; font-size: 12px; background: rgba(220, 53, 69, 0.2); backdrop-filter: blur(5px); padding: 10px; border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.4); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+            {{ signup_form.non_field_errors }}
+          </div>
+        {% endif %}
+        
+        <div class="input-box">
+          <input type="text" name="username" placeholder="Username" required value="{% if signup_form.username.value %}{{ signup_form.username.value }}{% endif %}">
+          <i class='bx bxs-user'></i>
+          {% if signup_form.username.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="first_name" placeholder="Prénom (optionnel)" value="{% if signup_form.first_name.value %}{{ signup_form.first_name.value }}{% endif %}">
+          <i class='bx bxs-user-circle'></i>
+          {% if signup_form.first_name.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.first_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="last_name" placeholder="Nom (optionnel)" value="{% if signup_form.last_name.value %}{{ signup_form.last_name.value }}{% endif %}">
+          <i class='bx bxs-user-circle'></i>
+          {% if signup_form.last_name.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.last_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="email" name="email" placeholder="Email" required value="{% if signup_form.email.value %}{{ signup_form.email.value }}{% endif %}">
+          <i class='bx bxs-envelope'></i>
+          {% if signup_form.email.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="phone" placeholder="Téléphone (optionnel)" value="{% if signup_form.phone.value %}{{ signup_form.phone.value }}{% endif %}">
+          <i class='bx bxs-phone'></i>
+          {% if signup_form.phone.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.phone.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="password" name="password" placeholder="Password (min 8 caractères)" required>
+          <i class='bx bxs-lock-alt'></i>
+          {% if signup_form.password.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="password" name="password_confirm" placeholder="Confirm Password" required>
+          <i class='bx bxs-lock-alt'></i>
+          {% if signup_form.password_confirm.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.password_confirm.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary-solid">S'inscrire</button>
+        <p>or register with</p>
+        <div class="social-icons">
+          <button type="button" class="face-id-btn" id="faceIdRegisterBtn" title="Register with Face ID">
+            <i class='bx bx-face'></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="toggle-box">
+      <div class="toggle-panel toggle-left">
+        <h1>Hello, Welcome!</h1>
+        <p>Don't have an account?</p>
+        <button class="btn register-btn">Register</button>
+      </div>
+      <div class="toggle-panel toggle-right">
+        <h1>Welcome Back!</h1>
+        <p>Already have an account?</p>
+        <button class="btn login-btn">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'User/assets/js/login.js' %}"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,19 @@
+{% extends 'evently/base.html' %}
+{% block title %}Gallery • EduLife{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h2>Gallery</h2>
+    <div class="row g-3">
+      {% for i in '1,2,3,4,5,6'|cut:',' %}
+      <div class="col-6 col-md-4">
+        <a href="{% static 'User/evently/img/events/gallery-' %}{{ i }}.webp" class="glightbox" data-gallery="event-gallery">
+          <img src="{% static 'User/evently/img/events/gallery-' %}{{ i }}.webp" class="img-fluid rounded-3" alt="gallery">
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,937 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Fil d'actualité • EduLife{% endblock %}
+
+{% block body_class %}schedule-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .schedule-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .schedule-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Make header transparent over hero */
+    body.schedule-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.schedule-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      background: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Ensure header text is visible on transparent background */
+    body.schedule-hero-page #header.header,
+    body.schedule-hero-page #header.header .logo h1,
+    body.schedule-hero-page #header.header .navmenu a {
+      color: #ffffff !important;
+    }
+
+    .schedule-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .schedule-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .schedule-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .schedule-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .schedule-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .schedule-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .schedule-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .schedule-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .schedule-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .schedule-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .schedule-main-content {
+      background: var(--background-color);
+      padding: 60px 0;
+    }
+
+    .schedule-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .schedule-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .schedule-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .schedule-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    .feed-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 992px) {
+      .schedule-hero h1 {
+        font-size: 2.5rem;
+      }
+      .schedule-hero {
+        min-height: 300px;
+        margin-top: 60px;
+      }
+      .feed-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* Create Post Card */
+    .create-post-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+    }
+
+    .create-post-form {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .create-post-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .create-post-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .create-post-input {
+      flex: 1;
+    }
+
+    .create-post-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .create-post-textarea:focus {
+      outline: none;
+      border-color: #11cdef;
+      box-shadow: 0 0 0 3px rgba(17, 205, 239, 0.1);
+    }
+
+    .create-post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.75rem;
+    }
+
+    .create-post-media-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .create-post-media-btn:hover {
+      background: #f5f5f5;
+      border-color: #11cdef;
+      color: #11cdef;
+    }
+
+    .create-post-submit {
+      background: linear-gradient(135deg, #11cdef, #5e72e4);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .create-post-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(17, 205, 239, 0.3);
+    }
+
+    /* Post Card */
+    .post-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      transition: box-shadow 0.2s;
+    }
+
+    .post-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .post-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .post-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .post-author-info {
+      flex: 1;
+    }
+
+    .post-author-name {
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 0.25rem 0;
+      font-size: 0.95rem;
+    }
+
+    .post-author-name a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .post-author-name a:hover {
+      text-decoration: underline;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .post-menu-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .post-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .post-menu-dropdown {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 150px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .post-menu-item {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      background: white;
+      border: none;
+      text-align: left;
+      color: #333;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .post-menu-item:hover {
+      background: #f5f5f5;
+    }
+
+    .post-content {
+      color: #1e293b;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .post-media {
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .post-media img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .post-media video {
+      width: 100%;
+      max-height: 500px;
+      display: block;
+    }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .post-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .post-action-btn:hover {
+      background: #f5f5f5;
+      color: #11cdef;
+    }
+
+    .post-action-btn i {
+      font-size: 1.1rem;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .comment-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .comment-content {
+      flex: 1;
+      background: #f5f5f5;
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.85rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .comment-text {
+      color: #475569;
+      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+    }
+
+    .sidebar-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+    }
+
+    .sidebar-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 1rem 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Modal for editing posts */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 2rem;
+      color: #666;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="schedule-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+  <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Fil d'actualité</h1>
+              <p class="hero-subtitle">Partagez vos pensées, expériences et connectez-vous avec la communauté EduLife.</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Fil d'actualité</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="schedule-main-content">
+    <div class="schedule-content-header">
+      <h2 class="schedule-content-title">Fil d'actualité</h2>
+      <p class="schedule-content-description">
+        Découvrez les dernières publications de la communauté et partagez vos propres expériences.
+      </p>
+    </div>
+
+    <div class="feed-container">
+      <div class="feed-main">
+      <!-- Create Post Card - Only for authenticated users -->
+      {% if request.user.is_authenticated %}
+      <div class="create-post-card">
+        <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data" class="create-post-form">
+          {% csrf_token %}
+          <div class="create-post-avatar">
+            {% if request.user.avatar %}
+              <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}" />
+            {% else %}
+              <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ request.user.get_full_name|default:request.user.username }}" />
+            {% endif %}
+          </div>
+          <div class="create-post-input">
+            <textarea name="content" class="create-post-textarea" placeholder="Partagez quelque chose avec la communauté..." required></textarea>
+            <div class="create-post-actions">
+              <label for="post-media" class="create-post-media-btn">
+                <i class="bi bi-image"></i> Photo/Video
+              </label>
+              <input type="file" id="post-media" name="media" accept="image/*,video/*" style="display: none;">
+              <button type="submit" class="create-post-submit">Publier</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      {% else %}
+      <!-- Message for non-authenticated users -->
+      <div class="create-post-card" style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">Connectez-vous pour participer</h3>
+        <p style="margin-bottom: 1.5rem; opacity: 0.9;">Vous pouvez voir les publications, mais vous devez vous connecter pour publier, commenter ou interagir.</p>
+        <a href="{% url 'login' %}" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <i class="bi bi-box-arrow-in-right"></i> Se connecter
+        </a>
+      </div>
+      {% endif %}
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %}" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Posts Feed -->
+      {% if posts %}
+        {% for post in posts %}
+        <div class="post-card">
+          <div class="post-header">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'user_profile' post.author.id %}" style="text-decoration: none;">
+              <div class="post-avatar" style="cursor: pointer;">
+                {% if post.author.avatar %}
+                  <img src="{{ post.author.avatar.url }}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+                {% else %}
+                  <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+                {% endif %}
+              </div>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" style="text-decoration: none;">
+              <div class="post-avatar" style="cursor: pointer;">
+                {% if post.author.avatar %}
+                  <img src="{{ post.author.avatar.url }}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+                {% else %}
+                  <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+                {% endif %}
+              </div>
+            </a>
+            {% endif %}
+            <div class="post-author-info">
+              <h3 class="post-author-name">
+                {% if request.user.is_authenticated %}
+                  <a href="{% url 'user_profile' post.author.id %}" style="color: inherit; text-decoration: none;">{{ post.author.get_full_name|default:post.author.username }}</a>
+                {% else %}
+                  <a href="{% url 'login' %}" style="color: inherit; text-decoration: none;">{{ post.author.get_full_name|default:post.author.username }}</a>
+                {% endif %}
+              </h3>
+              <div class="post-meta">
+                <span>{{ post.created_at|timesince }} ago</span>
+                {% if post.author.role %}
+                  <span>•</span>
+                  <span>{{ post.author.role|title }}</span>
+                {% endif %}
+                {% if request.user.is_authenticated and post.author != request.user %}
+                  <span>•</span>
+                  <a href="{% url 'user_profile' post.author.id %}" style="color: #11cdef; text-decoration: none; font-weight: 600;">Voir le profil</a>
+                {% elif not request.user.is_authenticated %}
+                  <span>•</span>
+                  <a href="{% url 'login' %}" style="color: #11cdef; text-decoration: none; font-weight: 600;">Voir le profil</a>
+                {% endif %}
+              </div>
+            </div>
+            {% if request.user.is_authenticated and post.author == request.user %}
+            <div style="position: relative;">
+              <button class="post-menu-btn" type="button" onclick="togglePostMenu('{{ post.id }}')">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <div class="post-menu-dropdown" id="post-menu-{{ post.id }}" style="display: none;">
+                <button class="post-menu-item"
+                        type="button"
+                        data-post-id="{{ post.id }}"
+                        data-post-content="{{ post.content|escapejs }}"
+                        data-post-media="{% if post.get_media_url %}{{ post.get_media_url|escapejs }}{% else %}{% endif %}"
+                        onclick="openEditPostModalFromButton(this)">
+                  <i class="bi bi-pencil"></i> Modifier
+                </button>
+                <form method="post" action="{% url 'delete_post' post.id %}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?');">
+                  {% csrf_token %}
+                  <button type="submit" class="post-menu-item" style="color: #dc3545;">
+                    <i class="bi bi-trash"></i> Supprimer
+                  </button>
+                </form>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="post-content">{{ post.content }}</div>
+          
+          {% if post.get_media_url %}
+          <div class="post-media">
+            {% with media_url=post.get_media_url %}
+              {% if media_url|slice:"-4:" == ".jpg" or media_url|slice:"-4:" == ".png" or media_url|slice:"-5:" == ".jpeg" or media_url|slice:"-4:" == ".gif" or media_url|slice:"-4:" == ".webp" %}
+                <img src="{{ media_url }}" alt="Post media" />
+              {% else %}
+                <video controls>
+                  <source src="{{ media_url }}" type="video/mp4">
+                </video>
+              {% endif %}
+            {% endwith %}
+          </div>
+          {% endif %}
+
+          {% if request.user.is_authenticated %}
+          <div class="post-actions">
+            <button class="post-action-btn">
+              <i class="bi bi-hand-thumbs-up"></i> J'aime
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-chat"></i> Commenter
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-share"></i> Partager
+            </button>
+          </div>
+          {% else %}
+          <div class="post-actions" style="opacity: 0.6; pointer-events: none;">
+            <button class="post-action-btn" disabled>
+              <i class="bi bi-hand-thumbs-up"></i> J'aime
+            </button>
+            <button class="post-action-btn" disabled>
+              <i class="bi bi-chat"></i> Commenter
+            </button>
+            <button class="post-action-btn" disabled>
+              <i class="bi bi-share"></i> Partager
+            </button>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-top: 1rem;">
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+              <a href="{% url 'login' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Connectez-vous</a> pour interagir avec cette publication
+            </p>
+          </div>
+          {% endif %}
+
+          {% if post.comments.all %}
+          <div class="comments-section">
+            {% for comment in post.comments.all|slice:":5" %}
+            <div class="comment-item">
+              <div class="comment-avatar">
+                {% if comment.author.avatar %}
+                  <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% else %}
+                  <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% endif %}
+              </div>
+              <div class="comment-content">
+                <p class="comment-author">{{ comment.author.get_full_name|default:comment.author.username }}</p>
+                <p class="comment-text">{{ comment.text }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Aucun post pour le moment. Soyez le premier à partager quelque chose !</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <h3><i class="bi bi-info-circle"></i> À propos</h3>
+        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">
+          Bienvenue sur le fil d'actualité d'EduLife. Partagez vos pensées, expériences et connectez-vous avec la communauté.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- Modal pour modifier un post -->
+  <div id="edit-post-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Modifier le post</h2>
+        <button type="button" class="close-btn" onclick="closeModal('edit-post-modal')">&times;</button>
+      </div>
+      <form method="post" action="" id="edit-post-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+          <label for="edit-post-content" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Contenu</label>
+          <textarea name="content" id="edit-post-content" class="create-post-textarea" rows="5" required></textarea>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="edit-post-media" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Média (optionnel)</label>
+          <input type="file" name="media" id="edit-post-media" class="form-control" accept="image/*,video/*">
+          <small style="color: #64748b; font-size: 0.85rem;">Laissez vide pour conserver le média actuel, ou sélectionnez un nouveau fichier pour le remplacer.</small>
+          <div id="edit-post-media-preview" style="margin-top: 10px;"></div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+          <button type="button" class="create-post-media-btn" onclick="closeModal('edit-post-modal')">Annuler</button>
+          <button type="submit" class="create-post-submit">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditPostModalFromButton(button) {
+      const postId = button.getAttribute('data-post-id');
+      const content = button.getAttribute('data-post-content');
+      const mediaUrl = button.getAttribute('data-post-media');
+      openEditPostModal(postId, content, mediaUrl);
+    }
+
+    function openEditPostModal(postId, content, mediaUrl) {
+      const form = document.getElementById('edit-post-form');
+      form.action = '/profile/post/' + postId + '/update/';
+      
+      document.getElementById('edit-post-content').value = content || '';
+      
+      const preview = document.getElementById('edit-post-media-preview');
+      preview.innerHTML = '';
+      if (mediaUrl && mediaUrl !== '') {
+        if (mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+          preview.innerHTML = `<img src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" alt="Média actuel">`;
+        } else {
+          preview.innerHTML = `<video src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" controls></video>`;
+        }
+      }
+      
+      document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+        menu.style.display = 'none';
+      });
+      
+      document.getElementById('edit-post-modal').style.display = 'block';
+    }
+
+    function togglePostMenu(postId) {
+      const menu = document.getElementById('post-menu-' + postId);
+      const isVisible = menu.style.display === 'block';
+      
+      document.querySelectorAll('.post-menu-dropdown').forEach(m => {
+        m.style.display = 'none';
+      });
+      
+      menu.style.display = isVisible ? 'none' : 'block';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.post-menu-btn') && !event.target.closest('.post-menu-dropdown')) {
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+          menu.style.display = 'none';
+        });
+      }
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+  </script>
+{% endblock %}
