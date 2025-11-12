@@ -2,6 +2,7 @@ from .models import Event, Seat
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from datetime import datetime, date
 from django.utils import timezone
 import stripe
@@ -12,6 +13,10 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.db.models import F
+
+# Décorateur pour vérifier si l'utilisateur est superuser ou admin
+def is_superuser_or_admin(user):
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'))
 
 STATIC_USER_ID = "user123"   # id temporaire pour dev (tu peux changer)
 
@@ -48,7 +53,12 @@ def event_home(request):
         "upcoming_event": upcoming_event,
         "my_reservations": my_reservations,  # 👈 indispensable
     })
+@login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def dashboard(request):
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+        return redirect('index')
     if request.method == "POST":
         print("POST data:", request.POST)  # Debug
         
@@ -155,6 +165,9 @@ def dashboard(request):
     # Récupérer tous les événements
     events = Event.objects.all().order_by('-date')
     return render(request, "backoffice/pages/dashboard.html", {"events": events})
+
+@login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def view_seats(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     seats = event.seats.all().order_by('number')
@@ -187,6 +200,9 @@ def sync_seats(event):
     elif total < current:
         extra_seats = seats.filter(number__gt=total, status="available")
         extra_seats.delete()
+
+@login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def seats_list(request):
     last_id = request.session.get("last_event_seats_id")
 

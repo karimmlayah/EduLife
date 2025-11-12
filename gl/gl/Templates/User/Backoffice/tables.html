@@ -141,6 +141,99 @@
     .user-avatar.avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.85), 0 0 10px 2px rgba(251,99,64,.35); }
     .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
     .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
+
+    /* User menu dropdown for dashboard */
+    .user-menu-dashboard {
+        position: relative;
+        display: inline-block;
+    }
+    .user-dropdown-dashboard {
+        position: absolute;
+        right: 0;
+        top: 46px;
+        min-width: 200px;
+        background: rgba(16, 23, 42, 0.95);
+        color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+        padding: 8px;
+        display: none;
+        z-index: 1050;
+        backdrop-filter: blur(8px);
+    }
+    .user-dropdown-dashboard a {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #e5e7eb;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .user-dropdown-dashboard a:hover {
+        background: rgba(59, 130, 246, 0.18);
+        color: #fff;
+    }
+    .user-dropdown-dashboard a i {
+        width: 20px;
+        text-align: center;
+    }
+    .user-menu-dashboard.open .user-dropdown-dashboard {
+        display: block;
+    }
+
+    /* Button to go to site */
+    .btn-site-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        opacity: 0.9;
+    }
+    .btn-site-dashboard:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Notifications and Messages Icons */
+    .notifications-icon-dashboard,
+    .messages-icon-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        opacity: 0.9;
+    }
+    .notifications-icon-dashboard:hover,
+    .messages-icon-dashboard:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .notifications-badge-dashboard,
+    .messages-badge-dashboard {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #f5365c;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        border: 2px solid #1e293b;
+    }
     /* Sidebar footer: pin logout lower with icon + animation */
     #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
     .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
@@ -278,26 +371,60 @@
 
 
           <ul class="navbar-nav  justify-content-end">
-            <li class="nav-item d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
-                {% with user_id=request.user.id|default:0 %}
-                <span class="user-avatar me-2 {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}">
-                  {% if request.user.is_authenticated %}
-                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
-                  {% else %}
-                    ?
-                  {% endif %}
-                </span>
-                {% endwith %}
-                <span class="d-none">
-                  {% if request.user.is_authenticated %}
-                    {{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}
-                  {% else %}
-                    Utilisateur
-                  {% endif %}
-                </span>
-              </a>
-            </li>
+            {% if request.user.is_authenticated %}
+                <!-- Button to go to site -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
+                        <i class="ni ni-world" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+                <!-- Notifications Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'notifications' %}" class="nav-link text-white p-0 notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                        <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- Messages Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'messages' %}" class="nav-link text-white p-0 messages-icon-dashboard" title="Messages" style="position: relative;">
+                        <i class="ni ni-chat-round" style="font-size: 1.2rem;"></i>
+                        {% if unread_messages_count > 0 %}
+                            <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- User Avatar Menu -->
+                <li class="nav-item d-flex align-items-center">
+                    {% with user_id=request.user.id|default:0 %}
+                    <div class="user-menu-dashboard" id="dashboardUserMenu">
+                        <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                            <span class="user-avatar me-2 {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}" style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;{% endif %}">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                                {% endif %}
+                            </span>
+                        </a>
+                        <div class="user-dropdown-dashboard" id="dashboardUserDropdown">
+                            <a href="{% url 'profile' %}"><i class="ni ni-single-02 me-2"></i> Profile</a>
+                            <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
+                            <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
+                            <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                </li>
+            {% else %}
+                <li class="nav-item d-flex align-items-center">
+                    <a href="{% url 'login' %}" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                        <span class="user-avatar me-2 avatar-c5">+</span>
+                    </a>
+                </li>
+            {% endif %}
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
                 <div class="sidenav-toggler-inner">
@@ -531,41 +658,56 @@
                       </td>
                       <td class="align-middle">
                         <div class="d-flex align-items-center actions">
-                          {% if request.user.is_superuser and not u.is_superuser %}
-                          {% if u.id == request.user.id %}
-                          <span class="btn-action btn-action--info" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas modifier votre propre rôle"><i class="ni ni-ruler-pencil"></i><span>Modifier</span></span>
-   onclick="return confirmRoleChange({{ u.id }}, '{{ u.role|default:'UTILISATEUR' }}');">
-   <i class="ni ni-ruler-pencil"></i><span>Modifier</span>
-</a>                          {% else %}
-                          <a href="#" class="btn-action btn-action--info" onclick="return confirmRoleChange({{ u.id }}, '{{ u.role|default:'UTILISATEUR' }}', '{{ u.first_name|default:u.username|escapejs }}{% if u.last_name %} {{ u.last_name|escapejs }}{% endif %}', '{{ u.email|escapejs }}');"><i class="ni ni-ruler-pencil"></i><span>Modifier</span></a>
-                          {% endif %}
-                          {% if u.is_active %}
+                          {# Actions pour les superusers uniquement #}
+                          {% if request.user.is_superuser %}
+                            {# Bouton Modifier le rôle (superuser uniquement, pas pour les superusers) #}
+                            {% if not u.is_superuser %}
+                              {% if u.id == request.user.id %}
+                                <span class="btn-action btn-action--info" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas modifier votre propre rôle"><i class="ni ni-ruler-pencil"></i><span>Modifier</span></span>
+                              {% else %}
+                                <a href="#" class="btn-action btn-action--info" onclick="return confirmRoleChange({{ u.id }}, '{{ u.role|default:'UTILISATEUR' }}', '{{ u.first_name|default:u.username|escapejs }}{% if u.last_name %} {{ u.last_name|escapejs }}{% endif %}', '{{ u.email|escapejs }}');"><i class="ni ni-ruler-pencil"></i><span>Modifier</span></a>
+                              {% endif %}
+                            {% endif %}
+                            
+                            {# Bouton Supprimer (superuser uniquement) #}
                             {% if u.id == request.user.id %}
-                              <span class="btn-action btn-action--danger" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas vous bannir"><i class="ni ni-fat-remove"></i><span>Bannir</span></span>
+                              <span class="btn-action btn-action--danger" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas supprimer votre propre compte"><i class="ni ni-fat-delete"></i><span>Supprimer</span></span>
                             {% else %}
-                              <form id="ban-form-{{ u.id }}" method="post" action="{% url 'ban_user' u.id %}" class="d-inline">
+                              <form id="delete-form-{{ u.id }}" method="post" action="{% url 'delete_user' u.id %}" class="d-inline">
                                 {% csrf_token %}
-                                <input type="hidden" name="reason" value="">
-                                <a href="#" class="btn-action btn-action--danger" onclick="return submitBan({{ u.id }}, '{{ u.username|escapejs }}');"><i class="ni ni-fat-remove"></i><span>Bannir</span></a>
+                                <button type="button" class="btn-action btn-action--danger" onclick="return confirmDelete({{ u.id }}, '{{ u.username|escapejs }}');"><i class="ni ni-fat-delete"></i><span>Supprimer</span></button>
                               </form>
                             {% endif %}
-                          {% else %}
-                            {% if u.ban_reason %}
-                              <a href="#" class="btn-action btn-action--info" onclick="return showBanReason('{{ u.ban_reason|escapejs }}', '{{ u.username|escapejs }}');"><span>Voir la raison</span></a>
+                          {% endif %}
+                          
+                          {# Actions pour les admins et superusers : Bannir/Débannir #}
+                          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+                            {# Les admins ne peuvent pas bannir/débannir les superusers #}
+                            {% if not request.user.is_superuser and u.is_superuser %}
+                              {# Admin ne peut rien faire sur un superuser #}
+                            {% else %}
+                              {% if u.is_active %}
+                                {# Utilisateur actif : bouton Bannir #}
+                                {% if u.id == request.user.id %}
+                                  <span class="btn-action btn-action--danger" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas vous bannir"><i class="ni ni-fat-remove"></i><span>Bannir</span></span>
+                                {% else %}
+                                  <form id="ban-form-{{ u.id }}" method="post" action="{% url 'ban_user' u.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reason" value="">
+                                    <a href="#" class="btn-action btn-action--danger" onclick="return submitBan({{ u.id }}, '{{ u.username|escapejs }}');"><i class="ni ni-fat-remove"></i><span>Bannir</span></a>
+                                  </form>
+                                {% endif %}
+                              {% else %}
+                                {# Utilisateur banni : voir raison et débannir #}
+                                {% if u.ban_reason %}
+                                  <a href="#" class="btn-action btn-action--info" onclick="return showBanReason('{{ u.ban_reason|escapejs }}', '{{ u.username|escapejs }}');"><i class="ni ni-bulb-61"></i><span>Voir la raison</span></a>
+                                {% endif %}
+                                <form method="post" action="{% url 'unban_user' u.id %}" class="d-inline">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn-action btn-action--success" style="background: rgba(45,206,137,.18);"><i class="ni ni-check-bold"></i><span>Débannir</span></button>
+                                </form>
+                              {% endif %}
                             {% endif %}
-                            <form method="post" action="{% url 'unban_user' u.id %}" class="d-inline">
-                              {% csrf_token %}
-                              <button type="submit" class="btn-action btn-action--success" style="background: rgba(45,206,137,.18);"><i class="ni ni-check-bold"></i> Débannir</button>
-                            </form>
-                          {% endif %}
-                          {% if u.id == request.user.id %}
-                            <span class="btn-action btn-action--danger" style="opacity:.5;cursor:not-allowed;" title="Vous ne pouvez pas supprimer votre propre compte"><i class="ni ni-fat-delete"></i><span>Supprimer</span></span>
-                          {% else %}
-                            <form id="delete-form-{{ u.id }}" method="post" action="{% url 'delete_user' u.id %}" class="d-inline">
-                              {% csrf_token %}
-                              <button type="button" class="btn-action btn-action--danger" onclick="return confirmDelete({{ u.id }}, '{{ u.username|escapejs }}');"><i class="ni ni-fat-delete"></i><span>Supprimer</span></button>
-                            </form>
-                          {% endif %}
                           {% endif %}
                         </div>
                       </td>

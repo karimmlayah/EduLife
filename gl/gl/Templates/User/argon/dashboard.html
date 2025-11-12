@@ -123,6 +123,99 @@
       .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
       .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
 
+      /* User menu dropdown for dashboard */
+      .user-menu-dashboard {
+          position: relative;
+          display: inline-block;
+      }
+      .user-dropdown-dashboard {
+          position: absolute;
+          right: 0;
+          top: 46px;
+          min-width: 200px;
+          background: rgba(16, 23, 42, 0.95);
+          color: #fff;
+          border-radius: 12px;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+          padding: 8px;
+          display: none;
+          z-index: 1050;
+          backdrop-filter: blur(8px);
+      }
+      .user-dropdown-dashboard a {
+          display: flex;
+          align-items: center;
+          padding: 10px 12px;
+          border-radius: 8px;
+          color: #e5e7eb;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+      }
+      .user-dropdown-dashboard a:hover {
+          background: rgba(59, 130, 246, 0.18);
+          color: #fff;
+      }
+      .user-dropdown-dashboard a i {
+          width: 20px;
+          text-align: center;
+      }
+      .user-menu-dashboard.open .user-dropdown-dashboard {
+          display: block;
+      }
+
+      /* Button to go to site */
+      .btn-site-dashboard {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          transition: all 0.2s;
+          opacity: 0.9;
+      }
+      .btn-site-dashboard:hover {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Notifications and Messages Icons */
+      .notifications-icon-dashboard,
+      .messages-icon-dashboard {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          transition: all 0.2s;
+          opacity: 0.9;
+      }
+      .notifications-icon-dashboard:hover,
+      .messages-icon-dashboard:hover {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.1);
+      }
+      .notifications-badge-dashboard,
+      .messages-badge-dashboard {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          background: #f5365c;
+          color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          font-weight: 700;
+          border: 2px solid #1e293b;
+      }
+
       /* Sidebar footer: pin logout lower with icon + animation */
       #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
       .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
@@ -248,27 +341,60 @@
           </div>
 
           <ul class="navbar-nav  justify-content-end">
-            <li class="nav-item d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
-                {% with user_id=request.user.id|default:0 %}
-                <span class="user-avatar me-2 {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}">
-                  {% if request.user.is_authenticated %}
-                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
-                  {% else %}
-                    ?
-                  {% endif %}
-                </span>
-                {% endwith %}
-                <span class="d-none">
-                  {% if request.user.is_authenticated %}
-                    {{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}
-                  {% else %}
-                    Utilisateur
-                  {% endif %}
-                </span>
-              </a>
-            </li>
+            {% if request.user.is_authenticated %}
+                <!-- Button to go to site -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
+                        <i class="ni ni-world" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+                <!-- Notifications Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'notifications' %}" class="nav-link text-white p-0 notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                        <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- Messages Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'messages' %}" class="nav-link text-white p-0 messages-icon-dashboard" title="Messages" style="position: relative;">
+                        <i class="ni ni-chat-round" style="font-size: 1.2rem;"></i>
+                        {% if unread_messages_count > 0 %}
+                            <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- User Avatar Menu -->
+                <li class="nav-item d-flex align-items-center">
+                    {% with user_id=request.user.id|default:0 %}
+                    <div class="user-menu-dashboard" id="dashboardUserMenu">
+                        <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                            <span class="user-avatar me-2 {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}" style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;{% endif %}">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                                {% endif %}
+                            </span>
+                        </a>
+                        <div class="user-dropdown-dashboard" id="dashboardUserDropdown">
+                            <a href="{% url 'profile' %}"><i class="ni ni-single-02 me-2"></i> Profile</a>
+                            <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
+                            <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
+                            <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                </li>
+            {% else %}
+                <li class="nav-item d-flex align-items-center">
+                    <a href="{% url 'login' %}" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                        <span class="user-avatar me-2 avatar-c5">+</span>
+                    </a>
+                </li>
+            {% endif %}
 
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
@@ -721,6 +847,30 @@
         var options = { damping: '0.5' }
         Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
       }
+
+      // Dropdown menu for user avatar in dashboard
+      (function(){
+          const menu = document.getElementById('dashboardUserMenu');
+          if (!menu) return;
+          const toggle = menu.querySelector('a');
+          const dd = document.getElementById('dashboardUserDropdown');
+          if (!toggle || !dd) return;
+          
+          function closeAll(e){ 
+              if(!menu.contains(e.target)){ 
+                  menu.classList.remove('open'); 
+                  document.removeEventListener('click', closeAll); 
+              } 
+          }
+          
+          toggle.addEventListener('click', function(e){
+              e.preventDefault();
+              menu.classList.toggle('open');
+              if(menu.classList.contains('open')){
+                  setTimeout(()=>document.addEventListener('click', closeAll), 0);
+              }
+          });
+      })();
     </script>
   </body>
 </html>

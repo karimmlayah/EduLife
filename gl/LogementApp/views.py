@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404
 from django.contrib import messages
 from django.views.decorators.http import require_POST
@@ -8,6 +8,10 @@ from django.utils import timezone
 from UserApp.models import CustomUser, Post, Comment, Connection, Message
 from .models import Logement, LogementImage
 from .forms import LogementForm
+
+# Décorateur pour vérifier si l'utilisateur est superuser ou admin
+def is_superuser_or_admin(user):
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'))
 
 # Create your views here.
 def logement_home(request):
@@ -117,9 +121,10 @@ def logement_delete(request, logement_id):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def dashboard(request):
     """Dashboard principal avec statistiques sur les utilisateurs"""
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
         return redirect('index')
     
@@ -211,7 +216,11 @@ def dashboard(request):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def argon_page(request, page: str):
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+        return redirect('index')
     allowed = {
         'dashboard',
         'billing',
@@ -229,15 +238,20 @@ def argon_page(request, page: str):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def tables(request):
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+        return redirect('index')
     users = CustomUser.objects.all().order_by('-date_joined')
     return render(request, 'User/Backoffice/tables.html', { 'users': users })
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def dashboard_logements(request):
     """Dashboard dédié aux logements avec statistiques"""
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
         return redirect('admin_dashboard')
     
@@ -271,9 +285,10 @@ def dashboard_logements(request):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def manage_logements(request):
     """Gérer les logements dans le dashboard (approuver/rejeter)"""
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
         return redirect('admin_dashboard')
     
@@ -525,9 +540,10 @@ def binome_contact(request, request_id):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def approve_logement(request, logement_id):
     """Approuver un logement"""
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'effectuer cette action.')
         return redirect('admin_dashboard')
     
@@ -540,9 +556,10 @@ def approve_logement(request, logement_id):
 
 
 @login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 def reject_logement(request, logement_id):
     """Rejeter un logement"""
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'effectuer cette action.')
         return redirect('admin_dashboard')
     

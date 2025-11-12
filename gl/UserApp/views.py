@@ -17,7 +17,8 @@ from datetime import timedelta
 
 # Create your views here.
 def index_view(request):
-    if request.user.is_authenticated and request.user.is_superuser:
+    # Rediriger les superusers et admins vers le dashboard
+    if request.user.is_authenticated and (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         return redirect('/admin/')
     return render(request, 'User/evently/index.html')
 
@@ -42,6 +43,35 @@ def login_view(request):
         form_type = request.POST.get('form_type')
         
         if form_type == 'login':
+            # Récupérer les données du formulaire AVANT la validation
+            identifier = request.POST.get('username', '').strip()
+            password = request.POST.get('password', '')
+            
+            # Vérifier si l'utilisateur existe et est banni AVANT la validation du formulaire
+            if identifier and password:
+                try:
+                    user_obj = CustomUser.objects.get(Q(email=identifier) | Q(username=identifier))
+                    
+                    # Vérifier si l'utilisateur est banni
+                    if not user_obj.is_active:
+                        # Vérifier si le mot de passe est correct
+                        if user_obj.check_password(password):
+                            # L'utilisateur est banni et le mot de passe est correct
+                            ban_message = 'Votre compte a été banni.'
+                            if hasattr(user_obj, 'ban_reason') and user_obj.ban_reason:
+                                ban_message += f' Raison : {user_obj.ban_reason}'
+                            messages.error(request, ban_message)
+                            # Créer un nouveau formulaire pour réafficher la page
+                            login_form = LoginForm(request)
+                            return render(request, 'User/FrontOffice/Login/login.html', {
+                                'login_form': login_form,
+                                'signup_form': signup_form,
+                                'show_login': show_login,
+                            })
+                except CustomUser.DoesNotExist:
+                    pass  # L'utilisateur n'existe pas, laisser le formulaire gérer l'erreur
+            
+            # Continuer avec la validation normale du formulaire
             login_form = LoginForm(request, data=request.POST)
             if login_form.is_valid():
                 identifier = login_form.cleaned_data.get('username')
@@ -64,13 +94,10 @@ def login_view(request):
                         request.session['user_id'] = user.id
                         request.session['username'] = user.username
                         messages.success(request, f'Bienvenue {user.username}!')
-                        if user.is_superuser:
+                        # Rediriger les superusers et admins vers le dashboard
+                        if user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'):
                             return redirect('/admin/')
                         return redirect('index')
-                    else:
-                        messages.error(request, 'Votre compte est dÃ©sactivÃ©.')
-                else:
-                    messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
         
         elif form_type == 'signup':
             signup_form = SignUpForm(request.POST)
@@ -1147,10 +1174,18 @@ def face_id_authenticate(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+# Décorateur pour vérifier si l'utilisateur est superuser ou admin
+def is_superuser_or_admin(user):
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'))
+
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 @require_POST
 def ban_user_view(request, user_id: int):
     target = get_object_or_404(CustomUser, pk=user_id)
+    # Les admins ne peuvent pas bannir les superusers
+    if not request.user.is_superuser and target.is_superuser:
+        messages.error(request, "Vous n'avez pas la permission de bannir un superuser.")
+        return redirect(request.META.get('HTTP_REFERER', 'manage_users'))
     reason = request.POST.get('reason', '').strip()
     target.is_active = False
     target.ban_reason = reason or 'Banni par un administrateur.'
@@ -1161,10 +1196,14 @@ def ban_user_view(request, user_id: int):
     return redirect(request.META.get('HTTP_REFERER', 'manage_users'))
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
 @require_POST
 def unban_user_view(request, user_id: int):
     target = get_object_or_404(CustomUser, pk=user_id)
+    # Les admins ne peuvent pas débannir les superusers
+    if not request.user.is_superuser and target.is_superuser:
+        messages.error(request, "Vous n'avez pas la permission de débannir un superuser.")
+        return redirect(request.META.get('HTTP_REFERER', 'manage_users'))
     target.is_active = True
     target.ban_reason = ''
     target.banned_at = None
