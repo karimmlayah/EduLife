@@ -1,718 +1,324 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-  <meta name="csrf-token" content="{{ csrf_token }}">
-<script>
-  window.CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
-</script>
-
-  <head>
+<html lang="fr">
+<head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="76x76"
-      href="{% static 'backoffice/assets/img/apple-icon.png' %}"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'backoffice/assets/img/apple-icon.png' %}" />
     <link rel="icon" type="image/png" href="{% static 'backoffice/assets/img/favicon.png' %}" />
-    <title>Argon Dashboard 3 by Creative Tim</title>
-    <!--     Fonts and icons     -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
-      rel="stylesheet"
-    />
+    <title>Admin Dashboard</title>
+    
+    <!-- Fonts and icons -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    
     <!-- Nucleo Icons -->
     <link
-      href="{% static 'backoffice/assets/css/nucleo-icons.css' %}"
+      href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css"
       rel="stylesheet"
     />
     <link
-      href="{% static 'backoffice/assets/css/nucleo-svg.css' %}"
+      href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css"
       rel="stylesheet"
     />
+    
     <!-- Font Awesome Icons -->
-    <script
-      src="https://kit.fontawesome.com/42d5adcbca.js"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    
     <!-- CSS Files -->
-    <link
-      id="pagestyle"
-      href="{% static 'backoffice/assets/css/argon-dashboard.css' %}?v=2.1.0"
-      rel="stylesheet"
-    />
-  </head>
+    <link id="pagestyle" href="{% static 'backoffice/assets/css/argon-dashboard.css' %}?v=2.1.0" rel="stylesheet" />
+    
+    <style>
+        /* Top menu polishing */
+        .top-search.input-group { 
+            border-radius: 999px; 
+            overflow: hidden; 
+            max-width: 240px; 
+        }
+        .top-search .input-group-text {
+            background: #ffffff;
+            border: 1px solid #ffffff;
+            border-right: 0;
+            color: #495057;
+        }
+        .top-search .form-control {
+            background: #ffffff;
+            border: 1px solid #ffffff;
+            border-left: 0;
+            color: #212529;
+        }
+        .top-search .form-control::placeholder { 
+            color: #6c757d; 
+        }
+        @media (max-width: 991.98px) {
+            .top-search.input-group { 
+                max-width: 200px; 
+            }
+        }
 
-  <body class="g-sidenav-show bg-gray-100">
-    <!-- Navbar personnalisée -->
- 
+        /* Top menu polishing */
+        .topmenu .nav-link {
+            color: #fff;
+            padding: .4rem .8rem;
+            border-radius: .5rem;
+            transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+            position: relative;
+        }
+        .topmenu .nav-link:hover { background: rgba(255,255,255,0.12); }
+        .topmenu .nav-link.active {
+            background: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,255,255,.12));
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+            color: #fff !important;
+        }
+        .topmenu .nav-item + .nav-item { margin-left: .35rem; }
 
-        <div
-          class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4"
-          id="navbar"
-        >
-          <div class="d-flex align-items-center">
-            <!-- MENUS À GAUCHE -->
-            <ul class="navbar-nav d-flex flex-row align-items-center me-3">
-              <li class="nav-item mx-2">
-                <a href="#" class="nav-link text-white fw-bold">
-                  <i class="ni ni-calendar-grid-58 text-white me-1"></i>
-                  Événements
-                </a>
-              </li>
-              <li class="nav-item mx-2">
-                <a href="#" class="nav-link text-white fw-bold">
-                  <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
-                </a>
-              </li>
-              <li class="nav-item mx-2">
-                <a href="#" class="nav-link text-white fw-bold">
-                  <i class="ni ni-briefcase-24 text-white me-1"></i> Offres
-                </a>
-              </li>
-            </ul>
+        /* User avatar (gradient + neon ring) */
+        .user-avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            box-shadow: 0 0 0 3px rgba(45, 255, 241, .85), 0 0 10px 2px rgba(45, 255, 241, .35);
+            color: #fff;
+            font-weight: 700;
+        }
+        .user-avatar-initial { font-size: .9rem; line-height: 1; }
 
-            <!-- BARRE DE RECHERCHE -->
-            <div class="input-group">
-              <span class="input-group-text text-body"
-                ><i class="fas fa-search" aria-hidden="true"></i
-              ></span>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Rechercher..."
-              />
-            </div>
-          </div>
+        /* Avatar color variants (Argon palette) */
+        .user-avatar.avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17,205,239,.85), 0 0 10px 2px rgba(17,205,239,.35); }
+        .user-avatar.avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45,206,137,.85), 0 0 10px 2px rgba(45,206,137,.35); }
+        .user-avatar.avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+        .user-avatar.avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.85), 0 0 10px 2px rgba(251,99,64,.35); }
+        .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+        .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
 
-          <!-- SECTION DROITE (profil, notifications, etc.) -->
-          <ul class="navbar-nav ms-auto justify-content-end">
-            <li class="nav-item d-flex align-items-center">
-              <a
-                href="javascript:;"
-                class="nav-link text-white font-weight-bold px-0"
-              >
-                <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Sign In</span>
-              </a>
-            </li>
-            <li class="nav-item px-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-white p-0">
-                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-              </a>
-            </li>
-            <li class="nav-item dropdown pe-2 d-flex align-items-center">
-              <a
-                href="javascript:;"
-                class="nav-link text-white p-0"
-                id="dropdownMenuButton"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i class="fa fa-bell cursor-pointer"></i>
-              </a>
-              <ul
-                class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4"
-                aria-labelledby="dropdownMenuButton"
-              >
-                <li>
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="my-auto">
-                        <img
-                          src="{% static 'backoffice/assets/img/team-2.jpg' %}"
-                          class="avatar avatar-sm me-3"
-                        />
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New message</span> from
-                          Laur
-                        </h6>
-                        <p class="text-xs text-secondary mb-0">
-                          <i class="fa fa-clock me-1"></i> 13 minutes ago
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+        /* Sidebar footer: pin logout lower with icon + animation */
+        #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
+        .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+        .btn-logout i { font-size: .875rem; }
+        .btn-logout { transition: transform .15s ease, box-shadow .3s ease; }
+        .btn-logout:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(17,205,239,.25); }
+        @keyframes subtle-pulse { 0% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } 50% { box-shadow: 0 0 12px 2px rgba(17,205,239,.35); } 100% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } }
+        .btn-logout:focus-visible { animation: subtle-pulse 1.2s ease-out; }
+    </style>
+</head>
+
+<body class="g-sidenav-show bg-gray-100">
+    <script>
+        window.CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
+    </script>
 
     <div class="min-height-300 bg-dark position-absolute w-100"></div>
-    <aside
-      class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4"
-      id="sidenav-main"
-    >
-      <div class="sidenav-header">
-        <i
-          class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-          aria-hidden="true"
-          id="iconSidenav"
-        ></i>
-        <a class="navbar-brand m-0" href="#">
-          <img
-            src="{% static 'backoffice/assets/img/logo-ct-dark.png' %}"
-            width="26px"
-            height="26px"
-            class="navbar-brand-img h-100"
-            alt="main_logo"
-          />
-          <span class="ms-1 font-weight-bold">Admin Dashboard</span>
-        </a>
-      </div>
-
-      <hr class="horizontal dark mt-0 mb-3" />
-
-      <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
-        <ul class="navbar-nav">
-
-          <!-- ✅ Tableau de Bord -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if request.path == '/' %}active{% endif %}"
-               href="/">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Tableau de Bord</span>
+    
+    <!-- Sidebar -->
+    <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+        <div class="sidenav-header">
+            <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+            <a class="navbar-brand m-0" href="#">
+                <img src="{% static 'backoffice/assets/img/logo-ct-dark.png' %}" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo" />
+                <span class="ms-1 font-weight-bold">Admin Dashboard</span>
             </a>
-          </li>
-
-          <!-- ✅ Événements -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}"
-               href="{% url 'dashboard' %}">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Événements</span>
-            </a>
-          </li>
-
-          <!-- ✅ Gestion des chaises -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if 'seats' in request.path %}active{% endif %}"
-               href="{% url 'seats_list' %}">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-badge text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Gestion des Places</span>
-            </a>
-          </li>
-
-          <!-- ✅ Réservations -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if 'reservations' in request.path %}active{% endif %}"
-               href="#">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-single-copy-04 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Réservations</span>
-            </a>
-          </li>
-
-          <!-- ✅ Utilisateurs -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if 'users' in request.path %}active{% endif %}"
-               href="#">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Utilisateurs</span>
-            </a>
-          </li>
-
-          <!-- ✅ Statistiques -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if 'statistics' in request.path %}active{% endif %}"
-               href="#">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-chart-bar-32 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Statistiques</span>
-            </a>
-          </li>
-
-          <!-- ✅ Paramètres -->
-          <li class="nav-item mb-2">
-            <a class="nav-link {% if 'settings' in request.path %}active{% endif %}"
-               href="#">
-              <div
-                class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center"
-              >
-                <i class="ni ni-settings-gear-65 text-dark text-sm opacity-10"></i>
-              </div>
-              <span class="nav-link-text ms-1">Paramètres</span>
-            </a>
-          </li>
-
-        </ul>
-      </div>
-
-      <div class="sidenav-footer mx-3 mt-4">
-        <div class="card card-plain shadow-none" id="sidenavCard">
-          <img
-            class="w-50 mx-auto"
-            src="{% static 'backoffice/assets/img/illustrations/icon-documentation.svg' %}"
-            alt="sidebar_illustration"
-          />
-          <div class="card-body text-center p-3 w-100 pt-0">
-            <div class="docs-info">
-              <h6 class="mb-1">Besoin d'aide ?</h6>
-              <p class="text-xs font-weight-bold mb-0">Consultez notre documentation</p>
-            </div>
-          </div>
         </div>
-        <a
-          href="https://www.creative-tim.com/learning-lab/bootstrap/license/argon-dashboard"
-          target="_blank"
-          class="btn btn-dark btn-sm w-100 mb-2"
-          >📚 Documentation</a
-        >
-        <a
-          class="btn btn-primary btn-sm mb-0 w-100"
-          href="https://www.creative-tim.com/product/argon-dashboard-pro?ref=sidebarfree"
-          type="button"
-          >⭐ Version Pro</a
-        >
-      </div>
-</aside>
+
+        <hr class="horizontal dark mt-0 mb-3" />
+
+        <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+            <ul class="navbar-nav">
+
+                <!-- ✅ Événements -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                        <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Événements</span>
+                    </a>
+                </li>
+
+                <!-- ✅ Gestion des chaises -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link {% if 'seats' in request.path %}active{% endif %}" href="{% url 'seats_list' %}">
+                        <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-badge text-dark text-sm opacity-10"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Gestion des Places</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="sidenav-footer mx-3 mt-4">
+            <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout mt-2">
+                <i class="ni ni-button-power"></i>
+                <span>Déconnexion</span>
+            </a>
+        </div>
+    </aside>
 
     <main class="main-content position-relative border-radius-lg">
-      <!-- Navbar -->
-      <nav
-        class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl"
-        id="navbarBlur"
-        data-scroll="false"
-      >
-        <div class="container-fluid py-1 px-3">
-          <nav aria-label="breadcrumb">
-            <ol
-              class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5"
-            >
-              <li class="breadcrumb-item text-sm">
-                <a class="opacity-5 text-white" href="javascript:;">Pages</a>
-              </li>
-              <li
-                class="breadcrumb-item text-sm text-white active"
-                aria-current="page"
-              >
-                Dashboard
-              </li>
-            </ol>
-            <h6 class="font-weight-bolder text-white mb-0">Dashboard</h6>
-          </nav>
+        <!-- Navbar -->
+        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="false">
+            <div class="container-fluid py-1 px-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
+                        <li class="breadcrumb-item text-sm text-white active" aria-current="page">Dashboard</li>
+                    </ol>
+                    <h6 class="font-weight-bolder text-white mb-0">Dashboard</h6>
+                </nav>
 
-          <div
-            class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4"
-            id="navbar"
-          >
-            <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-              <!-- BARRE DE RECHERCHE -->
-              <div class="input-group me-3">
-                <span class="input-group-text text-body">
-                  <i class="fas fa-search" aria-hidden="true"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Rechercher..."
-                />
-              </div>
+                <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+                    <div class="d-flex align-items-center w-100 pe-md-3">
+                        <!-- MENUS SUPPLÉMENTAIRES (gauche) -->
+                        <ul class="navbar-nav d-flex flex-row align-items-center me-auto topmenu">
+                            <li class="nav-item mx-2">
+                                <a href="{% url 'admin_dashboard' %}" data-match="/admin/" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %} active{% endif %}" {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %}aria-current="page"{% endif %}>
+                                    <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
+                                </a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a href="{% url 'dashboard_logements' %}" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'dashboard_logements' or request.resolver_match.url_name == 'manage_logements' or request.resolver_match.url_name == 'approve_logement' or request.resolver_match.url_name == 'reject_logement' %} active{% endif %}">
+                                    <i class="ni ni-building text-white me-1"></i> Logements
+                                </a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a href="#" data-match="/admin/events/" class="nav-link text-white fw-bold">
+                                    <i class="ni ni-calendar-grid-58 text-white me-1"></i>
+                                    Événements
+                                </a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a href="#" data-match="/admin/career/" class="nav-link text-white fw-bold">
+                                    <i class="ni ni-briefcase-24 text-white me-1"></i> Carrière
+                                </a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a href="#" data-match="/admin/carpool/" class="nav-link text-white fw-bold">
+                                    <i class="ni ni-delivery-fast text-white me-1"></i> Covoiturage
+                                </a>
+                            </li>
+                        </ul>
 
-              <!-- MENUS SUPPLÉMENTAIRES -->
-              <ul class="navbar-nav d-flex flex-row align-items-center">
-                <li class="nav-item mx-2">
-                  <a href="#" class="nav-link text-white fw-bold">
-                    <i class="ni ni-calendar-grid-58 text-white me-1"></i>
-                    Événements
-                  </a>
-                </li>
-                <li class="nav-item mx-2">
-                  <a href="#" class="nav-link text-white fw-bold">
-                    <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
-                  </a>
-                </li>
-                <li class="nav-item mx-2">
-                  <a href="#" class="nav-link text-white fw-bold">
-                    <i class="ni ni-briefcase-24 text-white me-1"></i> Offres
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- SECTION DROITE (profil, notifications, etc.) -->
-            <ul class="navbar-nav justify-content-end">
-              <li class="nav-item d-flex align-items-center">
-                <a
-                  href="javascript:;"
-                  class="nav-link text-white font-weight-bold px-0"
-                >
-                  <i class="fa fa-user me-sm-1"></i>
-                  <span class="d-sm-inline d-none">Sign In</span>
-                </a>
-              </li>
-
-              <li class="nav-item px-3 d-flex align-items-center">
-                <a href="javascript:;" class="nav-link text-white p-0">
-                  <i
-                    class="fa fa-cog fixed-plugin-button-nav cursor-pointer"
-                  ></i>
-                </a>
-              </li>
-
-              <li class="nav-item dropdown pe-2 d-flex align-items-center">
-                <a
-                  href="javascript:;"
-                  class="nav-link text-white p-0"
-                  id="dropdownMenuButton"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i class="fa fa-bell cursor-pointer"></i>
-                </a>
-                <ul
-                  class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4"
-                  aria-labelledby="dropdownMenuButton"
-                >
-                  <li class="mb-2">
-                    <a
-                      class="dropdown-item border-radius-md"
-                      href="javascript:;"
-                    >
-                      <div class="d-flex py-1">
-                        <div class="my-auto">
-                          <img
-                            src="{% static 'backoffice/assets/img/team-2.jpg' %}"
-                            class="avatar avatar-sm me-3"
-                          />
+                        <!-- BARRE DE RECHERCHE (droite) -->
+                        <div class="top-search input-group input-group-sm ms-auto me-3">
+                            <span class="input-group-text text-body">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                            </span>
+                            <input type="text" class="form-control form-control-sm" placeholder="Rechercher..." />
                         </div>
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="text-sm font-weight-normal mb-1">
-                            <span class="font-weight-bold">New message</span>
-                            from Laur
-                          </h6>
-                          <p class="text-xs text-secondary mb-0">
-                            <i class="fa fa-clock me-1"></i>
-                            13 minutes ago
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item border-radius-md"
-                      href="javascript:;"
-                    >
-                      <div class="d-flex py-1">
-                        <div
-                          class="avatar avatar-sm bg-gradient-secondary me-3 my-auto"
-                        >
-                          <i class="ni ni-credit-card text-white"></i>
-                        </div>
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="text-sm font-weight-normal mb-1">
-                            Payment successfully completed
-                          </h6>
-                          <p class="text-xs text-secondary mb-0">
-                            <i class="fa fa-clock me-1"></i>
-                            2 days
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
+                    </div>
+                </div>
+
+                <ul class="navbar-nav justify-content-end">
+                    <li class="nav-item d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                            {% with user_id=request.user.id|default:0 %}
+                            <span class="user-avatar me-2 {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}">
+                                {% if request.user.is_authenticated %}
+                                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+                                {% else %}
+                                    ?
+                                {% endif %}
+                            </span>
+                            {% endwith %}
+                        </a>
+                    </li>
+
+                    <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
+                            <div class="sidenav-toggler-inner">
+                                <i class="sidenav-toggler-line bg-white"></i>
+                                <i class="sidenav-toggler-line bg-white"></i>
+                                <i class="sidenav-toggler-line bg-white"></i>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item px-3 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-white p-0">
+                            <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown pe-2 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-bell cursor-pointer"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <li class="mb-2">
+                                <a class="dropdown-item border-radius-md" href="javascript:;">
+                                    <div class="d-flex py-1">
+                                        <div class="my-auto">
+                                            <img src="{% static 'backoffice/assets/img/team-2.jpg' %}" class="avatar avatar-sm me-3" />
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="text-sm font-weight-normal mb-1">
+                                                <span class="font-weight-bold">New message</span> from Laur
+                                            </h6>
+                                            <p class="text-xs text-secondary mb-0">
+                                                <i class="fa fa-clock me-1"></i>
+                                                13 minutes ago
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+            </div>
+        </nav>
+        <!-- End Navbar -->
 
-      <!-- End Navbar -->
-          {% block content %}
-      {% endblock %}
+        <!-- Content Block -->
+        {% block content %}
+        {% endblock %}
 
     </main>
+
+    <!-- Fixed Plugin -->
     <div class="fixed-plugin">
-      <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
-        <i class="fa fa-cog py-2"> </i>
-      </a>
-      <div class="card shadow-lg">
-        <div class="card-header pb-0 pt-3">
-          <div class="float-start">
-            <h5 class="mt-3 mb-0">Argon Configurator</h5>
-            <p>See our dashboard options.</p>
-          </div>
-          <div class="float-end mt-4">
-            <button
-              class="btn btn-link text-dark p-0 fixed-plugin-close-button"
-            >
-              <i class="fa fa-close"></i>
-            </button>
-          </div>
-          <!-- End Toggle Button -->
+        <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
+            <i class="fa fa-cog py-2"> </i>
+        </a>
+        <div class="card shadow-lg">
+            <div class="card-header pb-0 pt-3">
+                <div class="float-start">
+                    <h5 class="mt-3 mb-0">Argon Configurator</h5>
+                    <p>See our dashboard options.</p>
+                </div>
+                <div class="float-end mt-4">
+                    <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
+                        <i class="fa fa-close"></i>
+                    </button>
+                </div>
+            </div>
+            <hr class="horizontal dark my-1" />
+            <div class="card-body pt-sm-3 pt-0 overflow-auto">
+                <!-- Configuration options... -->
+            </div>
         </div>
-        <hr class="horizontal dark my-1" />
-        <div class="card-body pt-sm-3 pt-0 overflow-auto">
-          <!-- Sidebar Backgrounds -->
-          <div>
-            <h6 class="mb-0">Sidebar Colors</h6>
-          </div>
-          <a href="javascript:void(0)" class="switch-trigger background-color">
-            <div class="badge-colors my-2 text-start">
-              <span
-                class="badge filter bg-gradient-primary active"
-                data-color="primary"
-                onclick="sidebarColor(this)"
-              ></span>
-              <span
-                class="badge filter bg-gradient-dark"
-                data-color="dark"
-                onclick="sidebarColor(this)"
-              ></span>
-              <span
-                class="badge filter bg-gradient-info"
-                data-color="info"
-                onclick="sidebarColor(this)"
-              ></span>
-              <span
-                class="badge filter bg-gradient-success"
-                data-color="success"
-                onclick="sidebarColor(this)"
-              ></span>
-              <span
-                class="badge filter bg-gradient-warning"
-                data-color="warning"
-                onclick="sidebarColor(this)"
-              ></span>
-              <span
-                class="badge filter bg-gradient-danger"
-                data-color="danger"
-                onclick="sidebarColor(this)"
-              ></span>
-            </div>
-          </a>
-          <!-- Sidenav Type -->
-          <div class="mt-3">
-            <h6 class="mb-0">Sidenav Type</h6>
-            <p class="text-sm">Choose between 2 different sidenav types.</p>
-          </div>
-          <div class="d-flex">
-            <button
-              class="btn bg-gradient-primary w-100 px-3 mb-2 active me-2"
-              data-class="bg-white"
-              onclick="sidebarType(this)"
-            >
-              White
-            </button>
-            <button
-              class="btn bg-gradient-primary w-100 px-3 mb-2"
-              data-class="bg-default"
-              onclick="sidebarType(this)"
-            >
-              Dark
-            </button>
-          </div>
-          <p class="text-sm d-xl-none d-block mt-2">
-            You can change the sidenav type just on desktop view.
-          </p>
-          <!-- Navbar Fixed -->
-          <div class="d-flex my-3">
-            <h6 class="mb-0">Navbar Fixed</h6>
-            <div class="form-check form-switch ps-0 ms-auto my-auto">
-              <input
-                class="form-check-input mt-1 ms-auto"
-                type="checkbox"
-                id="navbarFixed"
-                onclick="navbarFixed(this)"
-              />
-            </div>
-          </div>
-          <hr class="horizontal dark my-sm-4" />
-          <div class="mt-2 mb-5 d-flex">
-            <h6 class="mb-0">Light / Dark</h6>
-            <div class="form-check form-switch ps-0 ms-auto my-auto">
-              <input
-                class="form-check-input mt-1 ms-auto"
-                type="checkbox"
-                id="dark-version"
-                onclick="darkMode(this)"
-              />
-            </div>
-          </div>
-          <a
-            class="btn bg-gradient-dark w-100"
-            href="https://www.creative-tim.com/product/argon-dashboard"
-            >Free Download</a
-          >
-          <a
-            class="btn btn-outline-dark w-100"
-            href="https://www.creative-tim.com/learning-lab/bootstrap/license/argon-dashboard"
-            >View documentation</a
-          >
-          <div class="w-100 text-center">
-            <a
-              class="github-button"
-              href="https://github.com/creativetimofficial/argon-dashboard"
-              data-icon="octicon-star"
-              data-size="large"
-              data-show-count="true"
-              aria-label="Star creativetimofficial/argon-dashboard on GitHub"
-              >Star</a
-            >
-            <h6 class="mt-3">Thank you for sharing!</h6>
-            <a
-              href="https://twitter.com/intent/tweet?text=Check%20Argon%20Dashboard%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23bootstrap5&amp;url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fargon-dashboard"
-              class="btn btn-dark mb-0 me-2"
-              target="_blank"
-            >
-              <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
-            </a>
-            <a
-              href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/argon-dashboard"
-              class="btn btn-dark mb-0 me-2"
-              target="_blank"
-            >
-              <i class="fab fa-facebook-square me-1" aria-hidden="true"></i>
-              Share
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
-    <!--   Core JS Files   -->
+
+    <!-- Core JS Files -->
     <script src="{% static 'backoffice/assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'backoffice/assets/js/core/bootstrap.min.js' %}"></script>
     <script src="{% static 'backoffice/assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
     <script src="{% static 'backoffice/assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
     <script src="{% static 'backoffice/assets/js/plugins/chartjs.min.js' %}"></script>
-    <script>
-      var ctx1 = document.getElementById("chart-line").getContext("2d");
-
-      var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
-
-      gradientStroke1.addColorStop(1, "rgba(94, 114, 228, 0.2)");
-      gradientStroke1.addColorStop(0.2, "rgba(94, 114, 228, 0.0)");
-      gradientStroke1.addColorStop(0, "rgba(94, 114, 228, 0)");
-      new Chart(ctx1, {
-        type: "line",
-        data: {
-          labels: [
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          datasets: [
-            {
-              label: "Mobile apps",
-              tension: 0.4,
-              borderWidth: 0,
-              pointRadius: 0,
-              borderColor: "#5e72e4",
-              backgroundColor: gradientStroke1,
-              borderWidth: 3,
-              fill: true,
-              data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-              maxBarThickness: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          interaction: {
-            intersect: false,
-            mode: "index",
-          },
-          scales: {
-            y: {
-              grid: {
-                drawBorder: false,
-                display: true,
-                drawOnChartArea: true,
-                drawTicks: false,
-                borderDash: [5, 5],
-              },
-              ticks: {
-                display: true,
-                padding: 10,
-                color: "#fbfbfb",
-                font: {
-                  size: 11,
-                  family: "Open Sans",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-            x: {
-              grid: {
-                drawBorder: false,
-                display: false,
-                drawOnChartArea: false,
-                drawTicks: false,
-                borderDash: [5, 5],
-              },
-              ticks: {
-                display: true,
-                color: "#ccc",
-                padding: 20,
-                font: {
-                  size: 11,
-                  family: "Open Sans",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-          },
-        },
-      });
-    </script>
-    <script>
-      var win = navigator.platform.indexOf("Win") > -1;
-      if (win && document.querySelector("#sidenav-scrollbar")) {
-        var options = {
-          damping: "0.5",
-        };
-        Scrollbar.init(document.querySelector("#sidenav-scrollbar"), options);
-      }
-    </script>
-    <!-- Github buttons -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
     <script src="{% static 'backoffice/assets/js/argon-dashboard.min.js' %}?v=2.1.0"></script>
-  </body>
+
+    <script>
+        var win = navigator.platform.indexOf("Win") > -1;
+        if (win && document.querySelector("#sidenav-scrollbar")) {
+            var options = { damping: "0.5" };
+            Scrollbar.init(document.querySelector("#sidenav-scrollbar"), options);
+        }
+    </script>
+</body>
 </html>

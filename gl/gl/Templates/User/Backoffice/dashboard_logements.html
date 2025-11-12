@@ -18,8 +18,16 @@
   <link rel="icon" type="image/png" href="{% static 'User/argon/assets/img/favicon.png' %}">
   <title>Dashboard Logements • EduLife</title>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <link href="{% static 'User/argon/assets/css/nucleo-icons.css' %}" rel="stylesheet" />
-  <link href="{% static 'User/argon/assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link
+    href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css"
+    rel="stylesheet"
+  />
+  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <link id="pagestyle" href="{% static 'User/argon/assets/css/argon-dashboard.min.css' %}" rel="stylesheet" />
   <style>
@@ -153,7 +161,7 @@
                 </a>
               </li>
               <li class="nav-item mx-2">
-                <a href="#" data-match="/admin/events/" class="nav-link text-white fw-bold">
+                <a href="{% url 'dashboard' %}" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
                   <i class="ni ni-calendar-grid-58 text-white me-1"></i>
                   Événements
                 </a>

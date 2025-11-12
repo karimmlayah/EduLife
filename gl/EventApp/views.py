@@ -16,7 +16,7 @@ from django.db.models import F
 STATIC_USER_ID = "user123"   # id temporaire pour dev (tu peux changer)
 
 def event_home(request):
-    STATIC_USER_ID = "user123"
+    STATIC_USER_ID = request.user.id
 
     events = Event.objects.all()
     user_reserved_seats = Seat.objects.filter(id_user=STATIC_USER_ID)
@@ -250,7 +250,7 @@ def payment_success(request):
     event = get_object_or_404(Event, id=event_id)
     seat_numbers = seats_raw.split(",")
 
-    STATIC_USER_ID = "user123"
+    STATIC_USER_ID = request.user.id
 
     # marquer sièges
     for number in seat_numbers:

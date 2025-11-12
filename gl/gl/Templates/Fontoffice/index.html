@@ -562,6 +562,110 @@
     .sponsors-logos img:hover {
       opacity: 1;
     }
+
+    /* User Menu Styles */
+    .user-avatar-mini {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.18);
+      cursor: pointer;
+    }
+    .user-avatar-initials {
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+    /* Avatar color variants */
+    .avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17, 205, 239, 0.55); }
+    .avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45, 206, 137, 0.55); }
+    .avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.55); }
+    .avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251, 99, 64, 0.55); }
+    .avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.55); }
+    .avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.45); }
+    /* User menu dropdown */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+    .user-dropdown {
+      position: absolute;
+      right: 0;
+      top: 46px;
+      min-width: 160px;
+      background: rgba(16, 23, 42, 0.92);
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 6px;
+      display: none;
+      z-index: 1050;
+      backdrop-filter: blur(8px);
+    }
+    .user-dropdown a {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .user-dropdown a:hover {
+      background: rgba(59, 130, 246, 0.18);
+      color: #fff;
+    }
+    .user-menu.open .user-dropdown {
+      display: block;
+    }
+    /* User actions container */
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .notifications-icon-link,
+    .messages-icon-link {
+      position: relative;
+      text-decoration: none;
+      color: #fff;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transition: all 0.2s;
+      opacity: 0.9;
+    }
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .notifications-badge,
+    .messages-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #f5365c;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border: 2px solid #1e293b;
+    }
   </style>
 </head>
 
@@ -575,15 +679,80 @@
       </a>
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="#hero" class="active">Accueil</a></li>
-          <li><a href="#featured-events">Événements</a></li>
-          <li><a href="#speakers">Intervenants</a></li>
-          <li><a href="#venue">Lieu</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="{% url 'index' %}" class="active">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li class="dropdown">
+            <a href="#"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'logement_add' %}"><i class="bi bi-plus-circle me-1"></i> Ajouter un logement</a></li>
+                <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
+                <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+              <li><a href="{% url 'admin_tables' %}">Utilisateurs</a></li>
+            </ul>
+          </li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
-      <a class="btn-getstarted" href="#tickets">Acheter des billets</a>
+      {% if request.user.is_authenticated %}
+        <div class="user-actions">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications">
+            <i class="bi bi-bell"></i>
+            {% if unread_notifications_count > 0 %}
+              <span class="notifications-badge">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages">
+            <i class="bi bi-chat-dots"></i>
+            {% if unread_messages_count > 0 %}
+              <span class="messages-badge">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
+          <!-- User Avatar Menu -->
+          {% with user_id=request.user.id|default:0 %}
+          <div class="user-menu" id="hdrUserMenu">
+            <a href="#" onclick="return false;"
+               class="user-avatar-mini {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+               title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}"
+               style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0;{% endif %}">
+              {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+              {% else %}
+                <span class="user-avatar-initials">
+                  {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                </span>
+              {% endif %}
+            </a>
+            <div class="user-dropdown" id="hdrUserDropdown">
+              <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+              <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+              <a href="{% url 'notifications' %}"><i class="bi bi-bell me-2"></i> Notifications{% if unread_notifications_count > 0 %} <span class="badge bg-danger">{{ unread_notifications_count }}</span>{% endif %}</a>
+              <a href="{% url 'messages' %}"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+              {% if request.user.is_superuser %}
+                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+              {% endif %}
+              <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 6px 4px;"></div>
+              <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+            </div>
+          </div>
+          {% endwith %}
+        </div>
+      {% else %}
+        <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="Se connecter">
+          <span class="user-avatar-initials">+</span>
+        </a>
+      {% endif %}
     </div>
   </header>
 
@@ -969,6 +1138,19 @@
         });
       }
     });
+
+    // Dropdown for avatar (header)
+    (function(){
+      const menu = document.getElementById('hdrUserMenu');
+      if (!menu) return;
+      const toggle = menu.querySelector('.user-avatar-mini');
+      const dd = document.getElementById('hdrUserDropdown');
+      function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+      toggle.addEventListener('click', function(){
+        menu.classList.toggle('open');
+        if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+      });
+    })();
   </script>
 </body>
 </html>
