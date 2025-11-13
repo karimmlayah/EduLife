@@ -231,7 +231,21 @@
       </nav>
 
       {% if request.user.is_authenticated %}
-        <div class="user-actions">
+        <div class="user-actions" style="display: flex; align-items: center; gap: 1rem;">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+            {% if unread_notifications_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+            {% if unread_messages_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
           <!-- User Avatar Menu -->
           {% with user_id=request.user.id|default:0 %}
           <div class="user-menu" id="idxUserMenu">

@@ -1,0 +1,2117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Covoiturage - Trouvez votre trajet</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+
+  <!-- Custom CSS for suggestions -->
+  <style>
+    .form-group {
+      position: relative;
+    }
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-top: 2px;
+    }
+    .suggestion-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    .suggestion-item:hover {
+      background-color: #f5f5f5;
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .input-with-icon {
+      position: relative;
+    }
+    .dropdown-toggle::after {
+      margin-left: 0.5em;
+    }
+    .dropdown-menu {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border: none;
+      margin-top: 10px;
+    }
+    .dropdown-item {
+      padding: 10px 20px;
+      transition: all 0.3s;
+    }
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+      color: #ff6b35;
+    }
+    .dropdown-item i {
+      margin-right: 8px;
+    }
+    .btn-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      color: white;
+    }
+    .btn-orange:active {
+      transform: translateY(0);
+    }
+    .btn-orange:focus {
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.25);
+      color: white;
+    }
+    .btn-reserver {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-width: 170px;
+      white-space: nowrap;
+    }
+    
+    /* Modern Offer Cards */
+    .offer-card {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      border: none;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .offer-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #ff6b35 0%, #f7931e 50%, #ff6b35 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .offer-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+    }
+    
+    .offer-card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .offer-card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid #764ba2;
+    }
+    
+    .offer-route {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .offer-route-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    
+    .offer-route-item.depart {
+      color: #4facfe;
+    }
+    
+    .offer-route-item.destination {
+      color: #43e97b;
+    }
+    
+    .offer-route-arrow {
+      margin: 0 10px;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    .offer-card-body {
+      padding: 25px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .offer-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .offer-info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    
+    .offer-info-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .offer-info-item i {
+      color: #ff6b35;
+      font-size: 1.2rem;
+    }
+    
+    .offer-info-item strong {
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+    
+    .offer-info-item span {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    
+    .offer-rating-section {
+      background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 15px 0;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .offer-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+    }
+    
+    .offer-feature-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .offer-price-section {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 15px 0;
+    }
+    
+    .offer-price-section .price {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .offer-price-section .price-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+    
+    .section-title-modern {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+    
+    .section-title-modern h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section-title-modern h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b35 0%, #f7931e 100%);
+      border-radius: 2px;
+    }
+    
+    .section-title-modern p {
+      color: #6c757d;
+      font-size: 1.1rem;
+      margin-top: 20px;
+    }
+    
+    /* Form improvements */
+    .contact-form-wrapper {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.98) !important;
+    }
+    
+    .contact-form-wrapper h2 {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+    
+    /* Info boxes improvements */
+    .contact-info-box {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      height: 100%;
+      border-top: 4px solid transparent;
+    }
+    
+    .contact-info-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+      border-top-color: #ff6b35;
+    }
+    
+    .contact-info-box .icon-box {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: white;
+      box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    }
+    
+    .contact-info-box h4 {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .contact-info-box p {
+      color: #6c757d;
+      margin: 0;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .offer-card {
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+    }
+    
+    .offer-card:nth-child(1) { animation-delay: 0.1s; }
+    .offer-card:nth-child(2) { animation-delay: 0.2s; }
+    .offer-card:nth-child(3) { animation-delay: 0.3s; }
+    .offer-card:nth-child(4) { animation-delay: 0.4s; }
+    .offer-card:nth-child(5) { animation-delay: 0.5s; }
+    .offer-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+      .offer-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .offer-route {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .offer-route-arrow {
+        transform: rotate(90deg);
+        margin: 5px 0;
+      }
+    }
+    /* User Avatar Styles */
+    .user-avatar-mini {
+      display:inline-flex;align-items:center;justify-content:center;
+      width:36px;height:36px;border-radius:50%;
+      color:#fff;font-weight:700;text-decoration:none;
+      box-shadow:0 0 0 3px rgba(37,117,252,.18);
+    }
+    .user-avatar-initials{ font-size:.9rem; letter-spacing:.5px; }
+    .avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17,205,239,.55) }
+    .avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45,206,137,.55) }
+    .avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.55) }
+    .avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.55) }
+    .avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.55) }
+    .avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.45) }
+    .user-menu{ position: relative; display:inline-block; }
+    .user-dropdown{
+      position: absolute; right:0; top:46px; min-width: 160px;
+      background: rgba(16,23,42,.92); color:#fff; border-radius:12px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+      padding:6px; display:none; z-index:1050; backdrop-filter: blur(8px);
+    }
+    .user-dropdown a{ display:block; padding:10px 12px; border-radius:8px; color:#e5e7eb; text-decoration:none; font-weight:600; font-size:.9rem; }
+    .user-dropdown a:hover{ background: rgba(59,130,246,.18); color:#fff; }
+    .user-menu.open .user-dropdown{ display:block; }
+    /* Notifications and Messages Icons */
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    /* Fix dropdown menu visibility */
+    .navmenu .dropdown ul {
+      background: #ffffff !important;
+      color: #40372e !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      z-index: 9999 !important;
+      min-width: 220px !important;
+      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    .navmenu .dropdown:hover ul {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .navmenu .dropdown ul li {
+      background: transparent !important;
+      list-style: none !important;
+    }
+    .navmenu .dropdown ul a {
+      color: #40372e !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 10px 20px !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: all 0.3s !important;
+    }
+    .navmenu .dropdown ul a:hover {
+      color: #f87500 !important;
+      background: rgba(248, 117, 0, 0.1) !important;
+    }
+    .navmenu .dropdown ul a i {
+      color: inherit !important;
+      font-size: 14px !important;
+      width: 18px !important;
+      display: inline-flex !important;
+    }
+  </style>
+
+  <!-- =======================================================
+  * Template Name: Evently
+  * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="contact-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">EduLife</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'logement_add' %}"><i class="bi bi-plus-circle me-1"></i> Ajouter un logement</a></li>
+                <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
+                <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' or request.resolver_match.url_name == 'home' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
+          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      {% if True %}
+        {% if request.user.is_authenticated %}
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Notifications Icon -->
+            <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+              {% if unread_notifications_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+            <!-- Messages Icon -->
+            <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+              {% if unread_messages_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+              {% endif %}
+            </a>
+            {% with user_id=request.user.id|default:0 %}
+            <div class="user-menu" id="hdrUserMenu">
+              <a href="#" onclick="return false;"
+                 class="user-avatar-mini {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+                 title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}"
+                 style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0;{% endif %}">
+                {% if request.user.avatar %}
+                  <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                  <span class="user-avatar-initials">
+                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                  </span>
+                {% endif %}
+              </a>
+            <div class="user-dropdown" id="hdrUserDropdown">
+            <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+            <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+              {% if request.user.is_superuser %}
+                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+              {% endif %}
+              <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+              <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+            </div>
+          </div>
+          {% endwith %}
+          </div>
+         {% else %}
+           <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
+         {% endif %}
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Covoiturage</h1>
+        <p>Partagez votre trajet et économisez ensemble. Trouvez ou proposez un covoiturage facilement.</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="/covoiturage/">Accueil</a></li>
+            <li class="current">Covoiturage</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Covoiturage Section -->
+    <section id="covoiturage" class="contact section">
+
+      <div class="container">
+
+        <!-- Info Boxes -->
+        <div class="row gy-4 mb-5">
+          <div class="col-lg-4">
+            <div class="contact-info-box">
+              <div class="icon-box">
+                <i class="bi bi-car-front"></i>
+              </div>
+              <div class="info-content">
+                <h4>Proposez un trajet</h4>
+                <p>Partagez votre véhicule et réduisez vos frais de déplacement</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="contact-info-box">
+              <div class="icon-box">
+                <i class="bi bi-search"></i>
+              </div>
+              <div class="info-content">
+                <h4>Recherchez un trajet</h4>
+                <p>Trouvez un covoiturage qui correspond à vos besoins</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="contact-info-box">
+              <div class="icon-box">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <div class="info-content">
+                <h4>Voyagez en sécurité</h4>
+                <p>Communauté vérifiée et trajets sécurisés</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Map Section with Form Overlay -->
+      <div class="map-section" style="position: relative; min-height: 500px; height: auto; overflow: visible;">
+        <!-- Map in background -->
+        <div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; min-height: 500px; z-index: 1;"></div>
+        
+        <!-- Formulaire de création d'offre par-dessus la carte -->
+        <div class="container" style="position: relative; z-index: 2; padding: 50px 15px;">
+          <div class="row justify-content-center align-items-end" style="min-height: 500px; padding-top: 80px;">
+            <div class="col-lg-8 col-xl-7">
+              <div class="contact-form-wrapper" style="background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 0 auto; margin-bottom: -200px;">
+                <h2 class="text-center mb-4">Proposer un trajet</h2>
+
+                <form action="{% url 'offre_create' %}" method="post" class="php-email-form">
+                  {% csrf_token %}
+                 <!-- Champs cachés latitude/longitude -->
+
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Lieu de départ</label>
+                        <div class="input-with-icon">
+                          <i class="bi bi-geo-alt-fill"></i>
+                          <input type="text" class="form-control"
+                                 id="depart"
+                                 name="depart"
+                                 placeholder="Tapez le nom d'un lieu (ex: Tunis, Avenue Habib Bourguiba)"
+                                 autocomplete="off"
+                                 required>
+                          <div id="depart-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+                        </div>
+                        <!-- bouton choix sur carte -->
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="openMapPicker('depart')">
+                            📍 Choisir sur la carte
+                        </button>
+                        <input type="hidden" id="depart-lat" name="depart_lat">
+                        <input type="hidden" id="depart-lng" name="depart_lng">
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Destination</label>
+                        <div class="input-with-icon">
+                          <i class="bi bi-geo-alt"></i>
+                          <input type="text" class="form-control"
+                                 id="destination"
+                                 name="destination"
+                                 placeholder="Tapez le nom d'un lieu (ex: Sfax, Avenue de la République)"
+                                 autocomplete="off"
+                                 required>
+                          <div id="destination-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+                        </div>
+                        <!-- bouton choix sur carte -->
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="openMapPicker('destination')">
+                            📍 Choisir sur la carte
+                        </button>
+                        <input type="hidden" id="destination-lat" name="destination_lat">
+                        <input type="hidden" id="destination-lng" name="destination_lng">
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-people"></i>
+                          <input type="number" class="form-control" name="nombre_places" placeholder="Nombre de places" min="1" required="">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-telephone"></i>
+                          <input type="tel" class="form-control" name="telephone" placeholder="Numéro de téléphone" required="">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-calendar"></i>
+                          <input type="datetime-local" class="form-control" name="date_covoiturage" placeholder="Date de covoiturage" required="">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-currency-exchange"></i>
+                          <input type="number" step="0.01" class="form-control" name="prix" placeholder="Prix par personne (DT)" required="">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-car-front"></i>
+                          <input type="text" class="form-control" name="modele_voiture" placeholder="Modèle de voiture (ex: Peugeot 208)">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="form-check form-switch" style="padding-top: 10px;">
+                          <input class="form-check-input" type="checkbox" name="climatisation" id="climatisation" style="width: 50px; height: 25px; cursor: pointer;">
+                          <label class="form-check-label" for="climatisation" style="margin-left: 10px; font-size: 16px;">
+                            <i class="bi bi-snow"></i> Climatisation
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label"><i class="bi bi-people"></i> Préférence de genre</label>
+                        <select class="form-control" name="preference_genre" id="preference_genre" required>
+                          <option value="tous">Tous (Hommes et Femmes)</option>
+                          <option value="homme">Hommes uniquement</option>
+                          <option value="femme">Femmes uniquement</option>
+                        </select>
+                        <small class="form-text text-muted">Choisissez votre préférence pour les passagers</small>
+                      </div>
+                    </div>
+
+                    <div class="col-12 text-center">
+                      <button type="submit" class="btn btn-orange btn-submit" id="submit-offre" style="padding: 12px 40px; font-size: 16px;">
+                        <i class="bi bi-send"></i> PUBLIER L'OFFRE
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des offres disponibles -->
+      <div class="container" style="margin-top: 150px; padding-top: 50px;">
+        <div class="row">
+          <div class="col-12">
+            <div class="section-title-modern">
+              <h2>Offres de covoiturage disponibles</h2>
+              <p>Choisissez le trajet qui vous convient le mieux</p>
+            </div>
+            {% if offres_avec_places %}
+              <div class="row gy-4">
+                {% for item in offres_avec_places %}
+                {% with offre=item.offre places_disponibles=item.places_disponibles %}
+                <div class="col-lg-4 col-md-6">
+                  <div class="offer-card">
+                    <!-- Header avec trajet -->
+                    <div class="offer-card-header">
+                      <div class="offer-route">
+                        <div class="offer-route-item depart">
+                          <i class="bi bi-geo-alt-fill"></i>
+                          <span><strong>{{ offre.depart|truncatewords:3 }}</strong></span>
+                        </div>
+                        <div class="offer-route-arrow">
+                          <i class="bi bi-arrow-right"></i>
+                        </div>
+                        <div class="offer-route-item destination">
+                          <i class="bi bi-geo-alt"></i>
+                          <span><strong>{{ offre.destination|truncatewords:3 }}</strong></span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Body avec détails -->
+                    <div class="offer-card-body">
+                      <!-- Prix en évidence -->
+                      <div class="offer-price-section">
+                        <div class="price">{{ offre.prix }} DT</div>
+                        <div class="price-label">par personne</div>
+                      </div>
+                      
+                      <!-- Grille d'informations -->
+                      <div class="offer-info-grid">
+                        <div class="offer-info-item">
+                          <i class="bi bi-person-circle"></i>
+                          <div>
+                            <strong>Conducteur</strong><br>
+                            <span>{{ offre.conducteur.username }}</span>
+                          </div>
+                        </div>
+                        <div class="offer-info-item">
+                          <i class="bi bi-calendar-event"></i>
+                          <div>
+                            <strong>Date</strong><br>
+                            <span>{% if offre.date_covoiturage %}{{ offre.date_covoiturage|date:"d/m/Y" }}{% else %}Non définie{% endif %}</span>
+                          </div>
+                        </div>
+                        <div class="offer-info-item">
+                          <i class="bi bi-clock"></i>
+                          <div>
+                            <strong>Heure</strong><br>
+                            <span>{% if offre.date_covoiturage %}{{ offre.date_covoiturage|date:"H:i" }}{% else %}—{% endif %}</span>
+                          </div>
+                        </div>
+                        <div class="offer-info-item">
+                          <i class="bi bi-people"></i>
+                          <div>
+                            <strong>Places</strong><br>
+                            <span id="places-dispo-{{ offre.id }}">{{ places_disponibles }}</span> / {{ offre.nombre_places }}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Téléphone -->
+                      {% if offre.telephone %}
+                      <div class="offer-info-item" style="margin-bottom: 15px;">
+                        <i class="bi bi-telephone"></i>
+                        <div>
+                          <strong>Téléphone</strong><br>
+                          <span>{{ offre.telephone }}</span>
+                        </div>
+                      </div>
+                      {% endif %}
+                      
+                      <!-- Features badges -->
+                      <div class="offer-features">
+                        {% if offre.modele_voiture %}
+                        <span class="offer-feature-badge" style="background: #e3f2fd; color: #1976d2;">
+                          <i class="bi bi-car-front"></i> {{ offre.modele_voiture }}
+                        </span>
+                        {% endif %}
+                        {% if offre.climatisation %}
+                        <span class="offer-feature-badge" style="background: #e8f5e9; color: #2e7d32;">
+                          <i class="bi bi-snow"></i> Climatisation
+                        </span>
+                        {% endif %}
+                        {% if offre.preference_genre == 'tous' %}
+                        <span class="offer-feature-badge" style="background: #e1f5fe; color: #0277bd;">
+                          <i class="bi bi-people"></i> Tous
+                        </span>
+                        {% elif offre.preference_genre == 'homme' %}
+                        <span class="offer-feature-badge" style="background: #e3f2fd; color: #1565c0;">
+                          <i class="bi bi-gender-male"></i> Hommes
+                        </span>
+                        {% elif offre.preference_genre == 'femme' %}
+                        <span class="offer-feature-badge" style="background: #fce4ec; color: #c2185b;">
+                          <i class="bi bi-gender-female"></i> Femmes
+                        </span>
+                        {% endif %}
+                      </div>
+                      
+                      <!-- Note moyenne -->
+                      {% if item.note_moyenne %}
+                      <div class="offer-rating-section">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                          <strong style="color: #856404;">
+                            <i class="bi bi-star-fill"></i> Note moyenne
+                          </strong>
+                          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
+                            {{ item.note_moyenne }}/5
+                          </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1 mb-2">
+                          {% with note_int=item.note_moyenne|floatformat:0 %}
+                            {% for i in "12345" %}
+                              {% if forloop.counter <= note_int|add:0 %}
+                                <i class="bi bi-star-fill text-warning" style="font-size: 1.2rem;"></i>
+                              {% else %}
+                                <i class="bi bi-star text-muted" style="font-size: 1.2rem;"></i>
+                              {% endif %}
+                            {% endfor %}
+                          {% endwith %}
+                        </div>
+                        <small class="text-muted">
+                          <i class="bi bi-chat-dots"></i> {{ item.nombre_avis }} avis
+                        </small>
+                      </div>
+                      {% else %}
+                      <div class="offer-rating-section" style="background: #f8f9fa; border-left-color: #6c757d;">
+                        <small class="text-muted">
+                          <i class="bi bi-info-circle"></i> Aucun avis pour le moment
+                        </small>
+                      </div>
+                      {% endif %}
+                      
+                      <!-- Bouton de réservation -->
+                      <div class="mt-auto pt-3">
+                        {% if places_disponibles > 0 %}
+                          <button type="button" class="btn btn-orange btn-reserver" data-bs-toggle="modal" data-bs-target="#reservationModal{{ offre.id }}">
+                            <i class="bi bi-ticket-perforated"></i> Réserver maintenant
+                          </button>
+                        {% else %}
+                          <button type="button" class="btn btn-secondary btn-reserver" disabled>
+                            <i class="bi bi-x-circle"></i> Complet
+                          </button>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Modal de réservation -->
+                <div class="modal fade" id="reservationModal{{ offre.id }}" tabindex="-1" aria-labelledby="reservationModalLabel{{ offre.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="reservationModalLabel{{ offre.id }}">Réserver un trajet</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p><strong>Trajet:</strong> {{ offre.depart }} → {{ offre.destination }}</p>
+                        <p><strong>Date:</strong> {% if offre.date_covoiturage %}{{ offre.date_covoiturage|date:"d/m/Y H:i" }}{% else %}Non spécifiée{% endif %}</p>
+                        <p><strong>Prix:</strong> {{ offre.prix }} DT par personne</p>
+                        <p><strong>Places disponibles:</strong> <span id="modal-places-{{ offre.id }}">{{ places_disponibles }}</span></p>
+                        <form id="reservationForm{{ offre.id }}">
+    {% csrf_token %}
+    <input type="hidden" name="offre_id" value="{{ offre.id }}">
+
+    <!-- Nouveau champ : Nom du passager -->
+    <div class="mb-3">
+        <label class="form-label">Nom complet</label>
+        <input type="text" class="form-control" name="nom_passager" placeholder="Votre nom complet" required>
+    </div>
+
+    <!-- Nouveau champ : Téléphone du passager -->
+    <div class="mb-3">
+        <label class="form-label">Numéro de téléphone</label>
+        <input type="text" class="form-control" name="telephone_passager" placeholder="Votre numéro de téléphone" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="nombre_places{{ offre.id }}" class="form-label">Nombre de places</label>
+        <input type="number" class="form-control" id="nombre_places{{ offre.id }}" name="nombre_places" min="1" max="{{ places_disponibles }}" value="1" required>
+        <small class="form-text text-muted">Maximum: {{ places_disponibles }} place(s)</small>
+    </div>
+</form>
+
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-orange" onclick="submitReservation({{ offre.id }})">
+                          <i class="bi bi-check-circle"></i> Confirmer la réservation
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="alert alert-info text-center">
+                <p>Aucune offre de covoiturage disponible pour le moment. Soyez le premier à proposer un trajet !</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /Covoiturage Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="index.html" class="logo d-flex align-items-center">
+            <span class="sitename">Evently</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>A108 Adam Street</p>
+            <p>New York, NY 535022</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+            <p><strong>Email:</strong> <span>info@example.com</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About us</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Terms of service</a></li>
+            <li><a href="#">Privacy policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="#">Web Design</a></li>
+            <li><a href="#">Web Development</a></li>
+            <li><a href="#">Product Management</a></li>
+            <li><a href="#">Marketing</a></li>
+            <li><a href="#">Graphic Design</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Hic solutasetp</h4>
+          <ul>
+            <li><a href="#">Molestiae accusamus iure</a></li>
+            <li><a href="#">Excepturi dignissimos</a></li>
+            <li><a href="#">Suscipit distinctio</a></li>
+            <li><a href="#">Dilecta</a></li>
+            <li><a href="#">Sit quas consectetur</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Nobis illum</h4>
+          <ul>
+            <li><a href="#">Ipsam</a></li>
+            <li><a href="#">Laudantium dolorum</a></li>
+            <li><a href="#">Dinera</a></li>
+            <li><a href="#">Trodelas</a></li>
+            <li><a href="#">Flexo</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">MyWebsite</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you've purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+<script>
+let mapPicker;
+let mapMarker;
+let activeInput = null;
+
+// Fonction pour convertir les coordonnées en nom de lieu (géocodage inverse)
+async function reverseGeocode(lat, lng) {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+            headers: {
+                'User-Agent': 'CovoiturageApp/1.0'
+            }
+        });
+        const data = await response.json();
+        if (data && data.display_name) {
+            return data.display_name;
+        }
+        return `${lat}, ${lng}`;
+    } catch (error) {
+        console.error('Erreur géocodage inverse:', error);
+        return `${lat}, ${lng}`;
+    }
+}
+
+// Fonction pour rechercher des lieux (géocodage direct)
+async function searchPlaces(query) {
+    if (query.length < 3) return [];
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`, {
+            headers: {
+                'User-Agent': 'CovoiturageApp/1.0'
+            }
+        });
+        const data = await response.json();
+        return data.map(item => ({
+            name: item.display_name,
+            lat: item.lat,
+            lng: item.lon
+        }));
+    } catch (error) {
+        console.error('Erreur recherche lieu:', error);
+        return [];
+    }
+}
+
+function openMapPicker(inputId) {
+    activeInput = inputId;
+    document.getElementById("mapPickerOverlay").style.display = "block";
+
+    setTimeout(() => {
+        if (!mapPicker) {
+            mapPicker = L.map('mapPicker').setView([36.8, 10.17], 10);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(mapPicker);
+
+            mapPicker.on('click', async function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+
+                if (mapMarker) mapPicker.removeLayer(mapMarker);
+                mapMarker = L.marker([lat, lng]).addTo(mapPicker)
+                    .bindPopup(`<strong>Chargement...</strong>`)
+                    .openPopup();
+
+                // Convertir les coordonnées en nom de lieu
+                const placeName = await reverseGeocode(lat, lng);
+                mapMarker.setPopupContent(`<strong>Lieu sélectionné:</strong><br>${placeName}`);
+
+                // Remplir le champ choisi avec le nom du lieu
+                const inputField = document.getElementById(activeInput);
+                const latField = document.getElementById(activeInput + '-lat');
+                const lngField = document.getElementById(activeInput + '-lng');
+                
+                if (inputField) {
+                    inputField.value = placeName;
+                }
+                if (latField) latField.value = lat;
+                if (lngField) lngField.value = lng;
+
+                // Fermer le popup après 1.5 secondes
+                setTimeout(function() {
+                    closeMapPicker();
+                }, 1500);
+            });
+        } else {
+            mapPicker.invalidateSize();
+        }
+    }, 200);
+}
+
+function closeMapPicker() {
+    document.getElementById("mapPickerOverlay").style.display = "none";
+}
+
+// Permettre de fermer le popup en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById("mapPickerOverlay");
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            // Fermer seulement si on clique sur l'overlay lui-même, pas sur la carte
+            if (e.target === overlay) {
+                closeMapPicker();
+            }
+        });
+    }
+
+    // Autocomplétion pour le champ de départ
+    const departInput = document.getElementById('depart');
+    const departSuggestions = document.getElementById('depart-suggestions');
+    let departTimeout;
+
+    if (departInput && departSuggestions) {
+        departInput.addEventListener('input', function() {
+            clearTimeout(departTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 3) {
+                departSuggestions.style.display = 'none';
+                return;
+            }
+
+            departTimeout = setTimeout(async () => {
+                const places = await searchPlaces(query);
+                if (places.length > 0) {
+                    departSuggestions.innerHTML = '';
+                    places.forEach(place => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.textContent = place.name;
+                        item.addEventListener('click', function() {
+                            departInput.value = place.name;
+                            const latField = document.getElementById('depart-lat');
+                            const lngField = document.getElementById('depart-lng');
+                            if (latField) latField.value = place.lat;
+                            if (lngField) lngField.value = place.lng;
+                            departSuggestions.style.display = 'none';
+                        });
+                        departSuggestions.appendChild(item);
+                    });
+                    departSuggestions.style.display = 'block';
+                } else {
+                    departSuggestions.style.display = 'none';
+                }
+            }, 300);
+        });
+
+        // Fermer les suggestions en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            if (!departInput.contains(e.target) && !departSuggestions.contains(e.target)) {
+                departSuggestions.style.display = 'none';
+            }
+        });
+    }
+
+    // Autocomplétion pour le champ de destination
+    const destinationInput = document.getElementById('destination');
+    const destinationSuggestions = document.getElementById('destination-suggestions');
+    let destinationTimeout;
+
+    if (destinationInput && destinationSuggestions) {
+        destinationInput.addEventListener('input', function() {
+            clearTimeout(destinationTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 3) {
+                destinationSuggestions.style.display = 'none';
+                return;
+            }
+
+            destinationTimeout = setTimeout(async () => {
+                const places = await searchPlaces(query);
+                if (places.length > 0) {
+                    destinationSuggestions.innerHTML = '';
+                    places.forEach(place => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.textContent = place.name;
+                        item.addEventListener('click', function() {
+                            destinationInput.value = place.name;
+                            const latField = document.getElementById('destination-lat');
+                            const lngField = document.getElementById('destination-lng');
+                            if (latField) latField.value = place.lat;
+                            if (lngField) lngField.value = place.lng;
+                            destinationSuggestions.style.display = 'none';
+                        });
+                        destinationSuggestions.appendChild(item);
+                    });
+                    destinationSuggestions.style.display = 'block';
+                } else {
+                    destinationSuggestions.style.display = 'none';
+                }
+            }, 300);
+        });
+
+        // Fermer les suggestions en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            if (!destinationInput.contains(e.target) && !destinationSuggestions.contains(e.target)) {
+                destinationSuggestions.style.display = 'none';
+            }
+        });
+      }
+      
+      // Configuration de la validation pour tous les modals de réservation
+      // Attendre que les modals soient créés
+      {% for item in offres_avec_places %}
+      {% with offre=item.offre %}
+      const modal{{ offre.id }} = document.getElementById('reservationModal{{ offre.id }}');
+      if (modal{{ offre.id }}) {
+        modal{{ offre.id }}.addEventListener('shown.bs.modal', function() {
+          setupReservationFormValidation({{ offre.id }});
+        });
+      }
+      {% endwith %}
+      {% endfor %}
+    });
+  </script>
+  
+  <style>
+    /* Styles pour les messages d'erreur */
+    .error-message {
+      display: block;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .is-invalid {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    .is-valid {
+      border-color: #28a745 !important;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    }
+    
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+      border-color: inherit;
+      box-shadow: inherit;
+    }
+  </style>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+  <!-- Map Initialization Script -->
+  <script>
+    let map;
+    let marker;
+
+    // Default coordinates (fallback if geolocation fails)
+    const defaultLat = 48.8566; // Paris
+    const defaultLng = 2.3522;
+
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      initMap();
+    });
+
+    // Initialize map
+    function initMap() {
+      // Try to get current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            createMap(lat, lng);
+          },
+          function(error) {
+            console.error('Erreur de géolocalisation:', error);
+            // Use default location if geolocation fails
+            createMap(defaultLat, defaultLng);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          }
+        );
+      } else {
+        // Browser doesn't support geolocation
+        console.error('La géolocalisation n\'est pas supportée par ce navigateur');
+        createMap(defaultLat, defaultLng);
+      }
+    }
+
+    // Create map with coordinates
+    function createMap(lat, lng) {
+      // Create map centered on current location
+      map = L.map('map').setView([lat, lng], 13);
+
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Add marker at current location
+      marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup('<strong>Votre position actuelle</strong>')
+        .openPopup();
+
+      // Add circle to show accuracy
+      L.circle([lat, lng], {
+        color: 'blue',
+        fillColor: '#3388ff',
+        fillOpacity: 0.2,
+        radius: 500
+      }).addTo(map);
+
+      // Permettre de cliquer sur la carte pour sélectionner un lieu
+      let clickMarker = null;
+      map.on('click', async function(e) {
+        const clickedLat = e.latlng.lat.toFixed(6);
+        const clickedLng = e.latlng.lng.toFixed(6);
+
+        // Supprimer le marqueur précédent s'il existe
+        if (clickMarker) {
+          map.removeLayer(clickMarker);
+        }
+
+        // Ajouter un nouveau marqueur au point cliqué
+        clickMarker = L.marker([clickedLat, clickedLng], {
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          })
+        }).addTo(map)
+        .bindPopup(`<strong>Chargement du nom du lieu...</strong>`)
+        .openPopup();
+
+        // Convertir les coordonnées en nom de lieu
+        const placeName = await reverseGeocode(clickedLat, clickedLng);
+        clickMarker.setPopupContent(`<strong>Lieu sélectionné:</strong><br>${placeName}`);
+
+        // Remplir automatiquement le champ de départ ou destination si vide
+        const departInput = document.getElementById('depart');
+        const destinationInput = document.getElementById('destination');
+        const departLat = document.getElementById('depart-lat');
+        const departLng = document.getElementById('depart-lng');
+        const destinationLat = document.getElementById('destination-lat');
+        const destinationLng = document.getElementById('destination-lng');
+        
+        if (departInput && !departInput.value) {
+          departInput.value = placeName;
+          if (departLat) departLat.value = clickedLat;
+          if (departLng) departLng.value = clickedLng;
+        } else if (destinationInput && !destinationInput.value) {
+          destinationInput.value = placeName;
+          if (destinationLat) destinationLat.value = clickedLat;
+          if (destinationLng) destinationLng.value = clickedLng;
+        } else {
+          // Si les deux champs sont remplis, demander à l'utilisateur lequel remplacer
+          const choix = confirm(`Lieu: ${placeName}\n\nVoulez-vous remplacer le champ "Départ"? (OK = Oui, Annuler = Remplacer "Destination")`);
+          if (choix) {
+            if (departInput) departInput.value = placeName;
+            if (departLat) departLat.value = clickedLat;
+            if (departLng) departLng.value = clickedLng;
+          } else {
+            if (destinationInput) destinationInput.value = placeName;
+            if (destinationLat) destinationLat.value = clickedLat;
+            if (destinationLng) destinationLng.value = clickedLng;
+          }
+        }
+      });
+    }
+
+    // ============================================
+    // VALIDATION DU FORMULAIRE DE PUBLICATION D'OFFRE
+    // ============================================
+    
+    // Fonction pour valider le téléphone tunisien
+    function validatePhone(phone) {
+      // Format tunisien : 8 chiffres, peut commencer par +216, 00216, ou 0
+      const phoneRegex = /^(\+216|00216|0)?[2-9][0-9]{7}$/;
+      const cleaned = phone.replace(/\s+/g, '');
+      return phoneRegex.test(cleaned);
+    }
+    
+    // Fonction pour valider la date (doit être dans le futur)
+    function validateDate(dateString) {
+      if (!dateString) return false;
+      const selectedDate = new Date(dateString);
+      const now = new Date();
+      return selectedDate > now;
+    }
+    
+    // Fonction pour trouver le conteneur parent approprié
+    function findFormGroup(field) {
+      // Chercher le form-group ou input-with-icon parent
+      let parent = field.parentElement;
+      while (parent && !parent.classList.contains('form-group') && !parent.classList.contains('input-with-icon') && !parent.classList.contains('mb-3')) {
+        parent = parent.parentElement;
+      }
+      // Si on ne trouve pas, utiliser le parent direct
+      return parent || field.parentElement;
+    }
+    
+    // Fonction pour afficher un message d'erreur
+    function showFieldError(field, message) {
+      const formGroup = findFormGroup(field);
+      
+      // Supprimer l'ancien message d'erreur
+      const existingError = formGroup.querySelector('.error-message');
+      if (existingError) {
+        existingError.remove();
+      }
+      
+      // Ajouter le nouveau message d'erreur
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message text-danger small mt-1';
+      errorDiv.textContent = message;
+      formGroup.appendChild(errorDiv);
+      
+      // Ajouter la classe d'erreur au champ
+      field.classList.add('is-invalid');
+      field.classList.remove('is-valid');
+    }
+    
+    // Fonction pour supprimer le message d'erreur
+    function clearFieldError(field) {
+      const formGroup = findFormGroup(field);
+      const errorDiv = formGroup.querySelector('.error-message');
+      if (errorDiv) {
+        errorDiv.remove();
+      }
+      field.classList.remove('is-invalid');
+      field.classList.add('is-valid');
+    }
+    
+    // Validation du formulaire de publication d'offre
+    function validateOffreForm() {
+      const form = document.querySelector('.php-email-form');
+      if (!form) return false;
+      
+      let isValid = true;
+      
+      // Validation du lieu de départ
+      const depart = form.querySelector('[name="depart"]');
+      if (!depart.value.trim()) {
+        showFieldError(depart, 'Le lieu de départ est requis');
+        isValid = false;
+      } else {
+        clearFieldError(depart);
+      }
+      
+      // Validation de la destination
+      const destination = form.querySelector('[name="destination"]');
+      if (!destination.value.trim()) {
+        showFieldError(destination, 'La destination est requise');
+        isValid = false;
+      } else if (destination.value.trim() === depart.value.trim()) {
+        showFieldError(destination, 'La destination doit être différente du lieu de départ');
+        isValid = false;
+      } else {
+        clearFieldError(destination);
+      }
+      
+      // Validation du nombre de places
+      const nombrePlaces = form.querySelector('[name="nombre_places"]');
+      const placesValue = parseInt(nombrePlaces.value);
+      if (!nombrePlaces.value || placesValue < 1) {
+        showFieldError(nombrePlaces, 'Le nombre de places doit être au moins 1');
+        isValid = false;
+      } else if (placesValue > 10) {
+        showFieldError(nombrePlaces, 'Le nombre de places ne peut pas dépasser 10');
+        isValid = false;
+      } else {
+        clearFieldError(nombrePlaces);
+      }
+      
+      // Validation du téléphone
+      const telephone = form.querySelector('[name="telephone"]');
+      if (!telephone.value.trim()) {
+        showFieldError(telephone, 'Le numéro de téléphone est requis');
+        isValid = false;
+      } else if (!validatePhone(telephone.value)) {
+        showFieldError(telephone, 'Format invalide. Exemple: 12345678, +21612345678, ou 0021612345678');
+        isValid = false;
+      } else {
+        clearFieldError(telephone);
+      }
+      
+      // Validation de la date
+      const dateCovoiturage = form.querySelector('[name="date_covoiturage"]');
+      if (!dateCovoiturage.value) {
+        showFieldError(dateCovoiturage, 'La date de covoiturage est requise');
+        isValid = false;
+      } else if (!validateDate(dateCovoiturage.value)) {
+        showFieldError(dateCovoiturage, 'La date doit être dans le futur');
+        isValid = false;
+      } else {
+        clearFieldError(dateCovoiturage);
+      }
+      
+      // Validation du prix
+      const prix = form.querySelector('[name="prix"]');
+      const prixValue = parseFloat(prix.value);
+      if (!prix.value || prixValue <= 0) {
+        showFieldError(prix, 'Le prix doit être supérieur à 0');
+        isValid = false;
+      } else if (prixValue > 1000) {
+        showFieldError(prix, 'Le prix ne peut pas dépasser 1000 DT');
+        isValid = false;
+      } else {
+        clearFieldError(prix);
+      }
+      
+      return isValid;
+    }
+    
+    // Validation en temps réel pour le formulaire d'offre
+    function setupOffreFormValidation() {
+      const form = document.querySelector('.php-email-form');
+      if (!form) return;
+      
+      // Validation du téléphone en temps réel
+      const telephone = form.querySelector('[name="telephone"]');
+      if (telephone) {
+        telephone.addEventListener('blur', function() {
+          if (this.value.trim()) {
+            if (!validatePhone(this.value)) {
+              showFieldError(this, 'Format invalide. Exemple: 12345678, +21612345678, ou 0021612345678');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation de la date en temps réel
+      const dateCovoiturage = form.querySelector('[name="date_covoiturage"]');
+      if (dateCovoiturage) {
+        dateCovoiturage.addEventListener('change', function() {
+          if (this.value) {
+            if (!validateDate(this.value)) {
+              showFieldError(this, 'La date doit être dans le futur');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation du prix en temps réel
+      const prix = form.querySelector('[name="prix"]');
+      if (prix) {
+        prix.addEventListener('blur', function() {
+          const prixValue = parseFloat(this.value);
+          if (this.value) {
+            if (prixValue <= 0) {
+              showFieldError(this, 'Le prix doit être supérieur à 0');
+            } else if (prixValue > 1000) {
+              showFieldError(this, 'Le prix ne peut pas dépasser 1000 DT');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation du nombre de places en temps réel
+      const nombrePlaces = form.querySelector('[name="nombre_places"]');
+      if (nombrePlaces) {
+        nombrePlaces.addEventListener('blur', function() {
+          const placesValue = parseInt(this.value);
+          if (this.value) {
+            if (placesValue < 1) {
+              showFieldError(this, 'Le nombre de places doit être au moins 1');
+            } else if (placesValue > 10) {
+              showFieldError(this, 'Le nombre de places ne peut pas dépasser 10');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation départ/destination en temps réel
+      const depart = form.querySelector('[name="depart"]');
+      const destination = form.querySelector('[name="destination"]');
+      
+      if (depart && destination) {
+        const validateDest = function() {
+          if (destination.value.trim() && destination.value.trim() === depart.value.trim()) {
+            showFieldError(destination, 'La destination doit être différente du lieu de départ');
+          } else if (destination.value.trim()) {
+            clearFieldError(destination);
+          }
+        };
+        
+        depart.addEventListener('blur', validateDest);
+        destination.addEventListener('blur', validateDest);
+      }
+    }
+    
+    // ============================================
+    // VALIDATION DU FORMULAIRE DE RÉSERVATION
+    // ============================================
+    
+    // Validation du formulaire de réservation
+    function validateReservationForm(offreId) {
+      const form = document.getElementById('reservationForm' + offreId);
+      if (!form) return false;
+      
+      let isValid = true;
+      
+      // Validation du nom du passager
+      const nomPassager = form.querySelector('[name="nom_passager"]');
+      if (!nomPassager.value.trim()) {
+        showFieldError(nomPassager, 'Le nom complet est requis');
+        isValid = false;
+      } else if (nomPassager.value.trim().length < 3) {
+        showFieldError(nomPassager, 'Le nom doit contenir au moins 3 caractères');
+        isValid = false;
+      } else {
+        clearFieldError(nomPassager);
+      }
+      
+      // Validation du téléphone du passager
+      const telephonePassager = form.querySelector('[name="telephone_passager"]');
+      if (!telephonePassager.value.trim()) {
+        showFieldError(telephonePassager, 'Le numéro de téléphone est requis');
+        isValid = false;
+      } else if (!validatePhone(telephonePassager.value)) {
+        showFieldError(telephonePassager, 'Format invalide. Exemple: 12345678, +21612345678, ou 0021612345678');
+        isValid = false;
+      } else {
+        clearFieldError(telephonePassager);
+      }
+      
+      // Validation du nombre de places
+      const nombrePlaces = form.querySelector('[name="nombre_places"]');
+      const placesValue = parseInt(nombrePlaces.value);
+      const maxPlaces = parseInt(nombrePlaces.getAttribute('max'));
+      
+      if (!nombrePlaces.value || placesValue < 1) {
+        showFieldError(nombrePlaces, 'Le nombre de places doit être au moins 1');
+        isValid = false;
+      } else if (placesValue > maxPlaces) {
+        showFieldError(nombrePlaces, `Le nombre de places ne peut pas dépasser ${maxPlaces}`);
+        isValid = false;
+      } else {
+        clearFieldError(nombrePlaces);
+      }
+      
+      return isValid;
+    }
+    
+    // Validation en temps réel pour le formulaire de réservation
+    function setupReservationFormValidation(offreId) {
+      const form = document.getElementById('reservationForm' + offreId);
+      if (!form) return;
+      
+      // Validation du nom en temps réel
+      const nomPassager = form.querySelector('[name="nom_passager"]');
+      if (nomPassager) {
+        nomPassager.addEventListener('blur', function() {
+          if (this.value.trim()) {
+            if (this.value.trim().length < 3) {
+              showFieldError(this, 'Le nom doit contenir au moins 3 caractères');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation du téléphone en temps réel
+      const telephonePassager = form.querySelector('[name="telephone_passager"]');
+      if (telephonePassager) {
+        telephonePassager.addEventListener('blur', function() {
+          if (this.value.trim()) {
+            if (!validatePhone(this.value)) {
+              showFieldError(this, 'Format invalide. Exemple: 12345678, +21612345678, ou 0021612345678');
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+      
+      // Validation du nombre de places en temps réel
+      const nombrePlaces = form.querySelector('[name="nombre_places"]');
+      if (nombrePlaces) {
+        nombrePlaces.addEventListener('change', function() {
+          const placesValue = parseInt(this.value);
+          const maxPlaces = parseInt(this.getAttribute('max'));
+          if (this.value) {
+            if (placesValue < 1) {
+              showFieldError(this, 'Le nombre de places doit être au moins 1');
+            } else if (placesValue > maxPlaces) {
+              showFieldError(this, `Le nombre de places ne peut pas dépasser ${maxPlaces}`);
+            } else {
+              clearFieldError(this);
+            }
+          }
+        });
+      }
+    }
+
+    // Gestion du formulaire de covoiturage en AJAX
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configuration de la validation en temps réel
+      setupOffreFormValidation();
+      
+      const form = document.querySelector('.php-email-form');
+      const submitBtn = document.getElementById('submit-offre');
+
+      if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault(); // Empêcher la soumission normale
+          
+          // Valider le formulaire avant soumission
+          if (!validateOffreForm()) {
+            // Faire défiler vers le premier champ en erreur
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+              firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              firstError.focus();
+            }
+            return false;
+          }
+
+          // Désactiver le bouton pendant le traitement
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Publication en cours...';
+
+          // Récupérer les données du formulaire
+          const formData = new FormData(form);
+          
+          // Récupérer le token CSRF
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          // Envoyer la requête AJAX
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': csrfToken
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Afficher le popup de confirmation
+              showConfirmationPopup(data.message);
+              
+              // Vider le formulaire
+              form.reset();
+              
+              // Recharger la page après 2 secondes pour afficher la nouvelle offre
+              setTimeout(function() {
+                window.location.reload();
+              }, 2000);
+            } else {
+              // Afficher un message d'erreur
+              alert('Erreur: ' + data.message);
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'PUBLIER L\'OFFRE';
+            }
+          })
+          .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la publication de l\'offre.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'PUBLIER L\'OFFRE';
+          });
+        });
+      }
+    });
+
+    // Fonction pour afficher le popup de confirmation
+    function showConfirmationPopup(message) {
+      // Créer l'overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+      `;
+      
+      // Créer le popup
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        text-align: center;
+        min-width: 300px;
+      `;
+      
+      popup.innerHTML = `
+        <div style="font-size: 48px; color: #28a745; margin-bottom: 20px;">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h3 style="color: #28a745; margin-bottom: 15px;">Succès !</h3>
+        <p style="margin-bottom: 20px; color: #333;">${message}</p>
+        <button onclick="this.closest('.popup-container').remove(); document.querySelector('.popup-overlay')?.remove();" style="
+          background: #28a745;
+          color: white;
+          border: none;
+          padding: 10px 30px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 16px;
+        ">OK</button>
+      `;
+
+      // Créer un conteneur pour le popup
+      const container = document.createElement('div');
+      container.className = 'popup-container';
+      container.appendChild(popup);
+
+      // Ajouter l'overlay et le popup au body
+      overlay.className = 'popup-overlay';
+      document.body.appendChild(overlay);
+      document.body.appendChild(container);
+
+      // Fermer en cliquant sur l'overlay
+      overlay.addEventListener('click', function() {
+        container.remove();
+        overlay.remove();
+      });
+
+      // Fermer automatiquement après 3 secondes
+      setTimeout(function() {
+        if (container.parentElement) {
+          container.remove();
+        }
+        if (overlay.parentElement) {
+          overlay.remove();
+        }
+      }, 3000);
+    }
+
+    // Fonction pour soumettre une réservation
+    function submitReservation(offreId) {
+      const form = document.getElementById('reservationForm' + offreId);
+      if (!form) return;
+      
+      // Valider le formulaire avant soumission
+      if (!validateReservationForm(offreId)) {
+        // Faire défiler vers le premier champ en erreur
+        const firstError = form.querySelector('.is-invalid');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.focus();
+        }
+        return false;
+      }
+      
+      const formData = new FormData(form);
+      const nombrePlaces = formData.get('nombre_places');
+      const submitBtn = document.querySelector(`#reservationModal${offreId} .btn-orange[onclick*="submitReservation"]`);
+      
+      // Désactiver le bouton pendant le traitement
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Traitement...';
+      
+      // Récupérer le token CSRF
+      const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      // Envoyer la requête AJAX
+      fetch('/reservation/add/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrfToken
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Afficher le message de succès
+          showConfirmationPopup(data.message);
+          
+          // Fermer le modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('reservationModal' + offreId));
+          modal.hide();
+          
+          // Mettre à jour les places disponibles
+          const placesDispoElement = document.getElementById('places-dispo-' + offreId);
+          const modalPlacesElement = document.getElementById('modal-places-' + offreId);
+          if (placesDispoElement) {
+            placesDispoElement.textContent = data.places_disponibles;
+          }
+          if (modalPlacesElement) {
+            modalPlacesElement.textContent = data.places_disponibles;
+          }
+          
+          // Mettre à jour le max du champ nombre de places
+          const nombrePlacesInput = document.getElementById('nombre_places' + offreId);
+          if (nombrePlacesInput) {
+            nombrePlacesInput.max = data.places_disponibles;
+          }
+          
+          // Si plus de places disponibles, désactiver le bouton Réserver
+          if (data.places_disponibles <= 0) {
+            const reserverBtn = document.querySelector(`[data-bs-target="#reservationModal${offreId}"]`);
+            if (reserverBtn) {
+              reserverBtn.disabled = true;
+              reserverBtn.textContent = 'Complet';
+              reserverBtn.classList.remove('btn-orange');
+              reserverBtn.classList.add('btn-secondary');
+            }
+          }
+          
+          // Réinitialiser le formulaire
+          form.reset();
+        } else {
+          // Afficher un message d'erreur
+          alert('Erreur: ' + data.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la réservation';
+        }
+      })
+      .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de la réservation.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la réservation';
+      });
+    }
+  </script>
+<!-- POPUP MAP PICKER -->
+<div id="mapPickerOverlay"
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.6); z-index:9999;">
+    <div style="position:absolute; top:50%; left:50%; width:80%; height:70%;
+                transform:translate(-50%, -50%); background:white;
+                border-radius:10px; overflow:hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div style="position:relative; padding:15px; background:#f8f9fa; border-bottom:1px solid #dee2e6;">
+            <h4 style="margin:0; display:inline-block;">Cliquez sur la carte pour sélectionner un lieu</h4>
+            <button onclick="closeMapPicker()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%);
+                    background:#dc3545; color:white; border:none; border-radius:5px; padding:5px 15px; cursor:pointer; font-size:16px;">
+                ✕ Fermer
+            </button>
+        </div>
+        <div id="mapPicker" style="width:100%; height:calc(100% - 60px);"></div>
+    </div>
+</div>
+  <script>
+    // Dropdown for avatar (header)
+    (function(){
+      const menu = document.getElementById('hdrUserMenu');
+      if (!menu) return;
+      const toggle = menu.querySelector('.user-avatar-mini');
+      const dd = document.getElementById('hdrUserDropdown');
+      function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+      toggle.addEventListener('click', function(){
+        menu.classList.toggle('open');
+        if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+      });
+    })();
+  </script>
+
+</body>
+
+</html>

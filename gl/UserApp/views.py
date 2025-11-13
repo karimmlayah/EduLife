@@ -953,12 +953,21 @@ def profile_update_view(request):
     Met à jour les informations de base du profil (prénom, nom, téléphone).
     """
     user = request.user
+    
+    # Récupérer l'utilisateur depuis la base de données pour éviter les problèmes de cache
+    try:
+        user = CustomUser.objects.get(id=user.id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Utilisateur introuvable.")
+        return redirect('account_settings')
+    
     first_name = request.POST.get('first_name', '').strip()
     last_name = request.POST.get('last_name', '').strip()
     phone = request.POST.get('phone', '').strip()
     address = request.POST.get('address', '').strip()
     city = request.POST.get('city', '').strip()
     country = request.POST.get('country', '').strip()
+    zip_code = request.POST.get('zip', '').strip()
 
     # Appliquer les mises à jour
     user.first_name = first_name
@@ -971,15 +980,44 @@ def profile_update_view(request):
         setattr(user, 'city', city)
     if hasattr(user, 'country'):
         setattr(user, 'country', country)
+    if hasattr(user, 'zip'):
+        setattr(user, 'zip', zip_code)
+    
     # Avatar upload
     if 'avatar' in request.FILES:
         user.avatar = request.FILES['avatar']
+    
     try:
-        user.save()
+        # Construire la liste des champs à mettre à jour
+        update_fields = ['first_name', 'last_name']
+        
+        # Ajouter les champs optionnels s'ils existent dans le modèle
+        if hasattr(user, 'phone'):
+            update_fields.append('phone')
+        if hasattr(user, 'address'):
+            update_fields.append('address')
+        if hasattr(user, 'city'):
+            update_fields.append('city')
+        if hasattr(user, 'country'):
+            update_fields.append('country')
+        if hasattr(user, 'zip'):
+            update_fields.append('zip')
+        if 'avatar' in request.FILES:
+            update_fields.append('avatar')
+        if hasattr(user, 'updated_at'):
+            update_fields.append('updated_at')
+        
+        # Utiliser update_fields pour éviter de toucher aux champs uniques (username, email)
+        user.save(update_fields=update_fields)
         messages.success(request, 'Profil mis à jour avec succès.')
     except Exception as e:
-        messages.error(request, f"Erreur lors de la mise à jour du profil: {e}")
-    return redirect('profile')
+        import traceback
+        error_details = traceback.format_exc()
+        messages.error(request, f"Erreur lors de la mise à jour du profil: {str(e)}")
+        # Log l'erreur pour le débogage (en production, utiliser un logger)
+        print(f"Erreur profile_update: {error_details}")
+    
+    return redirect('account_settings')
 
 
 @login_required

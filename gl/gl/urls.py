@@ -26,6 +26,24 @@ from LogementApp.views import dashboard as admin_dashboard_view, argon_page, tab
 from EventApp import views
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from ReservationApp.views import mes_reservations_passager
+
+
+from django.shortcuts import redirect
+
+# IMPORTS DES RÉSERVATIONS (IMPORTANT : AVANT urlpatterns)
+from gl.views import (
+    mes_reservations,
+    reservation_accept,
+    reservation_reject,
+    approver_offre,
+    rejeter_offre,
+)
+from gl import views as gl_views
+from CovoiturageApp import views as covoiturage_views
+
+def redirect_to_dashboard(request):
+    return redirect('dashboard')
 
 
 # Vues pour toutes les pages du template
@@ -395,6 +413,7 @@ def events(request):
     return render(request, 'stages/Backoffice/events.html')
 
 urlpatterns = [
+    # --- ADMIN ---
     path('admin/', admin_dashboard_view, name='admin_dashboard'),
     path('admin/tables/', tables, name='admin_tables'),
     path('admin/logements/dashboard/', dashboard_logements, name='dashboard_logements'),
@@ -403,13 +422,15 @@ urlpatterns = [
     path('admin/logements/<int:logement_id>/reject/', reject_logement, name='reject_logement'),
     path('admin/<str:page>/', argon_page, name='admin_page'),
     path('dj-admin/', admin.site.urls),
+    
+    # --- APPLICATIONS PRINCIPALES ---
     path('Logement/', include('LogementApp.urls')),
+    path('Event/', include('EventApp.urls')),  # AJOUT CRITIQUE: URLs pour EventApp
     path('api/', include('UserApp.api_urls')),
     path('', include('UserApp.urls')),
-    path('Event/', include("EventApp.urls")),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('event/<int:event_id>/seats/', views.view_seats, name='view_seats'),
-    path('seats/', views.seats_list, name='seats_list'),
+    
+    # --- DASHBOARD STAGES ---
+    path('dashboard/', dashboard, name='dashboard'),
     path('dashboard/internship/', dashboard, name='dashboard_internships'),
     path('dashboard/offres-stage/', offres_stage, name='offres_stage'),
     path('dashboard/postulations/', postulations, name='postulations'),
@@ -418,12 +439,48 @@ urlpatterns = [
     path('dashboard/housing/', housing, name='housing'),
     path('dashboard/ride-sharing/', ride_sharing, name='ride_sharing'),
     path('dashboard/events/', events, name='events'),
+    
+    # --- FRONTEND STAGES ---
     path('my-applications/', my_applications, name='my_applications'),
     path('my-interviews/', my_interviews, name='my_interviews'),
     path('about/', about, name='about'),
     path('internships/', internships, name='internships'),
     path('postuler/', postuler, name='postuler'),
     path('contact/', contact, name='contact'),
+    
+    # --- EVENT APP ---
+    path('event/<int:event_id>/seats/', views.view_seats, name='view_seats'),
+    path('seats/', views.seats_list, name='seats_list'),
+    
+    # --- ADMIN REDIRIGÉ VERS DASHBOARD ---
+    path('edds/', redirect_to_dashboard),
+
+    # --- DASHBOARD COVOITURAGE ---
+    path('dashboard/covoiturage/', gl_views.dashboard, name='dashboard_covoiturage'),
+    path('reservation_dashboard/', gl_views.reservation_dashboard, name='reservation_dashboard'),
+    
+    # --- APPROBATION DES OFFRES COVOITURAGE ---
+    path('offres/covoiturage/approver/<int:id>/', approver_offre, name='approver_offre'),
+    path('offres/covoiturage/rejeter/<int:id>/', rejeter_offre, name='rejeter_offre'),
+
+    # --- PAGE ACCUEIL FRONT COVOITURAGE ---
+    path('covoiturage/', include('CovoiturageApp.urls')),
+    # --- MODULE COVOITURAGE ---
+    path('offres/covoiturage/', covoiturage_views.offre_list, name='offres_list'),
+    path('offres/covoiturage/add/', covoiturage_views.offre_create, name='offre_create'),
+    path('offres/covoiturage/edit/<int:id>/', covoiturage_views.offre_update, name='offre_update'),
+    path('offres/covoiturage/delete/<int:id>/', covoiturage_views.offre_delete, name='offre_delete'),
+    path('mes_offres/', covoiturage_views.mes_offres, name='mes_offres'),
+    path('covoiturage/', include('CovoiturageApp.urls')),
+
+    # --- MODULE RÉSERVATIONS ---
+    path('reservation/', include('ReservationApp.urls')),
+
+    # Gestion des demandes pour le conducteur
+    path('mes_reservations/', mes_reservations, name='mes_reservations'),
+    path('reservations/accept/<int:id>/', reservation_accept, name='res_accept'),
+    path('reservations/reject/<int:id>/', reservation_reject, name='res_reject'),
+    path('mes_reservations_passager/', mes_reservations_passager, name='mes_reservations_passager'),
 ]
 
 if settings.DEBUG:

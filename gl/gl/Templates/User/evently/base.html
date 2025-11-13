@@ -257,6 +257,17 @@
             </ul>
           </li>
           <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' or request.resolver_match.url_name == 'home' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
             <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
@@ -275,6 +286,20 @@
       {% if True %}
         {% if request.user.is_authenticated %}
           <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Notifications Icon -->
+            <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+              {% if unread_notifications_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+            <!-- Messages Icon -->
+            <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+              {% if unread_messages_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+              {% endif %}
+            </a>
             {% with user_id=request.user.id|default:0 %}
             <div class="user-menu" id="hdrUserMenu">
               <a href="#" onclick="return false;"
