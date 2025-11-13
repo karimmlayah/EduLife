@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Edit Investment - Evently Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+</head>
+
+<body class="buy-tickets-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="" class="logo d-flex align-items-center">
+        <h1 class="sitename">Evently</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="">Home</a></li>
+          <li><a href="">About</a></li>
+          <li class="dropdown"><a href="#"><span>Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}">Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}">Create a Startup</a></li>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+            
+          </li>
+          <li><a href="">Instructors</a></li>
+          <li><a href="">Pricing</a></li>
+          <li><a href="">Blog</a></li>
+          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="">Course Details</a></li>
+              <li><a href="">Instructor Profile</a></li>
+              <li><a href="">Events</a></li>
+              <li><a href="">Blog Details</a></li>
+              <li><a href="">Terms</a></li>
+              <li><a href="">Privacy</a></li>
+              <li><a href="">404</a></li>
+            </ul>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="dropdown"><a href="#"><span>My Account</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'my_investissements' %}">My Investments</a></li>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+          </li>
+          {% endif %}
+          <li><a href="">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{% url 'create_startup' %}">Create Startup</a>
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %} );">
+      <div class="container position-relative">
+        <h1>Edit Investment</h1>
+        <p>Update the details of your pending investment.</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="">Home</a></li>
+            <li><a href="{% url 'my_investissements' %}">My Investments</a></li>
+            <li class="current">Edit</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <section class="buy-tickets section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+
+            <div class="ticket-form-wrapper">
+              <div class="event-info mb-4">
+                <h3>Investment Summary</h3>
+                <div class="event-details">
+                  <div class="event-meta">
+                    <span><i class="bi bi-lightbulb"></i> {{ investissement.startup.nom_startup }}</span>
+                    <span><i class="bi bi-currency-dollar"></i> Current amount: {{ investissement.montant }} TND</span>
+                    <span><i class="bi bi-clock-history"></i> Status: {{ investissement.statut|capfirst }}</span>
+                  </div>
+                </div>
+              </div>
+
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+              <form method="POST" action="{% url 'edit_investissement' investissement.id_invest %}" class="ticket-form">
+                {% csrf_token %}
+
+                <div class="form-group mb-4">
+                  <label for="montant">Investment Amount (TND) *</label>
+                  <input type="number"
+                         name="montant"
+                         id="montant"
+                         class="form-control"
+                         min="1"
+                         step="1"
+                         value="{{ investissement.montant }}"
+                         placeholder="Enter the amount you wish to invest">
+                  <small id="error-montant" class="text-danger server-error d-block">
+    {% if errors and errors.montant %}{{ errors.montant }}{% endif %}
+</small>
+
+                </div>
+
+                <div class="form-group mb-4">
+                  <label for="commentaire">Comment (optional)</label>
+                  <textarea name="commentaire"
+                            id="commentaire"
+                            rows="5"
+                            class="form-control"
+                            placeholder="Share why you're investing or any conditions...">{{ investissement.commentaire }}</textarea>
+                  <small id="error-commentaire" class="text-danger server-error d-block">
+    {% if errors and errors.commentaire %}{{ errors.commentaire }}{% endif %}
+</small>
+
+
+                </div>
+
+                <div class="form-submit mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-save me-2"></i>
+                    Save Changes
+                  </button>
+                  <a href="{% url 'my_investissements' %}" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="" class="logo d-flex align-items-center">
+            <span class="sitename">Evently</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>A108 Adam Street</p>
+            <p>New York, NY 535022</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+            <p><strong>Email:</strong> <span>info@example.com</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="">Home</a></li>
+            <li><a href="">About us</a></li>
+            <li><a href="{% url 'startup_list' %}">Startups</a></li>
+            <li><a href="">Terms of service</a></li>
+            <li><a href="">Privacy policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="{% url 'create_startup' %}">Create Startup</a></li>
+            <li><a href="{% url 'startup_list' %}">Browse Startups</a></li>
+            <li><a href="{% url 'my_investissements' %}">My Investments</a></li>
+            <li><a href="#">Mentorship</a></li>
+            <li><a href="#">Networking</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="">Blog</a></li>
+            <li><a href="">Events</a></li>
+            <li><a href="">Contact</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Account</h4>
+          <ul>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'my_investissements' %}">My Investments</a></li>
+            <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            {% else %}
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Sign Up</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Evently</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <div id="preloader"></div>
+
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    function validateMontant(value) {
+        if (!value || isNaN(value) || parseFloat(value) <= 0) {
+            return "Amount must be greater than 0.";
+        }
+        return "";
+    }
+
+    function validateCommentaire(value) {
+        if (!value) return "";  // optional field
+
+        const errors = [];
+
+        if (value.length < 5) {
+            errors.push("Comment must be at least 5 characters.");
+        }
+
+        const invalid = value.replace(/[A-Za-z0-9\s\-\_\.\,\!\?]/g, "");
+        if (invalid.length > 0) {
+            errors.push(`Invalid characters detected: "${invalid}"`);
+        }
+
+        return errors.join(" ");
+    }
+
+    function setupLiveValidation(inputId, errorId, validator) {
+        const input = document.getElementById(inputId);
+        const errorBox = document.getElementById(errorId);
+
+        if (!input || !errorBox) return;
+
+        input.addEventListener("input", function () {
+            if (errorBox.classList.contains("server-error")) {
+                errorBox.classList.remove("server-error");
+            }
+
+            const msg = validator(input.value.trim());
+
+            if (msg) {
+                errorBox.textContent = msg;
+                errorBox.style.display = "block";
+            } else {
+                errorBox.textContent = "";
+                errorBox.style.display = "none";
+            }
+        });
+    }
+
+    setupLiveValidation("montant", "error-montant", validateMontant);
+    setupLiveValidation("commentaire", "error-commentaire", validateCommentaire);
+
+    //---------------------------
+    // 🚫 BLOCK FORM SUBMISSION 
+    //---------------------------
+    const form = document.querySelector(".ticket-form");
+    form.addEventListener("submit", function (e) {
+        const montant = document.getElementById("montant").value.trim();
+        const commentaire = document.getElementById("commentaire").value.trim();
+
+        const montantError = validateMontant(montant);
+        const commentaireError = validateCommentaire(commentaire);
+
+        const errorMontantBox = document.getElementById("error-montant");
+        const errorCommentBox = document.getElementById("error-commentaire");
+
+        let hasError = false;
+
+        if (montantError) {
+            errorMontantBox.textContent = montantError;
+            errorMontantBox.style.display = "block";
+            hasError = true;
+        }
+
+        if (commentaireError) {
+            errorCommentBox.textContent = commentaireError;
+            errorCommentBox.style.display = "block";
+            hasError = true;
+        }
+
+        if (hasError) {
+            e.preventDefault();   // 🔥 BLOCK THE SUBMIT
+        }
+    });
+});
+</script>
+
+
+</body>
+
+</html>
+

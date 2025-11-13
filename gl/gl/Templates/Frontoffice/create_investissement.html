@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Invest in {{ startup.nom_startup }}</title>
+
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+</head>
+
+<body class="buy-tickets-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="" class="logo d-flex align-items-center">
+        <h1 class="sitename">Evently</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="">Home</a></li>
+          <li><a href="">About</a></li>
+          <li class="dropdown"><a href="#"><span>Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}">Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}">Create a Startup</a></li>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+            
+          </li>
+          <li><a href="">Instructors</a></li>
+          <li><a href="">Pricing</a></li>
+          <li><a href="">Blog</a></li>
+          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="">Course Details</a></li>
+              <li><a href="">Instructor Profile</a></li>
+              <li><a href="">Events</a></li>
+              <li><a href="">Blog Details</a></li>
+              <li><a href="">Terms</a></li>
+              <li><a href="">Privacy</a></li>
+              <li><a href="">404</a></li>
+            </ul>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="dropdown"><a href="#"><span>My Account</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'my_investissements' %}">My Investments</a></li>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+          </li>
+          {% endif %}
+          <li><a href="">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{% url 'create_startup' %}">Create Startup</a>
+
+    </div>
+  </header>
+
+<main class="main">
+
+  <div class="page-title dark-background"
+       style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+    <div class="container">
+      <h1>Invest in {{ startup.nom_startup }}</h1>
+      <p>Support this startup by submitting your investment details.</p>
+    </div>
+  </div>
+
+  <section id="invest-startup" class="buy-tickets section">
+    <div class="container">
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+          <div class="ticket-form-wrapper">
+
+            <div class="event-info mb-4">
+              <h3>Startup Summary</h3>
+              <div class="event-meta">
+                <span><i class="bi bi-lightbulb"></i> {{ startup.nom_startup }}</span>
+                <span><i class="bi bi-wallet2"></i> Goal: {{ startup.fond_desire }} TND</span>
+                <span><i class="bi bi-graph-up"></i> Raised: {{ startup.fond_actuel }} TND</span>
+              </div>
+            </div>
+
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="POST"
+                  action="{% url 'create_investissement' startup.id_startup %}"
+                  class="ticket-form">
+              {% csrf_token %}
+
+              <!-- Investment Amount -->
+              <div class="form-group mb-4">
+                <label for="montant">Investment Amount (TND) *</label>
+                <input type="number"
+                       name="montant"
+                       id="montant"
+                       class="form-control"
+                       min="1"
+                       step="1"
+                       value="{{ old.montant|default:'' }}"
+                       placeholder="Enter the amount you wish to invest">
+
+                <!-- Server error -->
+                <small class="text-danger server-error">
+                  {% if errors and errors.montant %}{{ errors.montant }}{% endif %}
+                </small>
+
+                <!-- JS error -->
+                <small class="text-danger live-error"></small>
+              </div>
+
+              <!-- Comment -->
+              <div class="form-group mb-4">
+                <label for="commentaire">Comment (optional)</label>
+                <textarea name="commentaire"
+                          id="commentaire"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Why are you investing?">{{ old.commentaire|default:'' }}</textarea>
+
+                <!-- Server error -->
+                <small class="text-danger server-error">
+                  {% if errors and errors.commentaire %}{{ errors.commentaire }}{% endif %}
+                </small>
+
+                <!-- JS error -->
+                <small class="text-danger live-error"></small>
+              </div>
+
+              <div class="pricing-summary">
+                <h5>Before You Submit</h5>
+                <div class="summary-row">
+                  <span><i class="bi bi-check-circle text-success"></i> Pending Review</span>
+                  <span>Your investment will remain pending.</span>
+                </div>
+              </div>
+
+              <div class="form-submit mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-currency-dollar me-2"></i> Confirm Investment
+                </button>
+                <a href="{% url 'startup_list' %}" class="btn btn-outline-secondary btn-lg ms-2">Back</a>
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const rules = {
+
+        montant: value => {
+            const errors = [];
+            if (!value) errors.push("Amount is required.");
+
+            const num = parseFloat(value);
+            if (isNaN(num)) errors.push("Amount must be a valid number.");
+            else if (num <= 0) errors.push("Amount must be greater than 0.");
+
+            return errors.join(" ");
+        },
+
+        commentaire: value => {
+            const errors = [];
+            if (!value) return ""; // optional
+
+            if (value.length < 10)
+                errors.push("Comment must be at least 10 characters.");
+
+            const cleaned = value.replace(/ /g, "");
+            const invalid = cleaned.replace(/[A-Za-z0-9\-\_\.\,\!\?]/g, "");
+            if (invalid.length)
+                errors.push(`Invalid characters detected: "${invalid}"`);
+
+            return errors.join(" ");
+        }
+    };
+
+    const form = document.querySelector("form.ticket-form");
+
+    form.addEventListener("input", e => {
+        const input = e.target;
+        if (!rules[input.id]) return;
+
+        input.parentElement.querySelectorAll(".server-error")
+            .forEach(el => el.textContent = "");
+
+        const error = rules[input.id](input.value.trim());
+        input.parentElement.querySelector(".live-error").textContent = error;
+    });
+
+    form.addEventListener("submit", e => {
+        let stop = false;
+
+        ["montant", "commentaire"].forEach(id => {
+            const input = document.getElementById(id);
+            const error = rules[id](input.value.trim());
+            input.parentElement.querySelector(".live-error").textContent = error;
+            if (error) stop = true;
+        });
+
+        if (stop) e.preventDefault();
+    });
+
+});
+</script>
+
+
+<script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+</body>
+</html>

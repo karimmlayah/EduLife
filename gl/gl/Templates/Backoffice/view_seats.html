@@ -1,0 +1,589 @@
+{% extends 'backoffice/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header avec stats en temps réel -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-purple shadow-lg">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="text-white mb-2">🎪 {{ event.name }}</h2>
+                            <p class="text-white opacity-8 mb-0">Gestion des places en temps réel</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex justify-content-end gap-4">
+                                <div class="text-center">
+                                    <h3 class="text-white mb-0">{{ total }}</h3>
+                                    <small class="text-white opacity-8">Total</small>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-white mb-0">{{ free }}</h3>
+                                    <small class="text-white opacity-8">Libres</small>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-white mb-0">{{ reserved }}</h3>
+                                    <small class="text-white opacity-8">Réservées</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar de contrôle -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h6 class="mb-0">📊 Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Jauge de progression circulaire -->
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <svg width="120" height="120" class="circular-chart">
+                                <circle class="circle-bg" cx="60" cy="60" r="54" fill="none" stroke="#f0f0f0" stroke-width="8"/>
+                                <circle class="circle-progress" cx="60" cy="60" r="54" fill="none" stroke="#8338ec" 
+                                        stroke-width="8" stroke-linecap="round" 
+                                        stroke-dasharray="339.3" stroke-dashoffset="{{ percent_offset }}"/>
+                                <text x="60" y="65" text-anchor="middle" class="percentage-text" fill="#8338ec" font-size="16" font-weight="bold">
+                                    {{ percent }}%
+                                </text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Légende interactive -->
+                    <div class="legend-container">
+                        <div class="legend-item d-flex align-items-center mb-2">
+                            <div class="legend-color available"></div>
+                            <span class="ms-2 small">Disponible ({{ free }})</span>
+                        </div>
+                        <div class="legend-item d-flex align-items-center mb-2">
+                            <div class="legend-color reserved"></div>
+                            <span class="ms-2 small">Réservée ({{ reserved }})</span>
+                        </div>
+                        <div class="legend-item d-flex align-items-center">
+                            <div class="legend-color selected"></div>
+                            <span class="ms-2 small">Sélectionnée</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions rapides -->
+                    <div class="mt-4">
+                        <button class="btn btn-outline-purple btn-sm w-100 mb-2" onclick="filterSeats('all')">
+                            👁️ Voir toutes
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm w-100 mb-2" onclick="filterSeats('reserved')">
+                            🔴 Réservées seulement
+                        </button>
+                        <button class="btn btn-outline-success btn-sm w-100" onclick="filterSeats('available')">
+                            🟢 Disponibles seulement
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recherche rapide -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="mb-3">🔍 Recherche</h6>
+                    <div class="input-group input-group-sm">
+                        <input type="text" id="searchSeat" class="form-control" placeholder="Numéro de chaise...">
+                        <button class="btn btn-purple" onclick="searchSeat()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone principale des chaises -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">🎯 Plan des places</h6>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-purple">{{ free }} libres</span>
+                        <span class="badge bg-danger">{{ reserved }} réservées</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Écran de scène (effet visuel) -->
+                    <div class="text-center mb-4">
+                        <div class="stage-container">
+                            <div class="stage-label">🎭 SCÈNE</div>
+                        </div>
+                    </div>
+
+                    <!-- Grille des chaises avec animation -->
+                    <div class="seats-grid" id="seatsContainer">
+                        {% for seat in seats %}
+                            <div class="seat-card {% if seat.status == 'reserved' %}reserved{% endif %}" 
+                                 data-seat-id="{{ seat.id }}"
+                                 data-seat-number="{{ seat.number }}"
+                                 data-status="{{ seat.status }}"
+                                 data-user="{{ seat.reserved_by }}"
+                                 onclick="openSeatModal(this)">
+                                
+                                <div class="seat-number">{{ seat.number }}</div>
+                                <div class="seat-status">
+                                    {% if seat.status == 'reserved' %}
+                                        <i class="fas fa-user-check text-danger"></i>
+                                    {% else %}
+                                        <i class="fas fa-user-plus text-success"></i>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Badge d'état -->
+                                <div class="seat-badge {% if seat.status == 'reserved' %}reserved-badge{% else %}available-badge{% endif %}">
+                                    {{ seat.status|title }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Indicateur de chargement pour le filtrage -->
+                    <div id="loadingIndicator" class="text-center mt-4" style="display: none;">
+                        <div class="spinner-border text-purple" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal amélioré -->
+<div class="modal fade" id="seatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            
+            <div class="modal-header bg-gradient-purple text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-chair me-2"></i>
+                    Détails de la place
+                </h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="info-card">
+                            <div class="info-label">Numéro</div>
+                            <div class="info-value" id="m-number">-</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="info-card">
+                            <div class="info-label">Statut</div>
+                            <div class="info-value" id="m-status">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card mt-3">
+                    <div class="info-label">Réservée par</div>
+                    <div class="info-value" id="m-user">-</div>
+                </div>
+
+                <!-- Actions contextuelles -->
+                <div class="action-buttons mt-4" id="actionButtons">
+                    <!-- Les boutons seront générés dynamiquement -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fermer
+                </button>
+                <button class="btn btn-purple" onclick="printSeatDetails()">
+                    <i class="fas fa-print me-2"></i>Imprimer
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+/* Thème principal */
+:root {
+    --purple-primary: #8338ec;
+    --purple-light: #f1e1ff;
+    --purple-dark: #6f28b1;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
+}
+
+.btn-purple {
+    background-color: var(--purple-primary);
+    border-color: var(--purple-primary);
+    color: white;
+}
+
+.btn-purple:hover {
+    background-color: var(--purple-dark);
+    border-color: var(--purple-dark);
+    color: white;
+}
+
+.btn-outline-purple {
+    border-color: var(--purple-primary);
+    color: var(--purple-primary);
+}
+
+.btn-outline-purple:hover {
+    background-color: var(--purple-primary);
+    color: white;
+}
+
+/* Jauge circulaire */
+.circular-chart {
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+}
+
+.circle-progress {
+    fill: none;
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.percentage-text {
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+/* Légende */
+.legend-container {
+    padding: 10px 0;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legend-color.available { background: var(--success-color); }
+.legend-color.reserved { background: var(--danger-color); }
+.legend-color.selected { background: var(--purple-primary); }
+
+/* Grille des chaises */
+.seats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    padding: 20px;
+}
+
+.seat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.seat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(131, 56, 236, 0.15);
+    border-color: var(--purple-primary);
+}
+
+.seat-card.reserved {
+    background: #fff5f5;
+    border-color: var(--danger-color);
+}
+
+.seat-card.reserved:hover {
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.15);
+}
+
+.seat-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--purple-dark);
+    margin-bottom: 5px;
+}
+
+.seat-card.reserved .seat-number {
+    color: var(--danger-color);
+}
+
+.seat-status {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.seat-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+}
+
+.available-badge {
+    background: var(--success-color);
+}
+
+.reserved-badge {
+    background: var(--danger-color);
+}
+
+/* Écran de scène */
+.stage-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.stage-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+}
+
+.stage-label {
+    position: relative;
+    z-index: 2;
+}
+
+/* Cartes d'information */
+.info-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 4px solid var(--purple-primary);
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #212529;
+}
+
+/* Animation de filtrage */
+.seat-card.hidden {
+    opacity: 0.3;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .seats-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    .seat-number {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+// Variables globales
+let currentFilter = 'all';
+
+// Fonction d'ouverture du modal améliorée
+function openSeatModal(seatElement) {
+    const seatId = seatElement.getAttribute('data-seat-id');
+    const seatNumber = seatElement.getAttribute('data-seat-number');
+    const status = seatElement.getAttribute('data-status');
+    const user = seatElement.getAttribute('data-user');
+
+    // Mise à jour du contenu du modal
+    document.getElementById("m-number").textContent = seatNumber;
+
+    // Statut avec icônes
+    if (status === "available") {
+        document.getElementById("m-status").innerHTML = 
+            '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Disponible</span>';
+    } else if (status === "reserved") {
+        document.getElementById("m-status").innerHTML = 
+            '<span class="badge bg-danger"><i class="fas fa-user-check me-1"></i>Réservée</span>';
+    }
+
+    document.getElementById("m-user").textContent = user !== "None" ? user : "Aucun utilisateur";
+
+    // Génération des boutons d'action contextuels
+    const actionButtons = document.getElementById("actionButtons");
+    actionButtons.innerHTML = '';
+
+    if (status === "available") {
+        actionButtons.innerHTML = `
+            <button class="btn btn-success w-100 mb-2">
+                <i class="fas fa-user-plus me-2"></i>Réserver cette place
+            </button>
+        `;
+    } else if (status === "reserved") {
+        actionButtons.innerHTML = `
+            <button class="btn btn-warning w-100 mb-2">
+                <i class="fas fa-user-times me-2"></i>Libérer cette place
+            </button>
+            <button class="btn btn-outline-info w-100">
+                <i class="fas fa-envelope me-2"></i>Contacter le réservateur
+            </button>
+        `;
+    }
+
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('seatModal'));
+    modal.show();
+}
+
+// Filtrage des chaises
+function filterSeats(filter) {
+    currentFilter = filter;
+    const seats = document.querySelectorAll('.seat-card');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    
+    loadingIndicator.style.display = 'block';
+
+    setTimeout(() => {
+        seats.forEach(seat => {
+            const status = seat.getAttribute('data-status');
+            
+            if (filter === 'all') {
+                seat.classList.remove('hidden');
+            } else if (filter === status) {
+                seat.classList.remove('hidden');
+            } else {
+                seat.classList.add('hidden');
+            }
+        });
+        
+        loadingIndicator.style.display = 'none';
+    }, 300);
+}
+
+// Recherche de chaise
+function searchSeat() {
+    const searchTerm = document.getElementById('searchSeat').value.toLowerCase();
+    const seats = document.querySelectorAll('.seat-card');
+    
+    seats.forEach(seat => {
+        const seatNumber = seat.getAttribute('data-seat-number').toLowerCase();
+        if (seatNumber.includes(searchTerm)) {
+            seat.classList.remove('hidden');
+            // Animation de surbrillance
+            seat.style.animation = 'highlight 1s ease';
+            setTimeout(() => {
+                seat.style.animation = '';
+            }, 1000);
+        } else {
+            seat.classList.add('hidden');
+        }
+    });
+}
+
+// Impression des détails
+function printSeatDetails() {
+    const content = `
+        Détails de la place:
+        Numéro: ${document.getElementById('m-number').textContent}
+        Statut: ${document.getElementById('m-status').textContent}
+        Utilisateur: ${document.getElementById('m-user').textContent}
+        Date: ${new Date().toLocaleDateString()}
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Détails Place - {{ event.name }}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .header { text-align: center; margin-bottom: 30px; }
+                    .detail { margin: 10px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>{{ event.name }}</h2>
+                    <h3>Détails de la place</h3>
+                </div>
+                <div class="details">
+                    <div class="detail"><strong>Numéro:</strong> ${document.getElementById('m-number').textContent}</div>
+                    <div class="detail"><strong>Statut:</strong> ${document.getElementById('m-status').textContent}</div>
+                    <div class="detail"><strong>Utilisateur:</strong> ${document.getElementById('m-user').textContent}</div>
+                    <div class="detail"><strong>Date d'émission:</strong> ${new Date().toLocaleDateString()}</div>
+                </div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Animation CSS pour la surbrillance
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes highlight {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(131, 56, 236, 0.7); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(131, 56, 236, 0); }
+        100% { transform: scale(1); }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcul de l'offset pour la jauge circulaire
+    const circumference = 339.3; // 2 * π * 54
+    const percentValue = Number('{{ percent }}');
+    const percentOffset = circumference - (percentValue / 100) * circumference;
+    document.documentElement.style.setProperty('--percent-offset', percentOffset);
+});
+</script>
+
+{% endblock %}

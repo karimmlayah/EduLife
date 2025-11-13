@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>My Startups - Evently Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Evently
+  * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="buy-tickets-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="" class="logo d-flex align-items-center">
+        <h1 class="sitename">Evently</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="">Home</a></li>
+          <li><a href="">About</a></li>
+          <li class="dropdown"><a href="#"><span>Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}">Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}">Create a Startup</a></li>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+            
+          </li>
+          <li><a href="">Instructors</a></li>
+          <li><a href="">Pricing</a></li>
+          <li><a href="">Blog</a></li>
+          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="">Course Details</a></li>
+              <li><a href="">Instructor Profile</a></li>
+              <li><a href="">Events</a></li>
+              <li><a href="">Blog Details</a></li>
+              <li><a href="">Terms</a></li>
+              <li><a href="">Privacy</a></li>
+              <li><a href="">404</a></li>
+            </ul>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="dropdown"><a href="#"><span>My Account</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            </ul>
+          </li>
+          {% endif %}
+          <li><a href="">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{% url 'create_startup' %}">Create Startup</a>
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Edit Startup</h1>
+        <p>Update your startup information and keep it current for potential investors.</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="">Home</a></li>
+            <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            <li class="current">Edit Startup</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Edit Startup Section -->
+<section id="edit-startup" class="buy-tickets section">
+
+  <div class="container">
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+
+        <div class="ticket-form-wrapper">
+          <div class="event-info mb-5">
+            <h3>Edit Startup: {{ startup.nom_startup }}</h3>
+            <div class="event-details">
+              <div class="event-meta">
+                <span><i class="bi bi-info-circle"></i> Update your startup details</span>
+                <span><i class="bi bi-shield-check"></i> Changes will be reviewed</span>
+                <span><i class="bi bi-clock"></i> Status: {{ startup.statut|capfirst }}</span>
+              </div>
+            </div>
+          </div>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="POST" enctype="multipart/form-data" action="{% url 'edit_startup' startup.id_startup %}" class="ticket-form">
+            {% csrf_token %}
+
+            <!-- Startup Name -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="nom_startup">Startup Name *</label>
+                  <input type="text" name="nom_startup" id="nom_startup" class="form-control" 
+                         required value="{{ startup.nom_startup }}" placeholder="Enter your startup name">
+
+                  {% if errors.nom_startup %}
+                    <small class="text-danger server-error">{{ errors.nom_startup }}</small>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Category + Funding Goal -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="category">Category *</label>
+                  <input type="text" name="category" id="category" class="form-control" 
+                         required value="{{ startup.category }}" placeholder="e.g. AI / HealthTech / Finance">
+
+                  {% if errors.category %}
+                    <small class="text-danger server-error">{{ errors.category }}</small>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="fond_desire">Funding Goal (TND) *</label>
+                  <input type="number" name="fond_desire" id="fond_desire" class="form-control" 
+                         min="0" required value="{{ startup.fond_desire }}" placeholder="Enter funding amount">
+
+                  {% if errors.fond_desire %}
+                    <small class="text-danger server-error">{{ errors.fond_desire }}</small>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label for="description">Description *</label>
+              <textarea name="description" id="description" rows="6" class="form-control" required 
+                        placeholder="Describe your startup's idea, vision, and goals...">{{ startup.description }}</textarea>
+
+              {% if errors.description %}
+                <small class="text-danger server-error">{{ errors.description }}</small>
+              {% endif %}
+            </div>
+
+            <!-- Logo -->
+            <div class="form-group">
+              <label for="logo">Startup Logo</label>
+
+              {% if startup.logo %}
+                <div class="mb-3">
+                  <p>Current Logo:</p>
+                  <img src="{{ startup.logo.url }}" alt="Current Logo" class="img-thumbnail" 
+                       style="max-width: 200px; max-height: 200px;">
+                </div>
+              {% endif %}
+
+              <input type="file" name="logo" id="logo" class="form-control" accept="image/*">
+              <small class="form-text text-muted d-block mt-2">
+                Upload a new logo to replace the current one (optional, recommended size: 500x500px)
+              </small>
+            </div>
+
+            <!-- Summary -->
+            <div class="pricing-summary">
+              <h5>Startup Status</h5>
+              <div class="summary-row">
+                <span>Current Status:</span>
+                <span class="badge 
+                  {% if startup.statut == 'active' %}bg-success{% 
+                     elif startup.statut == 'pending' %}bg-warning text-dark{% 
+                     else %}bg-secondary{% endif %}">
+                  {{ startup.statut|capfirst }}
+                </span>
+              </div>
+              <div class="summary-row">
+                <span>Funding Goal:</span>
+                <span>{{ startup.fond_desire }} TND</span>
+              </div>
+              <div class="summary-row">
+                <span>Current Funding:</span>
+                <span>{{ startup.fond_actuel }} TND</span>
+              </div>
+              <div class="summary-row">
+                <span>Created On:</span>
+                <span>{{ startup.date_creation }}</span>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-submit mt-4">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i>
+                Update Startup
+              </button>
+              <a href="{% url 'my_startups' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                <i class="bi bi-arrow-left me-2"></i>
+                Cancel
+              </a>
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</section><!-- /Edit Startup Section -->
+
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="" class="logo d-flex align-items-center">
+            <span class="sitename">Evently</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>A108 Adam Street</p>
+            <p>New York, NY 535022</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+            <p><strong>Email:</strong> <span>info@example.com</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="">Home</a></li>
+            <li><a href="">About us</a></li>
+            <li><a href="">Startups</a></li>
+            <li><a href="">Terms of service</a></li>
+            <li><a href="">Privacy policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="{% url 'create_startup' %}">Create Startup</a></li>
+            <li><a href="{% url 'startup_list' %}">Browse Startups</a></li>
+            <li><a href="#">Investment</a></li>
+            <li><a href="#">Mentorship</a></li>
+            <li><a href="#">Networking</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="">Blog</a></li>
+            <li><a href="">Events</a></li>
+            <li><a href="">Contact</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Account</h4>
+          <ul>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'my_startups' %}">My Startups</a></li>
+            <li><a href="#">Profile</a></li>
+            {% else %}
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Sign Up</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Evently</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+ <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rules = {
+    nom_startup: value => {
+        const errors = [];
+
+        if (value.length < 3)
+            errors.push("Startup name must be at least 3 characters.");
+
+        const invalidChars = value.replace(/[A-Za-z0-9\s\-\_]/g, '');
+        if (invalidChars.length > 0)
+            errors.push(`Invalid characters detected: "${invalidChars}"`);
+
+        return errors.join(" ");
+    },
+
+    category: value => {
+        const errors = [];
+
+        if (value.length < 2)
+            errors.push("Category must be at least 2 characters.");
+
+        const invalidChars = value.replace(/[A-Za-z0-9\s\-\_\/]/g, '');
+        if (invalidChars.length > 0)
+            errors.push(`Invalid characters detected: "${invalidChars}"`);
+
+        return errors.join(" ");
+    },
+
+    fond_desire: value => {
+        const errors = [];
+
+        if (value <= 0)
+            errors.push("Funding must be greater than 0.");
+
+        return errors.join(" ");
+    },
+
+    description: value => {
+        const errors = [];
+
+        if (value.length < 20)
+            errors.push("Description must be at least 20 characters.");
+
+        return errors.join(" ");
+    }
+  };
+
+  Object.keys(rules).forEach(id => {
+      const input = document.getElementById(id);
+      if (!input) return;
+
+      input.addEventListener("input", function () {
+
+          // REMOVE server error when the user types again
+          let serverError = input.parentElement.querySelector(".server-error");
+          if (serverError) {
+              serverError.remove();
+          }
+
+          // Live JS Validation
+          const error = rules[id](input.value.trim());
+
+          let errorBox = input.parentElement.querySelector(".live-error");
+          if (!errorBox) {
+              errorBox = document.createElement("small");
+              errorBox.classList.add("text-danger", "live-error");
+              input.insertAdjacentElement("afterend", errorBox);
+          }
+
+          errorBox.textContent = error;
+      });
+  });
+});
+</script>
+
+</body>
+
+</html>

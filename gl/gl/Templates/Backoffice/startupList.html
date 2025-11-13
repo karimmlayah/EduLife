@@ -1,0 +1,137 @@
+{% extends "backoffice/base.html" %}
+{% block content %}
+
+<!-- Load bootstrap icons -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4>Startup List</h4>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 8%">Logo</th>
+                        <th style="width: 28%">Startup Name</th>
+                        <th style="width: 15%">Status</th>
+                        <th style="width: 22%">Funding Goal</th>
+                        <th style="width: 15%">Created On</th>
+                        <th style="width: 12%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for s in startups %}
+                    <tr>
+
+                        <!-- LOGO -->
+                        <td>
+                            <div class="avatar avatar-sm rounded-circle bg-gradient-info shadow 
+                                d-flex align-items-center justify-content-center"
+                                style="width:45px; height:45px;">
+
+                                {% if s.logo %}
+                                    <img src="{{ s.logo.url }}" 
+                                         class="rounded-circle"
+                                         style="width:45px; height:45px; object-fit:cover;">
+                                {% else %}
+                                    <span class="text-white fw-bold">
+                                        {{ s.nom_startup|slice:":2"|upper }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- NAME -->
+                        <td>
+                            <span class="fw-bold text-dark">{{ s.nom_startup }}</span><br>
+                            <span class="text-xs text-muted">Founder: {{ s.owner.username }}</span>
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+                            {% if s.statut == "pending" %}
+                                <span class="badge bg-warning text-dark px-3 py-2">
+                                    <i class="bi bi-hourglass-split me-1"></i> Pending
+                                </span>
+                            {% elif s.statut == "active" %}
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Active
+                                </span>
+                            {% elif s.statut == "rejected" %}
+                                <span class="badge bg-danger px-3 py-2">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- FUNDING -->
+                        <td>
+                            <div class="fw-bold">{{ s.fond_actuel }} / {{ s.fond_desire }} DT</div>
+
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar 
+                                    {% if s.pct_funded < 30 %} bg-danger
+                                    {% elif s.pct_funded < 70 %} bg-warning
+                                    {% else %} bg-success {% endif %}"
+                                    style="width: {{ s.pct_funded }}%;">
+                                </div>
+                            </div>
+
+                            <small class="text-muted">{{ s.pct_funded|floatformat:0 }}% funded</small>
+                        </td>
+
+                        <!-- CREATED -->
+                        <td>
+                            <span class="fw-bold text-dark">{{ s.date_creation|date:"Y-m-d" }}</span><br>
+                            <span class="text-xs text-muted">{{ s.date_creation|timesince }} ago</span>
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td class="text-center">
+
+                            {% if s.statut == "pending" %}
+                            <div class="d-flex justify-content-center">
+
+                                <!-- APPROVE -->
+                                <form method="POST" action="{% url 'approve_startup' s.id_startup %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm me-2">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+
+                                <!-- REJECT -->
+                                <form method="POST" action="{% url 'reject_startup' s.id_startup %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+
+                            {% else %}
+                                <span class="text-muted small">
+                                    <i class="bi bi-check2-all text-success"></i> Reviewed
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
