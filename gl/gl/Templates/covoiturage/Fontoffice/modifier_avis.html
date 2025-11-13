@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Modifier l'avis - Covoiturage</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+
+  <style>
+    .rating-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .star-rating {
+      font-size: 3rem;
+      cursor: pointer;
+      color: #ddd;
+      transition: all 0.2s;
+    }
+    .star-rating:hover,
+    .star-rating.active {
+      color: #ffc107;
+    }
+    .star-rating.filled {
+      color: #ffc107;
+    }
+    .rating-label {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #666;
+    }
+    .comment-section {
+      margin-top: 30px;
+    }
+    .btn-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s;
+      padding: 12px 40px;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      color: white;
+    }
+    .trip-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+
+<body class="contact-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'root' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">Evently</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'root' %}">Home</a></li>
+          <li><a href="{% url 'mes_reservations_passager' %}">Mes réservations</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Modifier l'avis</h1>
+        <p>Modifiez votre évaluation du trajet</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <!-- Informations du trajet -->
+                <div class="trip-info">
+                  <h5 class="mb-3"><i class="bi bi-route"></i> Détails du trajet</h5>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-geo-alt-fill text-primary"></i> Départ :</strong> {{ reservation.offre.depart }}
+                  </p>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-geo-alt text-success"></i> Destination :</strong> {{ reservation.offre.destination }}
+                  </p>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-person"></i> Conducteur :</strong> {{ reservation.offre.conducteur.username }}
+                  </p>
+                  {% if reservation.offre.date_covoiturage %}
+                  <p class="mb-0">
+                    <strong><i class="bi bi-calendar-event"></i> Date :</strong> {{ reservation.offre.date_covoiturage|date:"d/m/Y H:i" }}
+                  </p>
+                  {% endif %}
+                </div>
+
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'modifier_avis' reservation.id %}">
+                  {% csrf_token %}
+                  
+                  <!-- Système de notation par étoiles -->
+                  <div class="rating-container">
+                    <h4 class="mb-4">Comment évaluez-vous ce trajet ?</h4>
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                      {% for i in "12345" %}
+                        <i class="bi bi-star star-rating" data-rating="{{ i }}" onclick="selectRating({{ i }})"></i>
+                      {% endfor %}
+                    </div>
+                    <input type="hidden" name="note" id="note-input" value="{{ avis.note }}" required>
+                    <div class="rating-label" id="rating-label">Note actuelle : {{ avis.note }}/5</div>
+                  </div>
+
+                  <!-- Commentaire -->
+                  <div class="comment-section">
+                    <label for="commentaire" class="form-label">
+                      <strong>Commentaire (optionnel)</strong>
+                    </label>
+                    <textarea 
+                      class="form-control" 
+                      id="commentaire" 
+                      name="commentaire" 
+                      rows="5" 
+                      placeholder="Partagez votre expérience : Comment s'est passé le trajet ? Y a-t-il eu des problèmes ? Le service était-il satisfaisant ?"
+                      maxlength="1000">{% if avis.commentaire %}{{ avis.commentaire }}{% endif %}</textarea>
+                    <small class="text-muted">Maximum 1000 caractères</small>
+                  </div>
+
+                  <!-- Boutons -->
+                  <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'mes_reservations_passager' %}" class="btn btn-secondary">
+                      <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-orange">
+                      <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Covoiturage</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <script>
+    let selectedRating = {{ avis.note }};
+    const labels = {
+      1: "Très mauvais - Le trajet ne s'est pas bien passé",
+      2: "Mauvais - Service insatisfaisant",
+      3: "Moyen - Expérience correcte",
+      4: "Bien - Bon service",
+      5: "Excellent - Parfait !"
+    };
+
+    // Initialiser l'affichage avec la note actuelle
+    window.addEventListener('DOMContentLoaded', function() {
+      selectRating({{ avis.note }});
+    });
+
+    function selectRating(rating) {
+      selectedRating = rating;
+      document.getElementById('note-input').value = rating;
+      document.getElementById('rating-label').textContent = labels[rating];
+      
+      // Mettre à jour l'affichage des étoiles
+      const stars = document.querySelectorAll('.star-rating');
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('filled');
+          star.classList.remove('bi-star');
+          star.classList.add('bi-star-fill');
+        } else {
+          star.classList.remove('filled');
+          star.classList.remove('bi-star-fill');
+          star.classList.add('bi-star');
+        }
+      });
+    }
+
+    // Hover effect sur les étoiles
+    document.querySelectorAll('.star-rating').forEach((star, index) => {
+      star.addEventListener('mouseenter', function() {
+        const rating = index + 1;
+        const stars = document.querySelectorAll('.star-rating');
+        stars.forEach((s, i) => {
+          if (i < rating) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    document.querySelector('.rating-container').addEventListener('mouseleave', function() {
+      const stars = document.querySelectorAll('.star-rating');
+      stars.forEach((star, index) => {
+        star.classList.remove('active');
+        if (index < selectedRating) {
+          star.classList.add('filled');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
+

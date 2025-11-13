@@ -1,0 +1,382 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Modifier une offre - Covoiturage</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+
+  <style>
+    .btn-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      color: white;
+    }
+    .form-group {
+      position: relative;
+    }
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-top: 2px;
+    }
+    .suggestion-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    .suggestion-item:hover {
+      background-color: #f5f5f5;
+    }
+    .input-with-icon {
+      position: relative;
+    }
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      z-index: 1;
+    }
+    .input-with-icon input,
+    .input-with-icon select {
+      padding-left: 45px;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+      <a href="{% url 'root' %}" class="logo d-flex align-items-center">
+        <span class="sitename">Evently</span>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'root' %}">Home</a></li>
+          <li><a href="{% url 'mes_offres' %}">Mes offres</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Modifier une offre</h1>
+        <p>Modifiez les détails de votre offre de covoiturage</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="{% url 'root' %}">Accueil</a></li>
+            <li><a href="{% url 'mes_offres' %}">Mes offres</a></li>
+            <li class="current">Modifier</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="container mt-4">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Formulaire de modification -->
+    <section class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <h3 class="mb-4"><i class="bi bi-pencil"></i> Modifier l'offre</h3>
+
+                <form action="{% url 'offre_update' offre.id %}" method="post" class="php-email-form">
+                  {% csrf_token %}
+
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Lieu de départ</label>
+                        <div class="input-with-icon">
+                          <i class="bi bi-geo-alt-fill"></i>
+                          <input type="text" class="form-control"
+                                 id="depart"
+                                 name="depart"
+                                 value="{{ offre.depart }}"
+                                 placeholder="Tapez le nom d'un lieu"
+                                 autocomplete="off"
+                                 required>
+                          <div id="depart-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="openMapPicker('depart')">
+                            📍 Choisir sur la carte
+                        </button>
+                        <input type="hidden" id="depart-lat" name="depart_lat" value="{{ offre.depart_lat|default:'' }}">
+                        <input type="hidden" id="depart-lng" name="depart_lng" value="{{ offre.depart_lng|default:'' }}">
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Destination</label>
+                        <div class="input-with-icon">
+                          <i class="bi bi-geo-alt"></i>
+                          <input type="text" class="form-control"
+                                 id="destination"
+                                 name="destination"
+                                 value="{{ offre.destination }}"
+                                 placeholder="Tapez le nom d'un lieu"
+                                 autocomplete="off"
+                                 required>
+                          <div id="destination-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="openMapPicker('destination')">
+                            📍 Choisir sur la carte
+                        </button>
+                        <input type="hidden" id="destination-lat" name="destination_lat" value="{{ offre.destination_lat|default:'' }}">
+                        <input type="hidden" id="destination-lng" name="destination_lng" value="{{ offre.destination_lng|default:'' }}">
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-people"></i>
+                          <input type="number" class="form-control" name="nombre_places" placeholder="Nombre de places" min="1" value="{{ offre.nombre_places }}" required>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-telephone"></i>
+                          <input type="tel" class="form-control" name="telephone" placeholder="Numéro de téléphone" value="{{ offre.telephone|default:'' }}" required>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-calendar"></i>
+                          <input type="datetime-local" class="form-control" name="date_covoiturage" 
+                                 value="{% if offre.date_covoiturage %}{{ offre.date_covoiturage|date:'Y-m-d\TH:i' }}{% endif %}" 
+                                 placeholder="Date de covoiturage" required>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-currency-exchange"></i>
+                          <input type="number" step="0.01" class="form-control" name="prix" placeholder="Prix par personne (DT)" value="{{ offre.prix }}" required>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="input-with-icon">
+                          <i class="bi bi-car-front"></i>
+                          <input type="text" class="form-control" name="modele_voiture" placeholder="Modèle de voiture" value="{{ offre.modele_voiture|default:'' }}">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="form-check form-switch" style="padding-top: 10px;">
+                          <input class="form-check-input" type="checkbox" name="climatisation" id="climatisation" {% if offre.climatisation %}checked{% endif %} style="width: 50px; height: 25px; cursor: pointer;">
+                          <label class="form-check-label" for="climatisation" style="margin-left: 10px; font-size: 16px;">
+                            <i class="bi bi-snow"></i> Climatisation
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label"><i class="bi bi-people"></i> Préférence de genre</label>
+                        <select class="form-control" name="preference_genre" id="preference_genre" required>
+                          <option value="tous" {% if offre.preference_genre == 'tous' %}selected{% endif %}>Tous (Hommes et Femmes)</option>
+                          <option value="homme" {% if offre.preference_genre == 'homme' %}selected{% endif %}>Hommes uniquement</option>
+                          <option value="femme" {% if offre.preference_genre == 'femme' %}selected{% endif %}>Femmes uniquement</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <div id="map"></div>
+                    </div>
+
+                    <div class="col-12 text-center mt-4">
+                      <button type="submit" class="btn btn-orange btn-lg">
+                        <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                      </button>
+                      <a href="{% url 'mes_offres' %}" class="btn btn-secondary btn-lg ms-2">
+                        <i class="bi bi-x-circle"></i> Annuler
+                      </a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="index.html" class="logo d-flex align-items-center">
+            <span class="sitename">Evently</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <!-- Map and Form Scripts -->
+  <script>
+    // Initialiser la carte
+    let map = L.map('map').setView([36.8065, 10.1815], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{s}/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let departMarker = null;
+    let destinationMarker = null;
+    let currentField = null;
+
+    // Fonction pour ouvrir le sélecteur de carte
+    function openMapPicker(field) {
+      currentField = field;
+      alert('Cliquez sur la carte pour sélectionner le ' + (field === 'depart' ? 'lieu de départ' : 'destination'));
+    }
+
+    // Gérer les clics sur la carte
+    map.on('click', function(e) {
+      if (currentField === 'depart') {
+        if (departMarker) map.removeLayer(departMarker);
+        departMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+        document.getElementById('depart-lat').value = e.latlng.lat;
+        document.getElementById('depart-lng').value = e.latlng.lng;
+        // Reverse geocoding
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${e.latlng.lat}&lon=${e.latlng.lng}&format=json`)
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById('depart').value = data.display_name || '';
+          });
+      } else if (currentField === 'destination') {
+        if (destinationMarker) map.removeLayer(destinationMarker);
+        destinationMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+        document.getElementById('destination-lat').value = e.latlng.lat;
+        document.getElementById('destination-lng').value = e.latlng.lng;
+        // Reverse geocoding
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${e.latlng.lat}&lon=${e.latlng.lng}&format=json`)
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById('destination').value = data.display_name || '';
+          });
+      }
+    });
+
+    // Afficher les marqueurs existants si disponibles
+    {% if offre.depart_lat and offre.depart_lng %}
+    departMarker = L.marker([{{ offre.depart_lat }}, {{ offre.depart_lng }}]).addTo(map);
+    {% endif %}
+    {% if offre.destination_lat and offre.destination_lng %}
+    destinationMarker = L.marker([{{ offre.destination_lat }}, {{ offre.destination_lng }}]).addTo(map);
+    {% endif %}
+  </script>
+
+</body>
+</html>
+

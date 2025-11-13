@@ -1,0 +1,628 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Demandes reçues - Covoiturage</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+  
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+  
+  <style>
+    .dropdown-menu {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border: none;
+      margin-top: 10px;
+    }
+    .dropdown-item {
+      padding: 10px 20px;
+      transition: all 0.3s;
+    }
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+      color: #ff6b35;
+    }
+    .dropdown-item i {
+      margin-right: 8px;
+    }
+    .btn-getstarted.dropdown-toggle::after {
+      margin-left: 0.5em;
+    }
+    .logout-form button {
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: inherit;
+    }
+    .logout-form button:hover {
+      background-color: #f8f9fa;
+      color: #ff6b35;
+    }
+    
+    /* Modern Reservation Cards */
+    .reservation-card {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      border: none;
+      margin-bottom: 25px;
+      position: relative;
+    }
+    
+    .reservation-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .reservation-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .reservation-card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+    }
+    
+    .reservation-card-body {
+      padding: 25px;
+    }
+    
+    .route-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .route-point {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .route-point.depart {
+      color: #4facfe;
+    }
+    
+    .route-point.destination {
+      color: #43e97b;
+    }
+    
+    .route-arrow {
+      margin: 0 15px;
+      font-size: 1.5rem;
+      color: #667eea;
+    }
+    
+    .map-container {
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    
+    .info-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .info-item i {
+      color: #667eea;
+      font-size: 1.3rem;
+    }
+    
+    .distance-badge {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .route-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .route-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .reservation-card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body class="contact-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'root' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">Evently</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'root' %}">Home</a></li>
+          <li><a href="{% url 'root' %}">About</a></li>
+          <li><a href="{% url 'root' %}">Schedule</a></li>
+          <li><a href="{% url 'root' %}">Speakers</a></li>
+          <li><a href="{% url 'root' %}">Venue</a></li>
+          <li class="dropdown">
+            <a href="#" id="covoiturageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <span>Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="covoiturageDropdown">
+              <li><a class="dropdown-item" href="/covoiturage/"><i class="bi bi-car-front"></i> Covoiturage</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'mes_offres' %}"><i class="bi bi-briefcase"></i> Mes offres</a></li>
+              <li><a class="dropdown-item" href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated"></i> Mes réservations</a></li>
+              <li><a class="dropdown-item" href="{% url 'mes_reservations' %}"><i class="bi bi-inbox"></i> Demandes reçues</a></li>
+            </ul>
+          </li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <div class="d-flex align-items-center gap-3">
+        {% if user.is_authenticated %}
+        <div class="dropdown">
+          <a class="btn-getstarted dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i> {{ user.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li>
+              <form method="post" action="{% url 'logout' %}" class="logout-form" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit">
+                  <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+        {% else %}
+        <a class="btn-getstarted" href="{% url 'login' %}">Connexion</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Demandes reçues</h1>
+        <p>Gérez les réservations sur vos offres de covoiturage</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="{% url 'root' %}">Accueil</a></li>
+            <li class="current">Demandes reçues</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Demandes Section -->
+    <section class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-inbox"></i> Demandes de réservation reçues</h5>
+              </div>
+              <div class="card-body">
+                {% if demandes %}
+                <div class="row">
+                  {% for d in demandes %}
+                  <div class="col-12">
+                    <div class="reservation-card">
+                      <div class="reservation-card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h5 class="mb-1 text-white">
+                              <i class="bi bi-person-circle"></i> {{ d.nom_passager }}
+                            </h5>
+                            <small class="text-white-50">@{{ d.passager.username }}</small>
+                          </div>
+                          <div>
+                            {% if d.statut == "pending" %}
+                              <span class="badge bg-warning text-dark" style="font-size: 14px; padding: 8px 12px;">
+                                <i class="bi bi-clock"></i> En attente
+                              </span>
+                            {% elif d.statut == "accepted" %}
+                              <span class="badge bg-success" style="font-size: 14px; padding: 8px 12px;">
+                                <i class="bi bi-check-circle"></i> Acceptée
+                              </span>
+                            {% elif d.statut == "rejected" %}
+                              <span class="badge bg-danger" style="font-size: 14px; padding: 8px 12px;">
+                                <i class="bi bi-x-circle"></i> Rejetée
+                              </span>
+                            {% elif d.statut == "cancelled" %}
+                              <span class="badge bg-secondary" style="font-size: 14px; padding: 8px 12px;">
+                                <i class="bi bi-x-octagon"></i> Annulée
+                              </span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="reservation-card-body">
+                        <!-- Route Info -->
+                        <div class="route-info">
+                          <div class="route-point depart">
+                            <i class="bi bi-geo-alt-fill" style="font-size: 1.5rem;"></i>
+                            <div>
+                              <strong>{{ d.offre.depart }}</strong>
+                            </div>
+                          </div>
+                          <div class="route-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                          </div>
+                          <div class="route-point destination">
+                            <i class="bi bi-geo-alt" style="font-size: 1.5rem;"></i>
+                            <div>
+                              <strong>{{ d.offre.destination }}</strong>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Map Container -->
+                        <div class="map-container" id="map-{{ d.id }}"></div>
+                        
+                        <!-- Distance Badge -->
+                        <div class="text-center mb-3">
+                          <span class="distance-badge" id="distance-{{ d.id }}">
+                            <i class="bi bi-speedometer2"></i> Calcul en cours...
+                          </span>
+                        </div>
+                        
+                        <!-- Info Grid -->
+                        <div class="info-grid">
+                          <div class="info-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <div>
+                              <strong>Date du trajet</strong><br>
+                              <span>{% if d.offre.date_covoiturage %}{{ d.offre.date_covoiturage|date:"d/m/Y à H:i" }}{% else %}Non spécifiée{% endif %}</span>
+                            </div>
+                          </div>
+                          <div class="info-item">
+                            <i class="bi bi-clock-history"></i>
+                            <div>
+                              <strong>Réservé le</strong><br>
+                              <span>{{ d.date_reservation|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                          </div>
+                          <div class="info-item">
+                            <i class="bi bi-people"></i>
+                            <div>
+                              <strong>Places</strong><br>
+                              <span>{{ d.nombre_places_reservees }} place(s)</span>
+                            </div>
+                          </div>
+                          <div class="info-item">
+                            <i class="bi bi-telephone"></i>
+                            <div>
+                              <strong>Téléphone</strong><br>
+                              <span>{{ d.telephone_passager }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        {% if d.statut == "pending" %}
+                        <div class="d-flex gap-2 justify-content-end mt-3">
+                          <a href="{% url 'res_accept' d.id %}" class="btn btn-success" onclick="return confirm('Êtes-vous sûr de vouloir accepter cette réservation ?');">
+                            <i class="bi bi-check-circle"></i> Accepter
+                          </a>
+                          <a href="{% url 'res_reject' d.id %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir refuser cette réservation ?');">
+                            <i class="bi bi-x-circle"></i> Refuser
+                          </a>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                  <i class="bi bi-info-circle"></i> Aucune demande de réservation reçue pour le moment.
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Covoiturage</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+  <script>
+    // Fonction pour calculer la distance entre deux points (formule de Haversine)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Rayon de la Terre en km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c; // Distance en km
+    }
+
+    // Fonction pour géocoder un lieu
+    async function geocodePlace(placeName) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}&limit=1`, {
+          headers: {
+            'User-Agent': 'CovoiturageApp/1.0'
+          }
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+          return {
+            lat: parseFloat(data[0].lat),
+            lng: parseFloat(data[0].lon)
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error('Erreur géocodage:', error);
+        return null;
+      }
+    }
+
+    // Fonction pour obtenir le trajet réel entre deux points (OSRM)
+    async function getRoute(startLat, startLng, endLat, endLng) {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          return {
+            geometry: route.geometry.coordinates.map(coord => [coord[1], coord[0]]), // Convertir [lng, lat] en [lat, lng]
+            distance: route.distance / 1000, // Distance en km
+            duration: route.duration // Durée en secondes
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error('Erreur routage:', error);
+        return null;
+      }
+    }
+
+    // Initialiser les cartes pour chaque réservation
+    document.addEventListener('DOMContentLoaded', async function() {
+      const reservations = [
+        {% for d in demandes %}
+        {
+          id: {{ d.id }},
+          depart: "{{ d.offre.depart }}",
+          destination: "{{ d.offre.destination }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      for (const res of reservations) {
+        const mapId = `map-${res.id}`;
+        const distanceId = `distance-${res.id}`;
+        
+        // Géocoder les lieux
+        const departCoords = await geocodePlace(res.depart);
+        const destCoords = await geocodePlace(res.destination);
+        
+        if (departCoords && destCoords) {
+          // Obtenir le trajet réel
+          const route = await getRoute(
+            departCoords.lat, departCoords.lng,
+            destCoords.lat, destCoords.lng
+          );
+          
+          let distance, duration;
+          if (route) {
+            distance = route.distance;
+            duration = Math.round(route.duration / 60); // Convertir en minutes
+          } else {
+            // Fallback: calculer la distance à vol d'oiseau si le routage échoue
+            distance = calculateDistance(
+              departCoords.lat, departCoords.lng,
+              destCoords.lat, destCoords.lng
+            );
+            duration = null;
+          }
+          
+          // Afficher la distance et la durée
+          let distanceHtml = `<i class="bi bi-speedometer2"></i> ${distance.toFixed(1)} km`;
+          if (duration) {
+            distanceHtml += ` <i class="bi bi-clock"></i> ~${duration} min`;
+          }
+          document.getElementById(distanceId).innerHTML = distanceHtml;
+          
+          // Créer la carte
+          const map = L.map(mapId).setView([
+            (departCoords.lat + destCoords.lat) / 2,
+            (departCoords.lng + destCoords.lng) / 2
+          ], 8);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+          }).addTo(map);
+          
+          // Ajouter les marqueurs avec icônes personnalisées
+          const departIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          });
+          
+          const destIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          });
+          
+          const departMarker = L.marker([departCoords.lat, departCoords.lng], {icon: departIcon})
+            .addTo(map)
+            .bindPopup(`<strong>📍 Départ:</strong><br>${res.depart}`);
+          
+          const destMarker = L.marker([destCoords.lat, destCoords.lng], {icon: destIcon})
+            .addTo(map)
+            .bindPopup(`<strong>🎯 Destination:</strong><br>${res.destination}`);
+          
+          // Ajouter le trajet réel ou la ligne droite
+          if (route && route.geometry) {
+            // Trajet réel avec le routage
+            L.polyline(route.geometry, {
+              color: '#667eea',
+              weight: 5,
+              opacity: 0.8,
+              smoothFactor: 1
+            }).addTo(map);
+          } else {
+            // Fallback: ligne droite si le routage échoue
+            L.polyline([
+              [departCoords.lat, departCoords.lng],
+              [destCoords.lat, destCoords.lng]
+            ], {
+              color: '#667eea',
+              weight: 4,
+              opacity: 0.7,
+              dashArray: '10, 10'
+            }).addTo(map);
+          }
+          
+          // Ajuster la vue pour voir le trajet complet
+          const group = new L.featureGroup([departMarker, destMarker]);
+          if (route && route.geometry) {
+            // Ajuster la vue pour le trajet réel
+            const routeLayer = L.polyline(route.geometry);
+            map.fitBounds(routeLayer.getBounds().pad(0.1));
+          } else {
+            map.fitBounds(group.getBounds().pad(0.1));
+          }
+        } else {
+          document.getElementById(distanceId).innerHTML = 
+            `<i class="bi bi-exclamation-triangle"></i> Distance non disponible`;
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
+
