@@ -51,7 +51,11 @@ INSTALLED_APPS = [
     'EventApp',
     'UserApp',
     'LogementApp',
+    'offreStage',
+    'postulation',
+    'entretien',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,16 +90,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gl.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# -----------------------
+# BASE DE DONNÉES
+# -----------------------
+# BASE DE DONNÉES
+# -----------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-
+        
     }
 }
+
 
 
 # Password validation
@@ -155,4 +162,23 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'karimmlayah14@gmail.com'  # Remplacez par votre email
 EMAIL_HOST_PASSWORD = 'mooz ozdw jhzr jszp'  # Remplacez par votre mot de passe d'application
 DEFAULT_FROM_EMAIL = 'karimmlayah14@gmail.com'  # Remplacez par votre email
+
+
+
+# 🔹 Dossier où Django cherchera les fichiers CSS, JS, images
+STATICFILES_DIRS = [
+    BASE_DIR / 'gl' / 'static',
+]
+
+# -----------------------
+# FICHIERS MEDIA (upload utilisateurs)
+# -----------------------
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# -----------------------
+# AUTHENTIFICATION
+# -----------------------
+LOGIN_REDIRECT_URL = '/dashboard/'
 

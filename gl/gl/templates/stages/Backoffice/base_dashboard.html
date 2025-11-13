@@ -1,0 +1,420 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/apple-icon.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
+  <title>{% block title %}Backoffice{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link id="pagestyle" href="https://demos.creative-tim.com/argon-dashboard/assets/css/argon-dashboard.min.css?v=2.1.0" rel="stylesheet" />
+  <style>
+    /* Style uniforme pour tous les boutons du dashboard */
+    .btn-dashboard-primary {
+      background-color: #5e72e4 !important;
+      color: white !important;
+      border: none !important;
+      padding: 8px 20px !important;
+      font-size: 14px !important;
+      border-radius: 8px !important;
+      transition: all 0.3s ease !important;
+    }
+    .btn-dashboard-primary:hover {
+      background-color: #4c63d2 !important;
+      color: white !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(94, 114, 228, 0.3);
+    }
+    .btn-dashboard-secondary {
+      background-color: #6c757d !important;
+      color: white !important;
+      border: none !important;
+      padding: 8px 20px !important;
+      font-size: 14px !important;
+      border-radius: 8px !important;
+      transition: all 0.3s ease !important;
+    }
+    .btn-dashboard-secondary:hover {
+      background-color: #5a6268 !important;
+      color: white !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+    }
+    
+    /* Sidebar footer: pin logout lower with icon + animation */
+    #sidenav-main .sidenav-footer { 
+      position: absolute; 
+      left: 12px; 
+      right: 12px; 
+      bottom: 16px; 
+    }
+    .btn-logout { 
+      margin-top: 200px;
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: .5rem; 
+    }
+    .btn-logout i { 
+      font-size: .875rem; 
+    }
+    .btn-logout { 
+      transition: transform .15s ease, box-shadow .3s ease; 
+    }
+    .btn-logout:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 22px rgba(17,205,239,.25); 
+    }
+    @keyframes subtle-pulse { 
+      0% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } 
+      50% { box-shadow: 0 0 12px 2px rgba(17,205,239,.35); } 
+      100% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } 
+    }
+    .btn-logout:focus-visible { 
+      animation: subtle-pulse 1.2s ease-out; 
+    }
+  </style>
+</head>
+<body class="g-sidenav-show bg-gray-100">
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href="{% url 'dashboard' %}">
+        <span style="font-size: 20px; font-weight: bold; color: #5e72e4;">EduLife</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/dashboard/internship/' %}active{% endif %}" href="http://127.0.0.1:8000/dashboard/internship/">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-chart-pie-35 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'offres_stage' %}active{% endif %}" href="{% url 'offres_stage' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Internship Offers</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'postulations' %}active{% endif %}" href="{% url 'postulations' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-credit-card text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Applications</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'entretiens' %}active{% endif %}" href="{% url 'entretiens' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Interviews</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sidenav-footer mx-3 mt-4">
+      <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout mt-2">
+        <i class="ni ni-button-power"></i>
+        <span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+  <main class="main-content position-relative border-radius-lg">
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="false">
+      <div class="container-fluid py-1 px-3">
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <!-- Left side: Breadcrumb -->
+          <div class="flex-grow-1">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
+                <li class="breadcrumb-item text-sm text-white active" aria-current="page">{% block breadcrumb %}{% endblock %}</li>
+              </ol>
+              <h6 class="font-weight-bolder text-white mb-0">{% block page_title %}{% endblock %}</h6>
+            </nav>
+          </div>
+          
+          <!-- Center: Navigation Links -->
+          <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
+            <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' %}active{% endif %}">
+              <i class="ni ni-single-02 me-1"></i>
+              <span>User</span>
+            </a>
+            <a href="http://127.0.0.1:8000/dashboard/internship/" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+              <i class="ni ni-briefcase-24 me-1"></i>
+              <span>Internship</span>
+            </a>
+            <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
+              <i class="ni ni-building me-1"></i>
+              <span>Startup</span>
+            </a>
+            <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
+              <i class="fas fa-home me-1"></i>
+              <span>Housing</span>
+            </a>
+            <a href="{% url 'ride_sharing' %}" class="nav-link-top {% if request.resolver_match.url_name == 'ride_sharing' %}active{% endif %}">
+              <i class="ni ni-delivery-fast me-1"></i>
+              <span>Ride sharing</span>
+            </a>
+            <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+              <i class="ni ni-calendar-grid-58 me-1"></i>
+              <span>Events</span>
+            </a>
+          </div>
+          
+          <!-- Right side: Notifications, Messages, and User Menu -->
+          <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2">
+            {% if request.user.is_authenticated %}
+              <!-- Button to go to site -->
+              <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
+                <i class="ni ni-world" style="font-size: 1.2rem;"></i>
+              </a>
+              <!-- Notifications Icon -->
+              <a href="{% url 'notifications' %}" class="notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                <i class="ni ni-bell-55" style="font-size: 1.2rem; color: white;"></i>
+                {% if unread_notifications_count > 0 %}
+                  <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
+                {% endif %}
+              </a>
+              <!-- Messages Icon -->
+              <a href="{% url 'messages' %}" class="messages-icon-dashboard" title="Messages" style="position: relative;">
+                <i class="ni ni-chat-round" style="font-size: 1.2rem; color: white;"></i>
+                {% if unread_messages_count > 0 %}
+                  <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
+                {% endif %}
+              </a>
+              <!-- User Avatar Menu -->
+              {% with user_id=request.user.id|default:0 %}
+              <div class="user-menu-dashboard" id="dashboardUserMenu">
+                <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center" style="cursor: pointer;">
+                  <span class="user-avatar me-2 {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}" style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;{% endif %}">
+                    {% if request.user.avatar %}
+                      <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                      {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                    {% endif %}
+                  </span>
+                </a>
+                <div class="user-dropdown-dashboard" id="dashboardUserDropdown">
+                  <a href="{% url 'profile' %}"><i class="ni ni-single-02 me-2"></i> Profile</a>
+                  <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
+                  <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
+                  <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
+                </div>
+              </div>
+              {% endwith %}
+            {% else %}
+              <a href="{% url 'login' %}" class="nav-link-top login-link">
+                <i class="ni ni-single-02"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <style>
+      .nav-link-top {
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .nav-link-top:hover:not(.nav-link-disabled) {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .nav-link-top.active {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+      }
+      .nav-link-disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .nav-link-disabled:hover {
+        color: rgba(255, 255, 255, 0.8) !important;
+        background-color: transparent !important;
+      }
+      .nav-link-top i {
+        font-size: 16px;
+      }
+      .login-link {
+        padding: 8px 12px;
+        font-size: 18px;
+      }
+      .login-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+      
+      /* Button to go to site */
+      .btn-site-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        opacity: 0.9;
+      }
+      .btn-site-dashboard:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      /* Notifications and Messages Icons */
+      .notifications-icon-dashboard,
+      .messages-icon-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        opacity: 0.9;
+        text-decoration: none;
+      }
+      .notifications-icon-dashboard:hover,
+      .messages-icon-dashboard:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .notifications-badge-dashboard,
+      .messages-badge-dashboard {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #f5365c;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        border: 2px solid #1e293b;
+      }
+      
+      /* User Menu Dropdown */
+      .user-menu-dashboard {
+        position: relative;
+      }
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .avatar-c0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+      .avatar-c1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+      .avatar-c2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+      .avatar-c3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+      .avatar-c4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+      .avatar-c5 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+      .user-dropdown-dashboard {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        background: #1e293b;
+        border-radius: 8px;
+        min-width: 200px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        padding: 8px 0;
+      }
+      .user-menu-dashboard.active .user-dropdown-dashboard {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      .user-dropdown-dashboard a {
+        display: block;
+        padding: 10px 16px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+      }
+      .user-dropdown-dashboard a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .user-dropdown-dashboard a i {
+        width: 20px;
+        text-align: center;
+      }
+    </style>
+    <div class="container-fluid py-4">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+  <script src="https://demos.creative-tim.com/argon-dashboard/assets/js/core/popper.min.js"></script>
+  <script src="https://demos.creative-tim.com/argon-dashboard/assets/js/core/bootstrap.min.js"></script>
+  <script src="https://demos.creative-tim.com/argon-dashboard/assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="https://demos.creative-tim.com/argon-dashboard/assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="https://demos.creative-tim.com/argon-dashboard/assets/js/argon-dashboard.min.js?v=2.1.0"></script>
+  <script>
+    // User dropdown menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const userMenu = document.getElementById('dashboardUserMenu');
+      if (userMenu) {
+        const dropdown = document.getElementById('dashboardUserDropdown');
+        const toggle = userMenu.querySelector('a[href="javascript:;"]');
+        
+        if (toggle && dropdown) {
+          toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle('active');
+          });
+          
+          // Close dropdown when clicking outside
+          document.addEventListener('click', function(e) {
+            if (!userMenu.contains(e.target)) {
+              userMenu.classList.remove('active');
+            }
+          });
+        }
+      }
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
+

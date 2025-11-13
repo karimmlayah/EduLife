@@ -73,7 +73,7 @@
         <ul>
           <li><a href="{% url 'index' %}" class="active">Home</a></li>
           <li><a href="{% url 'evently_schedule' %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
-          <li><a href="{% url 'event_home' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li><a href="{% url 'dashboard' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
           <li class="dropdown">
             <a href="#"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
@@ -83,6 +83,13 @@
                 <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
                 <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
               {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
           <li class="dropdown">

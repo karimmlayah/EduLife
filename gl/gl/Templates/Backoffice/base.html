@@ -197,6 +197,108 @@
         .btn-logout:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(17,205,239,.25); }
         @keyframes subtle-pulse { 0% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } 50% { box-shadow: 0 0 12px 2px rgba(17,205,239,.35); } 100% { box-shadow: 0 0 0 0 rgba(17,205,239,0); } }
         .btn-logout:focus-visible { animation: subtle-pulse 1.2s ease-out; }
+        
+        /* Navigation Links Styles */
+        .nav-link-top {
+            color: rgba(255, 255, 255, 0.8) !important;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .nav-link-top:hover:not(.nav-link-disabled) {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-link-top.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        .nav-link-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .nav-link-disabled:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+            background-color: transparent !important;
+        }
+        .nav-link-top i {
+            font-size: 16px;
+        }
+        .login-link {
+            padding: 8px 12px;
+            font-size: 18px;
+        }
+        .login-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* User Menu Dropdown */
+        .user-menu-dashboard {
+            position: relative;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .avatar-c0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .avatar-c1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .avatar-c2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .avatar-c3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .avatar-c4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .avatar-c5 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .user-dropdown-dashboard {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: #1e293b;
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+        .user-menu-dashboard.active .user-dropdown-dashboard {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .user-dropdown-dashboard a {
+            display: block;
+            padding: 10px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .user-dropdown-dashboard a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .user-dropdown-dashboard a i {
+            width: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -257,87 +359,70 @@
         <!-- Navbar -->
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="false">
             <div class="container-fluid py-1 px-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-                        <li class="breadcrumb-item text-sm text-white active" aria-current="page">Dashboard</li>
-                    </ol>
-                    <h6 class="font-weight-bolder text-white mb-0">Dashboard</h6>
-                </nav>
-
-                <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-                    <div class="d-flex align-items-center w-100 pe-md-3">
-                        <!-- MENUS SUPPLÉMENTAIRES (gauche) -->
-                        <ul class="navbar-nav d-flex flex-row align-items-center me-auto topmenu">
-                            <li class="nav-item mx-2">
-                                <a href="{% url 'admin_dashboard' %}" data-match="/admin/" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %} active{% endif %}" {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'manage_users' %}aria-current="page"{% endif %}>
-                                    <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
-                                </a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a href="{% url 'dashboard_logements' %}" class="nav-link text-white fw-bold{% if request.resolver_match.url_name == 'dashboard_logements' or request.resolver_match.url_name == 'manage_logements' or request.resolver_match.url_name == 'approve_logement' or request.resolver_match.url_name == 'reject_logement' %} active{% endif %}">
-                                    <i class="ni ni-building text-white me-1"></i> Logements
-                                </a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a href="#" data-match="/admin/events/" class="nav-link text-white fw-bold">
-                                    <i class="ni ni-calendar-grid-58 text-white me-1"></i>
-                                    Événements
-                                </a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a href="#" data-match="/admin/career/" class="nav-link text-white fw-bold">
-                                    <i class="ni ni-briefcase-24 text-white me-1"></i> Carrière
-                                </a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a href="#" data-match="/admin/carpool/" class="nav-link text-white fw-bold">
-                                    <i class="ni ni-delivery-fast text-white me-1"></i> Covoiturage
-                                </a>
-                            </li>
-                        </ul>
-
-                        <!-- BARRE DE RECHERCHE (droite) -->
-                        <div class="top-search input-group input-group-sm ms-auto me-3">
-                            <span class="input-group-text text-body">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                            </span>
-                            <input type="text" class="form-control form-control-sm" placeholder="Rechercher..." />
-                        </div>
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <!-- Left side: Breadcrumb -->
+                    <div class="flex-grow-1">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
+                                <li class="breadcrumb-item text-sm text-white active" aria-current="page">{% block breadcrumb %}Dashboard{% endblock %}</li>
+                            </ol>
+                            <h6 class="font-weight-bolder text-white mb-0">{% block page_title %}Dashboard{% endblock %}</h6>
+                        </nav>
                     </div>
-                </div>
-
-                <ul class="navbar-nav justify-content-end">
-                    {% if request.user.is_authenticated %}
-                        <!-- Button to go to site -->
-                        <li class="nav-item d-flex align-items-center me-2">
+                    
+                    <!-- Center: Navigation Links -->
+                    <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' or request.path == '/admin/' %}active{% endif %}">
+                            <i class="ni ni-single-02 me-1"></i>
+                            <span>User</span>
+                        </a>
+                        <a href="{% url 'offres_stage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+                            <i class="ni ni-briefcase-24 me-1"></i>
+                            <span>Internship</span>
+                        </a>
+                        <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
+                            <i class="ni ni-building me-1"></i>
+                            <span>Startup</span>
+                        </a>
+                        <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
+                            <i class="fas fa-home me-1"></i>
+                            <span>Housing</span>
+                        </a>
+                        <a href="{% url 'ride_sharing' %}" class="nav-link-top {% if request.resolver_match.url_name == 'ride_sharing' %}active{% endif %}">
+                            <i class="ni ni-delivery-fast me-1"></i>
+                            <span>Ride sharing</span>
+                        </a>
+                        <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' or request.path == '/dashboard/' or '/event/' in request.path and '/seats/' in request.path %}active{% endif %}">
+                            <i class="ni ni-calendar-grid-58 me-1"></i>
+                            <span>Events</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Right side: Notifications, Messages, and User Menu -->
+                    <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2">
+                        {% if request.user.is_authenticated %}
+                            <!-- Button to go to site -->
                             <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
                                 <i class="ni ni-world" style="font-size: 1.2rem;"></i>
                             </a>
-                        </li>
-                        <!-- Notifications Icon -->
-                        <li class="nav-item d-flex align-items-center me-2">
-                            <a href="{% url 'notifications' %}" class="nav-link text-white p-0 notifications-icon-dashboard" title="Notifications" style="position: relative;">
-                                <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                            <!-- Notifications Icon -->
+                            <a href="{% url 'notifications' %}" class="notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                                <i class="ni ni-bell-55" style="font-size: 1.2rem; color: white;"></i>
                                 {% if unread_notifications_count > 0 %}
                                     <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
                                 {% endif %}
                             </a>
-                        </li>
-                        <!-- Messages Icon -->
-                        <li class="nav-item d-flex align-items-center me-2">
-                            <a href="{% url 'messages' %}" class="nav-link text-white p-0 messages-icon-dashboard" title="Messages" style="position: relative;">
-                                <i class="ni ni-chat-round" style="font-size: 1.2rem;"></i>
+                            <!-- Messages Icon -->
+                            <a href="{% url 'messages' %}" class="messages-icon-dashboard" title="Messages" style="position: relative;">
+                                <i class="ni ni-chat-round" style="font-size: 1.2rem; color: white;"></i>
                                 {% if unread_messages_count > 0 %}
                                     <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
                                 {% endif %}
                             </a>
-                        </li>
-                        <!-- User Avatar Menu -->
-                        <li class="nav-item d-flex align-items-center">
+                            <!-- User Avatar Menu -->
                             {% with user_id=request.user.id|default:0 %}
                             <div class="user-menu-dashboard" id="dashboardUserMenu">
-                                <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                                <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center" style="cursor: pointer;">
                                     <span class="user-avatar me-2 {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}" style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;{% endif %}">
                                         {% if request.user.avatar %}
                                             <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
@@ -354,57 +439,13 @@
                                 </div>
                             </div>
                             {% endwith %}
-                        </li>
-                    {% else %}
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="{% url 'login' %}" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
-                                <span class="user-avatar me-2 avatar-c5">+</span>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="nav-link-top login-link">
+                                <i class="ni ni-single-02"></i>
                             </a>
-                        </li>
-                    {% endif %}
-
-                    <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-                        <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
-                            <div class="sidenav-toggler-inner">
-                                <i class="sidenav-toggler-line bg-white"></i>
-                                <i class="sidenav-toggler-line bg-white"></i>
-                                <i class="sidenav-toggler-line bg-white"></i>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item px-3 d-flex align-items-center">
-                        <a href="javascript:;" class="nav-link text-white p-0">
-                            <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-                        </a>
-                    </li>
-
-                    <li class="nav-item dropdown pe-2 d-flex align-items-center">
-                        <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-bell cursor-pointer"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                            <li class="mb-2">
-                                <a class="dropdown-item border-radius-md" href="javascript:;">
-                                    <div class="d-flex py-1">
-                                        <div class="my-auto">
-                                            <img src="{% static 'backoffice/assets/img/team-2.jpg' %}" class="avatar avatar-sm me-3" />
-                                        </div>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="text-sm font-weight-normal mb-1">
-                                                <span class="font-weight-bold">New message</span> from Laur
-                                            </h6>
-                                            <p class="text-xs text-secondary mb-0">
-                                                <i class="fa fa-clock me-1"></i>
-                                                13 minutes ago
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </nav>
         <!-- End Navbar -->
@@ -454,29 +495,29 @@
             Scrollbar.init(document.querySelector("#sidenav-scrollbar"), options);
         }
 
-        // Dropdown menu for user avatar in dashboard
-        (function(){
-            const menu = document.getElementById('dashboardUserMenu');
-            if (!menu) return;
-            const toggle = menu.querySelector('a');
-            const dd = document.getElementById('dashboardUserDropdown');
-            if (!toggle || !dd) return;
-            
-            function closeAll(e){ 
-                if(!menu.contains(e.target)){ 
-                    menu.classList.remove('open'); 
-                    document.removeEventListener('click', closeAll); 
-                } 
-            }
-            
-            toggle.addEventListener('click', function(e){
-                e.preventDefault();
-                menu.classList.toggle('open');
-                if(menu.classList.contains('open')){
-                    setTimeout(()=>document.addEventListener('click', closeAll), 0);
+        // User dropdown menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenu = document.getElementById('dashboardUserMenu');
+            if (userMenu) {
+                const dropdown = document.getElementById('dashboardUserDropdown');
+                const toggle = userMenu.querySelector('a[href="javascript:;"]');
+                
+                if (toggle && dropdown) {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        userMenu.classList.toggle('active');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!userMenu.contains(e.target)) {
+                            userMenu.classList.remove('active');
+                        }
+                    });
                 }
-            });
-        })();
+            }
+        });
     </script>
 </body>
 </html>
