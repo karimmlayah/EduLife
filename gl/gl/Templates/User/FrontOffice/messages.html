@@ -694,7 +694,6 @@
       </div>
 
       <div class="chat-input-container">
-        {% if is_connected %}
         <form method="post" action="{% url 'send_message' other_user.id %}" class="chat-input-form" id="message-form" enctype="multipart/form-data" onsubmit="return sendMessage(this);">
           {% csrf_token %}
           <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%;">
@@ -715,17 +714,6 @@
             <button type="button" onclick="clearFile()" style="margin-left: 0.5rem; color: #dc3545; background: none; border: none; cursor: pointer;">×</button>
           </div>
         </form>
-        {% else %}
-        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; border-radius: 8px; text-align: center;">
-          <p style="margin: 0; color: #856404;">
-            <i class="bi bi-info-circle"></i> Vous devez être connecté avec {{ other_user.get_full_name|default:other_user.username }} pour envoyer des messages.
-            <br>
-            <a href="{% url 'user_profile' other_user.id %}" style="color: #0a66c2; text-decoration: none; font-weight: 600; margin-top: 0.5rem; display: inline-block;">
-              Voir le profil et envoyer une demande de connexion
-            </a>
-          </p>
-        </div>
-        {% endif %}
       </div>
 
       <!-- Modal pour modifier un message -->

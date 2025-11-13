@@ -34,26 +34,17 @@
       }
     }
 
-    /* Make header transparent over hero */
+    /* Header normal - no transparency */
     body.notifications-hero-page #header.header {
-      --background-color: rgba(255, 255, 255, 0) !important;
-      background-color: rgba(255, 255, 255, 0) !important;
-      background: transparent !important;
-      box-shadow: none !important;
-    }
-
-    body.notifications-hero-page.scrolled #header.header {
-      --background-color: rgba(34, 18, 2, 0.9) !important;
-      background-color: rgba(34, 18, 2, 0.9) !important;
-      background: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.95) !important;
+      background: rgba(34, 18, 2, 0.95) !important;
       box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* Ensure header text is visible on transparent background */
-    body.notifications-hero-page #header.header,
-    body.notifications-hero-page #header.header .logo h1,
-    body.notifications-hero-page #header.header .navmenu a {
-      color: #ffffff !important;
+    /* Active state for notifications icon */
+    body.notifications-hero-page .notifications-icon-link {
+      background: rgba(255, 255, 255, 0.1) !important;
+      opacity: 1 !important;
     }
 
     .notifications-hero .background-overlay {
@@ -147,83 +138,164 @@
       font-weight: 600;
     }
 
-    /* Main Content Section */
+    /* Main Content Section - LinkedIn Style */
     .notifications-main-content {
-      background: var(--background-color);
-      padding: 60px 0;
+      background: #f3f2ef;
+      padding: 24px 0;
+      min-height: calc(100vh - 70px);
     }
 
-    .notifications-content-header {
-      max-width: 1200px;
-      margin: 0 auto 40px;
-      padding: 0 1rem;
+    .notifications-layout {
+      max-width: 1128px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 24px;
+      padding: 0 16px;
     }
 
-    .notifications-content-title {
-      font-size: 2.5rem;
-      font-weight: 600;
-      color: var(--heading-color);
+    @media (max-width: 992px) {
+      .notifications-layout {
+        grid-template-columns: 1fr;
+      }
+      .notifications-sidebar {
+        display: none;
+      }
+      .notifications-right-sidebar {
+        display: none;
+      }
+    }
+
+    /* Left Sidebar */
+    .notifications-sidebar {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .sidebar-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
       margin-bottom: 16px;
-      position: relative;
-      padding-bottom: 20px;
+      overflow: hidden;
     }
 
-    .notifications-content-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 80px;
-      height: 4px;
-      background: var(--accent-color);
-      border-radius: 2px;
+    .sidebar-card-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
     }
 
-    .notifications-content-description {
-      color: var(--default-color);
+    .sidebar-card-title {
       font-size: 1rem;
-      line-height: 1.6;
-      margin-top: 16px;
-      opacity: 0.8;
+      font-weight: 600;
+      color: #000;
+      margin: 0;
+    }
+
+    .sidebar-card-content {
+      padding: 16px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 8px 16px;
+      color: #0a66c2;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: #f3f2ef;
+      text-decoration: underline;
+    }
+
+    /* Main Content Area */
+    .notifications-main-area {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .notifications-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      background: white;
+    }
+
+    .notifications-tab {
+      padding: 16px 24px;
+      border: none;
+      background: none;
+      color: #666;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .notifications-tab:hover {
+      color: #000;
+      background: #f3f2ef;
+    }
+
+    .notifications-tab.active {
+      color: #0a66c2;
+      border-bottom-color: #0a66c2;
     }
 
     .notifications-container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 0;
     }
 
     .notification-item {
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e0e0e0;
-      margin-bottom: 1rem;
-      padding: 1.5rem;
+      border: none;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      margin: 0;
+      padding: 16px 24px;
       display: flex;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 12px;
       transition: all 0.2s;
+      position: relative;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
     }
 
     .notification-item:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: #f3f2ef;
     }
 
     .notification-item.unread {
       background: #f0f7ff;
-      border-left: 4px solid #0a66c2;
+    }
+
+    .notification-item.unread::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #0a66c2;
     }
 
     .notification-icon {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: #e6f2ff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       color: #0a66c2;
       flex-shrink: 0;
     }
@@ -255,8 +327,34 @@
     }
 
     .notification-time {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: #666;
+      margin-top: 4px;
+    }
+
+    .notification-menu {
+      margin-left: auto;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .notification-item:hover .notification-menu {
+      opacity: 1;
+    }
+
+    .notification-menu-btn {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .notification-menu-btn:hover {
+      background: #e0e0e0;
+      color: #000;
     }
 
     .notification-actions {
@@ -309,40 +407,32 @@
 {% endblock %}
 
 {% block content %}
-  <!-- Hero Section -->
-  <section class="notifications-hero section dark-background">
-    <div class="background-overlay"></div>
-    <div class="hero-content">
-      <div class="container">
-        <div class="row justify-content-center text-center">
-          <div class="col-lg-10">
-            <div class="hero-text">
-              <h1 class="hero-title">Notifications</h1>
-              <p class="hero-subtitle">Restez informé de toutes vos interactions et demandes de connexion.</p>
+  <!-- Main Content Section -->
+  <section class="notifications-main-content" style="margin-top: 70px;">
+    <div class="notifications-layout">
+      <!-- Left Sidebar -->
+      <div class="notifications-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-card-header">
+            <h3 class="sidebar-card-title">Gérer vos notifications</h3>
             </div>
-            <div class="notifications-breadcrumb">
-              <a href="{% url 'index' %}">Home</a>
-              <span>/</span>
-              <span class="current">Notifications</span>
-            </div>
+          <div class="sidebar-card-content">
+            <a href="#" class="sidebar-link">Voir les paramètres</a>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Main Content Section -->
-  <section class="notifications-main-content">
-    <div class="notifications-content-header">
-      <h2 class="notifications-content-title">Notifications</h2>
-      <p class="notifications-content-description">
-        Gérez vos demandes de connexion et restez informé de vos interactions.
-      </p>
+      <!-- Main Content Area -->
+      <div class="notifications-main-area">
+        <!-- Tabs -->
+        <div class="notifications-tabs">
+          <button class="notifications-tab active" data-tab="all">Tout</button>
+          <button class="notifications-tab" data-tab="connections">Connexions</button>
+          <button class="notifications-tab" data-tab="messages">Messages</button>
     </div>
 
     <div class="notifications-container">
       {% if notifications %}
-        <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Total: {{ notifications|length }} notification(s)</p>
         {% for notification in notifications %}
         <div class="notification-item {% if not notification.read %}unread{% endif %}">
           <div class="notification-icon">
@@ -411,7 +501,7 @@
                 {{ notification.verb }}
               {% endif %}
             </div>
-            <div class="notification-time">{{ notification.created_at|timesince }} ago</div>
+            <div class="notification-time">{{ notification.created_at|timesince }}</div>
             {% if notification.verb == 'connection_request' and not notification.read %}
             <div class="notification-actions">
               {% with connection_id=notification.data.connection_id %}
@@ -433,6 +523,11 @@
             </div>
             {% endif %}
           </div>
+          <div class="notification-menu">
+            <button class="notification-menu-btn" title="Plus d'options">
+              <i class="bi bi-three-dots"></i>
+            </button>
+          </div>
         </div>
         {% endfor %}
       {% else %}
@@ -441,7 +536,29 @@
           <p>Aucune notification pour le moment.</p>
         </div>
       {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="notifications-right-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-card-content">
+            <p style="font-size: 0.875rem; color: #666; margin: 0;">Espace publicitaire</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
+
+  <script>
+    // Tab switching functionality
+    document.querySelectorAll('.notifications-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.notifications-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        // Here you can add logic to filter notifications by tab
+      });
+    });
+  </script>
 {% endblock %}
 

@@ -32,6 +32,7 @@ urlpatterns = [
     # Messages
     path('messages/', views.messages_view, name='messages'),
     path('messages/<int:user_id>/', views.messages_view, name='messages_conversation'),
+    path('messages/api/<int:user_id>/', views.get_conversation_messages, name='get_conversation_messages'),
     path('messages/<int:user_id>/send/', views.send_message_view, name='send_message'),
     path('messages/<int:message_id>/update/', views.update_message_view, name='update_message'),
     path('messages/<int:message_id>/delete/', views.delete_message_view, name='delete_message'),
@@ -56,4 +57,5 @@ urlpatterns = [
     path('contact/', views.evently_template, {'page': 'contact'}, name='evently_contact'),
     path('sponsors/', views.evently_template, {'page': 'sponsors'}, name='evently_sponsors'),
     path('starter-page/', views.evently_template, {'page': 'starter-page'}, name='evently_starter_page'),
+    path('spline-test/', views.evently_template, {'page': 'spline-test'}, name='evently_spline_test'),
 ]

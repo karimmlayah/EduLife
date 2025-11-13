@@ -47,6 +47,59 @@
       box-shadow: none;
       padding: 0;
     }
+    /* Spline 3D Viewer in Hero Section - Full image visible, not cut */
+    .spline-container-hero {
+      top: -10%;
+      right: 10%;
+      width: 240%;
+      height: 480%;
+      z-index: 1;
+      overflow: visible;
+      pointer-events: auto;
+    }
+    canvas.spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+    }
+    .spline-container-hero spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+    }
+    /* Make background overlay more transparent to show Spline colors */
+    .hero .background-overlay {
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.3) 0%, rgba(37, 37, 37, 0.2) 100%);
+      z-index: 0;
+    }
+    /* Ensure hero content is above Spline and scrollable */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      pointer-events: none;
+    }
+    /* Make interactive elements clickable */
+    .hero-content a,
+    .hero-content button,
+    .hero-content .btn {
+      pointer-events: auto;
+    }
+    /* Ensure page can scroll normally - allow scroll on left side */
+    .hero {
+      overflow: visible;
+      position: relative;
+    }
+    /* Allow scrolling on the left side of hero */
+    .hero-content .container {
+      pointer-events: none;
+    }
+    .hero-content .container > * {
+      pointer-events: auto;
+    }
   </style>
 
   <!-- =======================================================
@@ -71,11 +124,11 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{% url 'index' %}" class="active">Home</a></li>
-          <li><a href="{% url 'evently_schedule' %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
-          <li><a href="{% url 'dashboard' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
           <li class="dropdown">
-            <a href="#"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
               {% if request.user.is_authenticated %}
@@ -86,41 +139,23 @@
             </ul>
           </li>
           <li class="dropdown">
-            <a href="{% url 'internships' %}" class="">Internships <i class="bi bi-chevron-down"></i></a>
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li class="dropdown">
-            <a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-              <li><a href="{% url 'admin_tables' %}">Utilisateurs</a></li>
-            </ul>
-          </li>
+          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
+          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
       {% if request.user.is_authenticated %}
         <div style="display: flex; align-items: center; gap: 1rem;">
-          <!-- Notifications Icon -->
-          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; text-decoration: none; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-            <i class="bi bi-bell"></i>
-            {% if unread_notifications_count > 0 %}
-              <span class="notifications-badge" style="position: absolute; top: -2px; right: -2px; background: #f5365c; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid #1e293b;">{{ unread_notifications_count }}</span>
-            {% endif %}
-          </a>
-          
-          <!-- Messages Icon -->
-          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; text-decoration: none; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-            <i class="bi bi-chat-dots"></i>
-            {% if unread_messages_count > 0 %}
-              <span class="messages-badge" style="position: absolute; top: -2px; right: -2px; background: #f5365c; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid #1e293b;">{{ unread_messages_count }}</span>
-            {% endif %}
-          </a>
-          
           {% with user_id=request.user.id|default:0 %}
           <div class="user-menu" id="idxUserMenu">
             <a href="#" onclick="return false;"
@@ -137,7 +172,6 @@
           <div class="user-dropdown" id="idxUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
-            <a href="{% url 'messages' %}"><i class="bi bi-chat-dots me-2"></i> Messages</a>
             {% if request.user.is_superuser %}
               <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
             {% endif %}
@@ -159,6 +193,11 @@
     <!-- Hero Section -->
     <section id="hero" class="hero section dark-background">
       <div class="background-overlay"></div>
+      <!-- Spline 3D Viewer -->
+      <div class="spline-container-hero">
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
+        <spline-viewer url="https://prod.spline.design/zpQ8cAh3-ZTcG2JV/scene.splinecode"></spline-viewer>
+      </div>
       <div class="hero-content">
         <div class="container">
           <div class="row justify-content-center text-center">
@@ -959,5 +998,9 @@
       });
     })();
   </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
+
 </body>
 </html>

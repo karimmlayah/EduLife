@@ -604,32 +604,12 @@ def mark_notification_read(request, notification_id):
 
 @login_required
 def messages_view(request, user_id=None):
-    """Page de messagerie"""
+    """Page de messagerie - Permet à n'importe qui de parler à n'importe qui"""
     if user_id:
         # Conversation avec un utilisateur spécifique
         other_user = get_object_or_404(CustomUser, id=user_id)
         if other_user == request.user:
             return redirect('messages')
-        
-        # Vérifier le statut de la connexion
-        connection = Connection.objects.filter(
-            Q(from_user=request.user, to_user=other_user) |
-            Q(from_user=other_user, to_user=request.user)
-        ).first()
-        
-        # Vérifier si les utilisateurs sont connectés (status = 'accepted')
-        is_connected = connection and connection.status == 'accepted'
-        connection_status = connection.status if connection else None
-        
-        # Si pas connecté, rediriger vers le profil
-        if not is_connected:
-            if connection and connection.status == 'rejected':
-                messages.error(request, "Votre demande de connexion a été refusée. Vous pouvez réessayer d'envoyer une demande depuis le profil.")
-            elif connection and connection.status == 'pending':
-                messages.info(request, "Votre demande de connexion est en attente. Vous devez attendre que la personne accepte avant de pouvoir voir la conversation.")
-            else:
-                messages.info(request, "Vous devez être connecté avec cette personne pour voir la conversation. Envoyez d'abord une demande de connexion.")
-            return redirect('user_profile', user_id=user_id)
         
         # Récupérer les messages personnels entre les deux utilisateurs (non supprimés, sans logement)
         messages_list = Message.objects.filter(
@@ -649,7 +629,7 @@ def messages_view(request, user_id=None):
         return render(request, 'User/FrontOffice/messages.html', {
             'other_user': other_user,
             'messages_list': messages_list,
-            'is_connected': is_connected,
+            'is_connected': True,  # Toujours True maintenant, pas besoin de vérifier
         })
     else:
         # Liste des conversations
@@ -683,34 +663,140 @@ def messages_view(request, user_id=None):
         })
 
 
+def get_conversation_messages(request, user_id):
+    """API pour récupérer les messages d'une conversation (JSON)"""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    import json
+    
+    print(f"[API] get_conversation_messages called for user_id={user_id}, authenticated={request.user.is_authenticated}")
+    
+    # Vérifier l'authentification manuellement pour retourner du JSON
+    if not request.user.is_authenticated:
+        print("[API] User not authenticated")
+        return JsonResponse({'error': 'Authentication required', 'success': False}, status=401)
+    
+    try:
+        other_user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found', 'success': False}, status=404)
+    
+    if other_user == request.user:
+        return JsonResponse({'error': 'Cannot message yourself', 'success': False}, status=400)
+    
+    # Récupérer les messages - pas besoin de vérifier la connexion
+    messages_list = Message.objects.filter(
+        Q(sender=request.user, receiver=other_user) |
+        Q(sender=other_user, receiver=request.user),
+        deleted=False,
+        logement__isnull=True
+    ).order_by('sent_at')
+    
+    # Marquer les messages comme lus
+    Message.objects.filter(
+        sender=other_user, 
+        receiver=request.user, 
+        read=False
+    ).update(read=True)
+    
+    # Sérialiser les messages (convertir en liste pour itérer)
+    messages_data = []
+    messages_queryset = list(messages_list)  # Convertir en liste pour éviter les problèmes de requête
+    
+    for msg in messages_queryset:
+        try:
+            avatar_url = None
+            if msg.sender.avatar:
+                try:
+                    avatar_url = str(msg.sender.avatar.url)
+                except:
+                    avatar_url = None
+        except:
+            avatar_url = None
+        
+        try:
+            file_name = msg.get_file_name()
+            file_name = str(file_name) if file_name else None
+        except:
+            file_name = None
+            
+        try:
+            file_url = msg.get_file_url()
+            file_url = str(file_url) if file_url else None
+        except:
+            file_url = None
+        
+        try:
+            sent_at_str = msg.sent_at.isoformat() if hasattr(msg.sent_at, 'isoformat') else str(msg.sent_at)
+        except:
+            sent_at_str = str(msg.sent_at) if msg.sent_at else ''
+            
+        messages_data.append({
+            'id': int(msg.id),
+            'sender_id': int(msg.sender.id),
+            'sender_name': str(msg.sender.get_full_name() or msg.sender.username),
+            'sender_avatar': avatar_url,
+            'text': str(msg.text) if msg.text else '',
+            'file_name': file_name,
+            'file_url': file_url,
+            'sent_at': sent_at_str,
+            'is_mine': bool(msg.sender == request.user),
+        })
+    
+    try:
+        user_avatar = None
+        if other_user.avatar:
+            user_avatar = other_user.avatar.url
+    except:
+        user_avatar = None
+    
+    # S'assurer que toutes les valeurs sont sérialisables en JSON
+    try:
+        # Construire l'objet user
+        user_data = {
+            'id': int(other_user.id),
+            'name': str(other_user.get_full_name() or other_user.username),
+            'avatar': str(user_avatar) if user_avatar else None,
+        }
+        
+        response_data = {
+            'user': user_data,
+            'messages': messages_data,
+            'count': int(len(messages_data)),
+            'has_messages': bool(len(messages_data) > 0),
+            'success': True
+        }
+        
+        # Vérifier que les données sont sérialisables
+        json_str = json.dumps(response_data)
+        print(f"[API] Successfully serialized {len(messages_data)} messages for user {other_user.id}")
+        print(f"[API] Response structure: user={bool(response_data.get('user'))}, messages={len(response_data.get('messages', []))}, success={response_data.get('success')}")
+        
+        response = JsonResponse(response_data, safe=True)
+        response['Content-Type'] = 'application/json'
+        return response
+    except Exception as e:
+        import traceback
+        error_msg = f"Error serializing response: {str(e)}"
+        print(error_msg)
+        print(traceback.format_exc())
+        return JsonResponse({
+            'error': 'Erreur lors de la sérialisation des données',
+            'success': False,
+            'messages': [],
+            'count': 0
+        }, status=500)
+
+
 @login_required
 @require_POST
 def send_message_view(request, user_id):
-    """Envoyer un message - seulement si connecté"""
+    """Envoyer un message - Permet à n'importe qui de parler à n'importe qui"""
     receiver = get_object_or_404(CustomUser, id=user_id)
     
     if receiver == request.user:
         messages.error(request, "Vous ne pouvez pas vous envoyer un message à vous-même.")
         return redirect('messages')
-    
-    # Vérifier le statut de la connexion
-    connection = Connection.objects.filter(
-        Q(from_user=request.user, to_user=receiver) |
-        Q(from_user=receiver, to_user=request.user)
-    ).first()
-    
-    # Vérifier si les utilisateurs sont connectés (status = 'accepted')
-    is_connected = connection and connection.status == 'accepted'
-    
-    # Si pas connecté ou connexion refusée, bloquer l'envoi
-    if not is_connected:
-        if connection and connection.status == 'rejected':
-            messages.error(request, f"Votre demande de connexion a été refusée. Vous ne pouvez pas envoyer de message. Vous pouvez réessayer d'envoyer une demande de connexion depuis le profil.")
-        elif connection and connection.status == 'pending':
-            messages.error(request, "Votre demande de connexion est en attente. Vous devez attendre que la personne accepte avant de pouvoir envoyer des messages.")
-        else:
-            messages.error(request, "Vous devez être connecté avec cette personne pour lui envoyer un message. Envoyez d'abord une demande de connexion depuis son profil.")
-        return redirect('user_profile', user_id=user_id)
     
     text = request.POST.get('text', '').strip()
     file = request.FILES.get('file', None)
@@ -1026,7 +1112,7 @@ def evently_template(request, page: str):
     allowed = {
         'about', 'schedule', 'speakers', 'speaker-details',
         'venue', 'tickets', 'buy-tickets', 'gallery',
-        'terms', 'privacy', 'contact', 'sponsors', 'starter-page'
+        'terms', 'privacy', 'contact', 'sponsors', 'starter-page', 'spline-test'
     }
     if page in allowed:
         return render(request, f'User/evently/{page}.html')

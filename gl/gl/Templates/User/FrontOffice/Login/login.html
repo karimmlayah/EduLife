@@ -59,7 +59,7 @@
       pointer-events: none; /* visual cover only */
     }
 
-    /* Optional floating icon button */
+    /* Optional floating icon button - matching index.html colors */
     .floating-icon {
       position: fixed;
       right: 18px;
@@ -71,13 +71,19 @@
       align-items: center;
       justify-content: center;
       color: #fff;
-      background: linear-gradient(135deg, rgba(59,130,246,0.8), rgba(30,58,138,0.9));
-      box-shadow: 0 8px 22px rgba(0,0,0,.35);
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.9), rgba(248, 117, 0, 0.7));
+      box-shadow: 0 8px 22px rgba(248, 117, 0, 0.4), 0 0 0 1px rgba(248, 117, 0, 0.3) inset;
+      border: 1px solid rgba(248, 117, 0, 0.5);
       text-decoration: none;
       z-index: 2;
-      transition: transform .2s ease, box-shadow .2s ease;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
     }
-    .floating-icon:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.45); }
+    .floating-icon:hover { 
+      transform: translateY(-2px); 
+      background: linear-gradient(135deg, rgba(248, 117, 0, 1), rgba(248, 117, 0, 0.9));
+      box-shadow: 0 12px 26px rgba(248, 117, 0, 0.5), 0 0 0 1px rgba(248, 117, 0, 0.6) inset;
+      border-color: rgba(248, 117, 0, 0.8);
+    }
     .floating-icon i { font-size: 22px; }
 
   </style>

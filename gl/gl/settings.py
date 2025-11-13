@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                     'UserApp.context_processors.unread_messages_count',
                 'UserApp.context_processors.unread_notifications_count',
+                'UserApp.context_processors.recent_conversations',
 
             ],
         },
@@ -181,4 +182,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # AUTHENTIFICATION
 # -----------------------
 LOGIN_REDIRECT_URL = '/dashboard/'
+
 

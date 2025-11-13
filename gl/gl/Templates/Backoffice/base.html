@@ -96,46 +96,10 @@
         .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
         .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
 
-        /* User menu dropdown for dashboard */
+        /* User menu dropdown for dashboard - using .active class */
         .user-menu-dashboard {
             position: relative;
             display: inline-block;
-        }
-        .user-dropdown-dashboard {
-            position: absolute;
-            right: 0;
-            top: 46px;
-            min-width: 200px;
-            background: rgba(16, 23, 42, 0.95);
-            color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-            padding: 8px;
-            display: none;
-            z-index: 1050;
-            backdrop-filter: blur(8px);
-        }
-        .user-dropdown-dashboard a {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: #e5e7eb;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .user-dropdown-dashboard a:hover {
-            background: rgba(59, 130, 246, 0.18);
-            color: #fff;
-        }
-        .user-dropdown-dashboard a i {
-            width: 20px;
-            text-align: center;
-        }
-        .user-menu-dashboard.open .user-dropdown-dashboard {
-            display: block;
         }
 
         /* Button to go to site */
@@ -362,64 +326,64 @@
                 <div class="d-flex align-items-center justify-content-between w-100">
                     <!-- Left side: Breadcrumb -->
                     <div class="flex-grow-1">
-                        <nav aria-label="breadcrumb">
+                <nav aria-label="breadcrumb">
                             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
                                 <li class="breadcrumb-item text-sm text-white active" aria-current="page">{% block breadcrumb %}Dashboard{% endblock %}</li>
-                            </ol>
+                    </ol>
                             <h6 class="font-weight-bolder text-white mb-0">{% block page_title %}Dashboard{% endblock %}</h6>
-                        </nav>
+                </nav>
                     </div>
-                    
-                    <!-- Center: Navigation Links -->
-                    <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
+
+                        <!-- Center: Navigation Links -->
+                        <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
                         <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' or request.path == '/admin/' %}active{% endif %}">
-                            <i class="ni ni-single-02 me-1"></i>
-                            <span>User</span>
-                        </a>
-                        <a href="{% url 'offres_stage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
-                            <i class="ni ni-briefcase-24 me-1"></i>
-                            <span>Internship</span>
-                        </a>
-                        <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
-                            <i class="ni ni-building me-1"></i>
-                            <span>Startup</span>
-                        </a>
+                                <i class="ni ni-single-02 me-1"></i>
+                                <span>User</span>
+                            </a>
+                            <a href="{% url 'offres_stage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+                                <i class="ni ni-briefcase-24 me-1"></i>
+                                <span>Internship</span>
+                            </a>
+                            <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
+                                <i class="ni ni-building me-1"></i>
+                                <span>Startup</span>
+                            </a>
                         <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
-                            <i class="fas fa-home me-1"></i>
-                            <span>Housing</span>
-                        </a>
-                        <a href="{% url 'ride_sharing' %}" class="nav-link-top {% if request.resolver_match.url_name == 'ride_sharing' %}active{% endif %}">
-                            <i class="ni ni-delivery-fast me-1"></i>
-                            <span>Ride sharing</span>
-                        </a>
+                                <i class="fas fa-home me-1"></i>
+                                <span>Housing</span>
+                            </a>
+                            <a href="{% url 'ride_sharing' %}" class="nav-link-top {% if request.resolver_match.url_name == 'ride_sharing' %}active{% endif %}">
+                                <i class="ni ni-delivery-fast me-1"></i>
+                                <span>Ride sharing</span>
+                            </a>
                         <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' or request.path == '/dashboard/' or '/event/' in request.path and '/seats/' in request.path %}active{% endif %}">
-                            <i class="ni ni-calendar-grid-58 me-1"></i>
-                            <span>Events</span>
-                        </a>
-                    </div>
-                    
+                                <i class="ni ni-calendar-grid-58 me-1"></i>
+                                <span>Events</span>
+                            </a>
+                </div>
+
                     <!-- Right side: Notifications, Messages, and User Menu -->
                     <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2">
-                        {% if request.user.is_authenticated %}
-                            <!-- Button to go to site -->
+                    {% if request.user.is_authenticated %}
+                        <!-- Button to go to site -->
                             <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
                                 <i class="ni ni-world" style="font-size: 1.2rem;"></i>
                             </a>
-                            <!-- Notifications Icon -->
+                        <!-- Notifications Icon -->
                             <a href="{% url 'notifications' %}" class="notifications-icon-dashboard" title="Notifications" style="position: relative;">
                                 <i class="ni ni-bell-55" style="font-size: 1.2rem; color: white;"></i>
                                 {% if unread_notifications_count > 0 %}
                                     <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
                                 {% endif %}
                             </a>
-                            <!-- Messages Icon -->
+                        <!-- Messages Icon -->
                             <a href="{% url 'messages' %}" class="messages-icon-dashboard" title="Messages" style="position: relative;">
                                 <i class="ni ni-chat-round" style="font-size: 1.2rem; color: white;"></i>
                                 {% if unread_messages_count > 0 %}
                                     <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
                                 {% endif %}
                             </a>
-                            <!-- User Avatar Menu -->
+                        <!-- User Avatar Menu -->
                             {% with user_id=request.user.id|default:0 %}
                             <div class="user-menu-dashboard" id="dashboardUserMenu">
                                 <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center" style="cursor: pointer;">
@@ -439,13 +403,13 @@
                                 </div>
                             </div>
                             {% endwith %}
-                        {% else %}
+                    {% else %}
                             <a href="{% url 'login' %}" class="nav-link-top login-link">
                                 <i class="ni ni-single-02"></i>
                             </a>
-                        {% endif %}
-                    </div>
-                </div>
+                    {% endif %}
+                                        </div>
+                                    </div>
             </div>
         </nav>
         <!-- End Navbar -->
@@ -504,7 +468,7 @@
                 
                 if (toggle && dropdown) {
                     toggle.addEventListener('click', function(e) {
-                        e.preventDefault();
+                e.preventDefault();
                         e.stopPropagation();
                         userMenu.classList.toggle('active');
                     });
@@ -513,11 +477,14 @@
                     document.addEventListener('click', function(e) {
                         if (!userMenu.contains(e.target)) {
                             userMenu.classList.remove('active');
-                        }
-                    });
+                }
+            });
                 }
             }
         });
     </script>
+    
+    <!-- LinkedIn Style Messaging Widget -->
+    {% include 'User/includes/messaging_widget.html' %}
 </body>
 </html>

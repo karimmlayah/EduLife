@@ -34,26 +34,11 @@
       }
     }
 
-    /* Make header transparent over hero */
+    /* Header normal - no transparency */
     body.profile-hero-page #header.header {
-      --background-color: rgba(255, 255, 255, 0) !important;
-      background-color: rgba(255, 255, 255, 0) !important;
-      background: transparent !important;
-      box-shadow: none !important;
-    }
-
-    body.profile-hero-page.scrolled #header.header {
-      --background-color: rgba(34, 18, 2, 0.9) !important;
-      background-color: rgba(34, 18, 2, 0.9) !important;
-      background: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.95) !important;
+      background: rgba(34, 18, 2, 0.95) !important;
       box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    /* Ensure header text is visible on transparent background */
-    body.profile-hero-page #header.header,
-    body.profile-hero-page #header.header .logo h1,
-    body.profile-hero-page #header.header .navmenu a {
-      color: #ffffff !important;
     }
 
     .profile-hero .background-overlay {
@@ -150,7 +135,8 @@
     /* Main Content Section */
     .profile-main-content {
       background: var(--background-color);
-      padding: 60px 0;
+      padding: 0;
+      margin-top: 0;
     }
 
     .profile-content-header {
@@ -191,15 +177,16 @@
     .profile-container {
       max-width: 1128px;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 0 16px;
     }
     
     /* Profile Header */
     .profile-header {
       background: #fff;
-      border-radius: 8px;
+      border-radius: 0;
       box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
       margin-bottom: 16px;
+      margin-top: 0;
       overflow: hidden;
       position: relative;
     }
@@ -208,6 +195,7 @@
       background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
       position: relative;
       overflow: hidden;
+      margin-top: 100px;
     }
     .profile-cover img {
       width: 100%;
@@ -833,31 +821,9 @@
 {% endblock %}
 
 {% block content %}
-  <!-- Hero Section -->
-  <section class="profile-hero section dark-background">
-    <div class="background-overlay"></div>
-    <div class="hero-content">
-      <div class="container">
-        <div class="row justify-content-center text-center">
-          <div class="col-lg-10">
-            <div class="hero-text">
-              <h1 class="hero-title">Profil</h1>
-              <p class="hero-subtitle">Découvrez et partagez votre profil professionnel avec la communauté EduLife.</p>
-            </div>
-            <div class="profile-breadcrumb">
-              <a href="{% url 'index' %}">Home</a>
-              <span>/</span>
-              <span class="current">Profil</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Main Content Section -->
-  <section class="profile-main-content">
-    <div class="profile-content-header">
+  <section class="profile-main-content" style="margin-top: 0; padding-top: 0;">
+    <div class="profile-content-header" style="display: none;">
       <h2 class="profile-content-title">Profil</h2>
       <p class="profile-content-description">
         Gérez votre profil et partagez vos expériences avec la communauté.

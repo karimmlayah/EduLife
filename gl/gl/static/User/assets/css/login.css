@@ -24,16 +24,16 @@ body{
     width: 900px;
     height: 650px;
     max-height: 95vh;
-    /* More transparent glass */
-    background: rgba(255, 255, 255, 0.03);
+    /* Dark background matching index.html */
+    background: rgba(16, 9, 1, 0.4);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     margin: 20px;
     border-radius: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
-                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 
+                0 0 0 1px rgba(248, 117, 0, 0.15) inset;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(248, 117, 0, 0.2);
     perspective: 1000px;
 }
 
@@ -58,8 +58,8 @@ form{ width: 100%; }
     right: 0;
     width: 50%;
     height: 100%;
-    /* Transparent blue glass instead of grey */
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.16) 0%, rgba(59, 130, 246, 0.12) 100%);
+    /* Dark background matching index.html dark-background */
+    background: linear-gradient(135deg, rgba(16, 9, 1, 0.85) 0%, rgba(37, 37, 37, 0.75) 100%);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     display: flex;
@@ -73,7 +73,7 @@ form{ width: 100%; }
     transition: transform .7s cubic-bezier(.22,.8,.24,1), opacity .5s ease, visibility 0s .4s;
     overflow-y: auto;
     overflow-x: hidden;
-    border-left: 1px solid rgba(59, 130, 246, 0.25);
+    border-left: 1px solid rgba(248, 117, 0, 0.2);
     transform-style: preserve-3d;
 }
 
@@ -123,25 +123,25 @@ form{ width: 100%; }
     .input-box input{
         width: 100%;
         padding: 12px 50px 12px 20px;
-        /* Transparent blue tint instead of grey */
-        background: rgba(59, 130, 246, 0.12);
+        /* Dark background matching index.html */
+        background: rgba(37, 37, 37, 0.6);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-radius: 12px;
-        border: 2px solid rgba(59, 130, 246, 0.35);
+        border: 2px solid rgba(248, 117, 0, 0.3);
         outline: none;
         font-size: 15px;
         color: #ffffff;
         font-weight: 500;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
     .input-box input:focus{
-        border-color: rgba(255, 255, 255, 0.6);
-        background: rgba(59, 130, 246, 0.18);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25),
-                    0 6px 20px rgba(0, 0, 0, 0.2);
+        border-color: rgba(248, 117, 0, 0.6);
+        background: rgba(37, 37, 37, 0.8);
+        box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.25),
+                    0 6px 20px rgba(0, 0, 0, 0.4);
         transform: translateY(-2px);
     }
 
@@ -186,13 +186,13 @@ form{ width: 100%; }
 .btn{
     width: 100%;
     height: 45px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(248, 117, 0, 0.8) 0%, rgba(248, 117, 0, 0.6) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
-                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(248, 117, 0, 0.3) inset;
+    border: 2px solid rgba(248, 117, 0, 0.5);
     cursor: pointer;
     font-size: 15px;
     color: #ffffff;
@@ -211,7 +211,7 @@ form{ width: 100%; }
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s ease;
 }
 
@@ -220,11 +220,11 @@ form{ width: 100%; }
 }
 
 .btn:hover{
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
+    background: linear-gradient(135deg, rgba(248, 117, 0, 1) 0%, rgba(248, 117, 0, 0.8) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 6px 25px rgba(248, 117, 0, 0.4),
+                0 0 0 1px rgba(248, 117, 0, 0.6) inset;
+    border-color: rgba(248, 117, 0, 0.8);
 }
 
 .btn:active {
@@ -240,8 +240,8 @@ form{ width: 100%; }
     .social-icons button{
         display: inline-flex;
         padding: 10px;
-        border: 2px solid rgba(59, 130, 246, 0.3);
-        background: rgba(59, 130, 246, 0.12);
+        border: 2px solid rgba(248, 117, 0, 0.3);
+        background: rgba(37, 37, 37, 0.6);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-radius: 10px;
@@ -254,18 +254,18 @@ form{ width: 100%; }
 
     .social-icons a:hover,
     .social-icons button:hover{
-        border-color: rgba(255, 255, 255, 0.6);
-        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(248, 117, 0, 0.6);
+        background: rgba(248, 117, 0, 0.2);
         color: #ffffff;
         transform: translateY(-3px) scale(1.1);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 6px 20px rgba(248, 117, 0, 0.3);
     }
 
     .face-id-btn {
         display: inline-flex;
         padding: 10px;
-        border: 2px solid rgba(59, 130, 246, 0.3);
-        background: rgba(59, 130, 246, 0.12);
+        border: 2px solid rgba(248, 117, 0, 0.3);
+        background: rgba(37, 37, 37, 0.6);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-radius: 10px;
@@ -277,11 +277,11 @@ form{ width: 100%; }
     }
 
     .face-id-btn:hover {
-        border-color: rgba(59, 130, 246, 0.5);
-        background: rgba(59, 130, 246, 0.2);
+        border-color: rgba(248, 117, 0, 0.6);
+        background: rgba(248, 117, 0, 0.2);
         color: #ffffff;
         transform: translateY(-3px) scale(1.1);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 6px 20px rgba(248, 117, 0, 0.3);
     }
 
 .toggle-box{
@@ -291,14 +291,15 @@ form{ width: 100%; }
 }
 /* Make primary submit button highly visible for registration */
 .btn-primary-solid{
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-    border: 2px solid rgba(255,255,255,0.15);
+    background: linear-gradient(135deg, rgba(248, 117, 0, 0.9) 0%, rgba(248, 117, 0, 0.7) 100%);
+    border: 2px solid rgba(248, 117, 0, 0.5);
     position: relative;
     z-index: 5;
     margin-top: 16px;
 }
 .btn-primary-solid:hover{
-    background: linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, rgba(248, 117, 0, 1) 0%, rgba(248, 117, 0, 0.9) 100%);
+    border-color: rgba(248, 117, 0, 0.8);
 }
 
     .toggle-box::before{
@@ -307,14 +308,14 @@ form{ width: 100%; }
         left: -250%;
         width: 300%;
         height: 100%;
-        /* lighter translucent gradient to keep background visible */
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.22) 0%, rgba(59, 130, 246, 0.22) 100%);
+        /* Dark background matching index.html */
+        background: linear-gradient(135deg, rgba(16, 9, 1, 0.9) 0%, rgba(37, 37, 37, 0.85) 100%);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border-radius: 150px;
         z-index: 2;
         transition: 1.4s cubic-bezier(.22,.8,.24,1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     }
 
         .container.active .toggle-box::before{ left: 50%; }

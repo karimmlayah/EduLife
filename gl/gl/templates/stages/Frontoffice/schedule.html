@@ -674,7 +674,6 @@
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="{% url 'index' %}" class="">Home</a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
           <li><a href="{% url 'evently_schedule' %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
           <li><a href="{% url 'dashboard' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
           <li class="dropdown">
@@ -695,34 +694,17 @@
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li class="dropdown">
-            <a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-              <li><a href="{% url 'admin_tables' %}">Utilisateurs</a></li>
-            </ul>
-          </li>
+          <li><a href="{% url 'about' %}">About</a></li>
           <li><a href="{% url 'contact' %}">Contact</a></li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
       {% if request.user.is_authenticated %}
         <div class="user-actions">
-          <!-- Notifications Icon -->
-          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications">
-            <i class="bi bi-bell"></i>
-            {% if unread_notifications_count > 0 %}
-              <span class="notifications-badge">{{ unread_notifications_count }}</span>
-            {% endif %}
-          </a>
-          <!-- Messages Icon -->
-          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages">
-            <i class="bi bi-chat-dots"></i>
-            {% if unread_messages_count > 0 %}
-              <span class="messages-badge">{{ unread_messages_count }}</span>
-            {% endif %}
-          </a>
           <!-- User Avatar Menu -->
           {% with user_id=request.user.id|default:0 %}
           <div class="user-menu" id="idxUserMenu">
@@ -1178,6 +1160,9 @@
         });
     })();
   </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
 
 </body>
 

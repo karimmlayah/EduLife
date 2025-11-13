@@ -491,9 +491,6 @@
           <span class="connection-status accepted">
             <i class="bi bi-check-circle"></i> Connecté
           </span>
-          <a href="{% url 'messages_conversation' profile_user.id %}" class="btn-message">
-            <i class="bi bi-envelope"></i> Message
-          </a>
         {% elif connection_status == 'pending' %}
           {% if is_request_sender %}
             <span class="connection-status pending">
@@ -524,6 +521,11 @@
               <i class="bi bi-person-plus"></i> Se connecter
             </button>
           </form>
+        {% endif %}
+        {% if profile_user != request.user %}
+          <a href="{% url 'messages_conversation' profile_user.id %}" class="btn-message" style="margin-left: 0.5rem;">
+            <i class="bi bi-envelope"></i> Message
+          </a>
         {% endif %}
       </div>
     </div>

@@ -206,7 +206,8 @@
         width: 20px;
         text-align: center;
     }
-    .user-menu-dashboard.open .user-dropdown-dashboard {
+    .user-menu-dashboard.open .user-dropdown-dashboard,
+    .user-menu-dashboard.active .user-dropdown-dashboard {
         display: block;
     }
 
@@ -642,9 +643,15 @@
                       <td>
                         <div class="d-flex px-2 py-1">
                           <div>
-                            <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);font-weight:700;">
-                              {{ u.first_name|default:u.username|make_list|first|upper }}
-                            </span>
+                            {% with user_id=u.id|default:0 %}
+                            {% if u.avatar %}
+                              <img src="{{ u.avatar.url }}" alt="{{ u.first_name|default:u.username }}" class="avatar avatar-sm me-3" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                            {% else %}
+                              <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);font-weight:700;">
+                                {{ u.first_name|default:u.username|make_list|first|upper }}
+                              </span>
+                            {% endif %}
+                            {% endwith %}
                           </div>
                           <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">{{ u.first_name }} {% if u.last_name %}{{ u.last_name }}{% endif %}</h6>
@@ -1331,6 +1338,35 @@ function confirmRoleChange(userId, current, name, email) {
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
 
   <script src="{% static 'User/argon/assets/js/argon-dashboard.min.js' %}?v=2.1.0"></script>
+
+  <script>
+    // User dropdown menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const userMenu = document.getElementById('dashboardUserMenu');
+      if (userMenu) {
+        const dropdown = document.getElementById('dashboardUserDropdown');
+        const toggle = userMenu.querySelector('a[href="javascript:;"]');
+        
+        if (toggle && dropdown) {
+          toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle('active');
+          });
+          
+          // Close dropdown when clicking outside
+          document.addEventListener('click', function(e) {
+            if (!userMenu.contains(e.target)) {
+              userMenu.classList.remove('active');
+            }
+          });
+        }
+      }
+    });
+  </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
 
 </body>
 <script>

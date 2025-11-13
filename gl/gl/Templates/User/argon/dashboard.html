@@ -204,46 +204,15 @@
       .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
       .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
 
-      /* User menu dropdown for dashboard */
+      /* User menu dropdown for dashboard - using .active class */
       .user-menu-dashboard {
           position: relative;
           display: inline-block;
       }
-      .user-dropdown-dashboard {
-          position: absolute;
-          right: 0;
-          top: 46px;
-          min-width: 200px;
-          background: rgba(16, 23, 42, 0.95);
-          color: #fff;
-          border-radius: 12px;
-          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-          padding: 8px;
-          display: none;
-          z-index: 1050;
-          backdrop-filter: blur(8px);
-      }
-      .user-dropdown-dashboard a {
-          display: flex;
-          align-items: center;
-          padding: 10px 12px;
-          border-radius: 8px;
-          color: #e5e7eb;
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: all 0.2s;
-      }
-      .user-dropdown-dashboard a:hover {
-          background: rgba(59, 130, 246, 0.18);
-          color: #fff;
-      }
-      .user-dropdown-dashboard a i {
-          width: 20px;
-          text-align: center;
-      }
-      .user-menu-dashboard.open .user-dropdown-dashboard {
-          display: block;
+      .user-menu-dashboard.active .user-dropdown-dashboard {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
       }
 
       /* Button to go to site */
@@ -695,9 +664,13 @@
                           <div class="d-flex px-2 py-1">
                             <div>
                               {% with user_id=user.id|default:0 %}
-                              <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);font-weight:700;">
-                                {{ user.first_name|default:user.username|make_list|first|upper }}
-                              </span>
+                              {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.first_name|default:user.username }}" class="avatar avatar-sm me-3" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+                              {% else %}
+                                <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white {% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);font-weight:700;">
+                                  {{ user.first_name|default:user.username|make_list|first|upper }}
+                                </span>
+                              {% endif %}
                               {% endwith %}
                             </div>
                             <div class="d-flex flex-column justify-content-center">
@@ -855,5 +828,8 @@
         }
       });
     </script>
+    
+    <!-- LinkedIn Style Messaging Widget -->
+    {% include 'User/includes/messaging_widget.html' %}
   </body>
 </html>
