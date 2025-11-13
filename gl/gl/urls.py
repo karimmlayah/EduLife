@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Startup.urls')),  # your app routes
     path('investissements/', include('Investissement.urls')),
+    path('startupMembers/', include('StartupMembers.urls')),
+
 ]
 
 if settings.DEBUG:

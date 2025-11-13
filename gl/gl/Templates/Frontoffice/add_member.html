@@ -1,14 +1,13 @@
-<!DOCTYPE html>
 {% load static %}
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>My Startups - Evently Bootstrap Template</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+
+  <title>Add Member - {{ startup.nom_startup }}</title>
 
   <!-- Favicons -->
   <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
@@ -17,29 +16,21 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
+  <!-- Vendor CSS -->
   <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
 
-  <!-- Main CSS File -->
+  <!-- Main CSS -->
   <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
-
-  <!-- =======================================================
-  * Template Name: Evently
-  * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
-  * Updated: Jul 19 2025 with Bootstrap v5.3.7
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body class="schedule-page">
 
-  <header id="header" class="header d-flex align-items-center fixed-top">
+  <!-- HEADER (same as Evently) -->
+   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
       <a href="" class="logo d-flex align-items-center">
@@ -92,8 +83,8 @@
 
   <main class="main">
 
-    <!-- Page Title -->
-     <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %} ) ;">
+    <!-- PAGE TITLE -->
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %} ) ;">
       <div class="container position-relative">
         <h1>My Startups</h1>
         <p>Manage your startups, track funding progress, and update your information.</p>
@@ -106,121 +97,50 @@
       </div>
     </div><!-- End Page Title -->
 
-    <!-- My Startups Section -->
-    <section id="my-startups" class="schedule section light-background">
-
+    <!-- FORM SECTION -->
+    <section class="section light-background py-5">
       <div class="container">
 
-        <div class="row mb-4">
-          <div class="col-12 d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">Your Startups</h2>
-            <a href="{% url 'create_startup' %}" class="btn btn-primary">
-              <i class="bi bi-plus-circle me-2"></i>Create New Startup
-            </a>
+        <div class="card shadow border-0 mx-auto" style="max-width: 550px;">
+          <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">Add a New Member</h4>
+          </div>
+
+          <div class="card-body">
+
+            <form method="POST">
+              {% csrf_token %}
+
+              <div class="mb-3">
+                <label class="form-label">User (username or email)</label>
+                <input type="text" name="user" class="form-control" placeholder="ex: johndoe / johndoe@email.com" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Role in the Startup</label>
+                <input type="text" name="role" class="form-control" placeholder="ex: Developer, Designer, Manager">
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'startup_members' startup.id_startup %}" class="btn btn-secondary">
+                  <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-person-plus-fill"></i> Add Member
+                </button>
+              </div>
+
+            </form>
+
           </div>
         </div>
-
-        {% if startups %}
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th style="width: 80px;">Logo</th>
-                <th>Startup Name</th>
-                <th>Status</th>
-                <th>Funding Goal</th>
-                <th>Current Funding</th>
-                <th>Created On</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for startup in startups %}
-              <tr>
-                <td>
-                  {% if startup.logo %}
-                    <img src="{{ startup.logo.url }}" width="60" height="60" class="rounded-circle" style="object-fit:cover;">
-                  {% else %}
-                    <img src="{% static 'frontoffice/assets/img/events/speaker-1.webp' %}" width="60" height="60" class="rounded-circle" style="object-fit:cover;">
-                  {% endif %}
-                </td>
-                <td>
-                  <strong>{{ startup.nom_startup }}</strong>
-                  {% if startup.category %}
-                    <br><small class="text-muted">{{ startup.category }}</small>
-                  {% endif %}
-                </td>
-                <td>
-                  <span class="badge {% if startup.statut == 'active' %}bg-success{% elif startup.statut == 'pending' %}bg-warning text-dark{% elif startup.statut == 'funded' %}bg-info{% elif startup.statut == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
-                    {{ startup.statut|capfirst }}
-                  </span>
-                </td>
-                <td>{{ startup.fond_desire }} TND</td>
-                <td>
-                  <strong>{{ startup.fond_actuel }} TND</strong>
-                  {% if startup.fond_desire > 0 %}
-                    <br><small class="text-muted">
-                      {% widthratio startup.fond_actuel startup.fond_desire 100 %}% funded
-                    </small>
-                  {% endif %}
-                </td>
-                <td>{{ startup.date_creation|date:"M d, Y" }}</td>
-                <td>
-                  <div class="d-flex gap-2">
-                     <a href="{% url 'edit_startup' startup.id_startup %}" class="btn btn-sm btn-primary" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    {% if startup.fond_actuel == 0 %}
-                      <form method="POST" action="{% url 'delete_startup' startup.id_startup %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this startup?');">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      </form>
-                    {% else %}
-                      <button class="btn btn-sm btn-secondary" disabled title="Cannot delete - has funding">
-                        <i class="bi bi-lock"></i>
-                      </button>
-                    {% endif %}
-                    <!-- ⭐ MANAGE MEMBERS BUTTON -->
-        <a href="{% url 'startup_members' startup.id_startup %}" 
-            class="btn btn-info btn-sm"
-           title="Manage Members">
-            <i class="bi bi-people-fill"></i>
-        </a>
-        <a href="{% url 'startup_members' startup.id_startup %}" 
-   class="btn btn-info btn-sm">
-    Manage Members
-</a>
-
-
-
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="text-center py-5">
-          <div class="mb-4">
-            <i class="bi bi-briefcase" style="font-size: 4rem; color: #ccc;"></i>
-          </div>
-          <h3>No Startups Yet</h3>
-          <p class="text-muted mb-4">You haven't created any startups yet. Start your journey by creating your first startup!</p>
-          <a href="{% url 'create_startup' %}" class="btn btn-primary btn-lg">
-            <i class="bi bi-plus-circle me-2"></i>Create Your First Startup
-          </a>
-        </div>
-        {% endif %}
 
       </div>
-
-    </section><!-- /My Startups Section -->
+    </section>
 
   </main>
 
+  <!-- FOOTER -->
   <footer id="footer" class="footer position-relative dark-background">
 
     <div class="container footer-top">
@@ -301,22 +221,14 @@
 
   </footer>
 
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+  </a>
 
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
   <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
   <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
   <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
-
-  <!-- Main JS File -->
   <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
 
 </body>
-
 </html>

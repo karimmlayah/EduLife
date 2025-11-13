@@ -68,11 +68,13 @@ def courses(request):
 
     return render(request, 'Frontoffice/startup_list.html', {'page_obj': page_obj, 'now': now})
 
+
 @login_required
 def my_startups(request):
-    # Show only startups created by the current user
-    startups = Startup.objects.filter(founder=request.user).order_by('-date_creation')
-    return render(request, 'Frontoffice/my_startups.html', {'startups': startups})
+    startups = Startup.objects.filter(founder=request.user)
+    return render(request, "Frontoffice/my_startups.html", {
+        "startups": startups
+    })
 
 @login_required
 def delete_startup(request, id):
@@ -236,7 +238,7 @@ def create_startup(request):
 
         invalid = re.sub(r'[A-Za-z0-9\s\-\_]', '', nom)
         if invalid:
-            errors['nom_startup'] = errors.get('nom_startup', "") + f' Invalid characters detected: "{invalid}".'
+            errors['nom_startup'] = errors.get('nom_startup', "") + f' Invalid characters detected: \"{invalid}\".'
 
         # -----------------------------
         # VALIDATION : category
@@ -246,7 +248,7 @@ def create_startup(request):
 
         invalid = re.sub(r'[A-Za-z0-9\s\-\_\/]', '', cat)
         if invalid:
-            errors['category'] = errors.get('category', "") + f' Invalid characters detected: "{invalid}".'
+            errors['category'] = errors.get('category', "") + f' Invalid characters detected: \"{invalid}\".'
 
         # -----------------------------
         # VALIDATION : description
@@ -270,13 +272,12 @@ def create_startup(request):
         if logo:
             ext = logo.name.split('.')[-1].lower()
             if ext not in ['png', 'jpg', 'jpeg', 'webp', 'jfif']:
-                errors['logo'] = "Only PNG, JPG, JFIF, JPEG or WEBP images are allowed."
+                errors['logo'] = "Only PNG, JPG, JPEG, JFIF or WEBP are allowed."
 
         # -----------------------------
-        # IF ERRORS → RETURN WITH ERRORS
+        # ERRORS → RETURN FORM
         # -----------------------------
         if errors:
-            # keep user input inside fields
             old_data = {
                 'nom_startup': nom,
                 'description': desc,
@@ -290,9 +291,9 @@ def create_startup(request):
             })
 
         # -----------------------------
-        # NO ERRORS → CREATE STARTUP
+        # CREATE STARTUP
         # -----------------------------
-        Startup.objects.create(
+        new_startup = Startup.objects.create(
             nom_startup=nom,
             description=desc,
             category=cat,
@@ -304,7 +305,18 @@ def create_startup(request):
             founder=request.user
         )
 
-        
+        # -----------------------------
+        # ADD FOUNDER TO MEMBERS TABLE
+        # -----------------------------
+        from StartupMembers.models import StartupMember
+
+        StartupMember.objects.create(
+            user=request.user,
+            startup=new_startup,  # ✔ correct instance
+            role="Founder",
+            is_lead=True
+        )
+
         return redirect('startup_list')
 
     return render(request, 'Frontoffice/create_startup.html')
