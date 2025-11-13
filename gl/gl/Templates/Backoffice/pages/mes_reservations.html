@@ -1,0 +1,84 @@
+{% extends 'backoffice/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <h4 class="text-white mb-4">Demandes de réservation reçues</h4>
+
+    <div class="card">
+        <div class="card-header pb-0">
+            <h6>Liste des réservations</h6>
+        </div>
+
+        <div class="card-body px-0 pt-0 pb-2">
+            <div class="table-responsive p-3">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th>Passager</th>
+                            <th>Trajet</th>
+                            <th>Date réservation</th>
+                            <th>Places</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for d in demandes %}
+                        <tr>
+                            <td>{{ d.passager.username }}</td>
+                            <td>{{ d.offre.depart }} → {{ d.offre.destination }}</td>
+                            <td>{{ d.date_reservation|date:"d/m/Y H:i" }}</td>
+                            <td>{{ d.nombre_places_reservees }}</td>
+
+                            <!-- BADGES DE STATUT -->
+                            <td>
+                                {% if d.statut == "pending" %}
+                                    <span class="badge bg-warning text-dark">En attente</span>
+
+                                {% elif d.statut == "accepted" %}
+                                    <span class="badge bg-success">Acceptée</span>
+
+                                {% elif d.statut == "cancelled" %}
+                                    <span class="badge bg-secondary">Annulée</span>
+
+                                {% else %}
+                                    <span class="badge bg-danger">Rejetée</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- BOUTONS -->
+                            <td class="text-center">
+
+                                {% if d.statut == "pending" %}
+                                    <a href="{% url 'res_accept' d.id %}"
+                                       class="btn btn-success btn-sm">Accepter</a>
+
+                                    <a href="{% url 'res_reject' d.id %}"
+                                       class="btn btn-danger btn-sm">Refuser</a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">
+                                Aucune demande de réservation.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
