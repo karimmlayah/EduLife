@@ -32,7 +32,7 @@ def create_investissement(request, startup_id):
         errors, montant_raw, commentaire = _validate_create_form(request.POST)
 
         if errors:
-            return render(request, 'Frontoffice/create_investissement.html', {
+            return render(request, 'startup/Frontoffice/create_investissement.html', {
                 'startup': startup,
                 'errors': errors,
                 'old': {
@@ -53,7 +53,7 @@ def create_investissement(request, startup_id):
         )
         return redirect('my_investissements')
 
-    return render(request, 'Frontoffice/create_investissement.html', {'startup': startup})
+    return render(request, 'startup/Frontoffice/create_investissement.html', {'startup': startup})
 
 
 @login_required
@@ -65,7 +65,7 @@ def my_investissements(request):
         .order_by('-date')
     )
 
-    return render(request, 'Frontoffice/my_investissements.html', {
+    return render(request, 'startup/Frontoffice/my_investissements.html', {
         'investissements': investissements
     })
 
@@ -84,7 +84,7 @@ def edit_investissement(request, invest_id):
         if errors:
             investissement.montant = montant_raw
             investissement.commentaire = commentaire
-            return render(request, 'Frontoffice/edit_investissement.html', {
+            return render(request, 'startup/Frontoffice/edit_investissement.html', {
                 'investissement': investissement,
                 'errors': errors
             })
@@ -106,7 +106,7 @@ def edit_investissement(request, invest_id):
         
         return redirect('my_investissements')
 
-    return render(request, 'Frontoffice/edit_investissement.html', {
+    return render(request, 'startup/Frontoffice/edit_investissement.html', {
         'investissement': investissement
     })
 

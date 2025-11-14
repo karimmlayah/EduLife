@@ -8,16 +8,16 @@ import Startup.templatetags.startup_extras as startup_tags
 
 
 def home(request):
-    return render(request, 'Frontoffice/index.html')
+    return render(request, 'startup/Frontoffice/index.html')
 
 def base(request):
-    return render(request, 'Backoffice/base.html')
+    return render(request, 'startup/Backoffice/base.html')
 def dashboard_startup(request):
-    return render(request, 'Backoffice/dashboard_startup.html')
+    return render(request, 'startup/Backoffice/dashboard_startup.html')
 def investmentList(request):
-    return render(request, 'Backoffice/investmentList.html')
+    return render(request, 'startup/Backoffice/investmentList.html')
 def startupList(request):
-    return render(request, 'Backoffice/startupList.html')
+    return render(request, 'startup/Backoffice/startupList.html')
 
 def about(request):
     return render(request, 'about.html')
@@ -66,13 +66,13 @@ def courses(request):
     for startup in page_obj:
         startup.time_since_creation = (now - startup.date_creation).days
 
-    return render(request, 'Frontoffice/startup_list.html', {'page_obj': page_obj, 'now': now})
+    return render(request, 'startup/Frontoffice/startup_list.html', {'page_obj': page_obj, 'now': now})
 
 
 @login_required
 def my_startups(request):
     startups = Startup.objects.filter(founder=request.user)
-    return render(request, "Frontoffice/my_startups.html", {
+    return render(request, "startup/Frontoffice/my_startups.html", {
         "startups": startups
     })
 
@@ -120,9 +120,9 @@ def edit_startup(request, id):
             return redirect('my_startups')
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
-            return render(request, 'Frontoffice/edit_startup.html', {'startup': startup})
+            return render(request, 'startup/Frontoffice/edit_startup.html', {'startup': startup})
 
-    return render(request, 'Frontoffice/edit_startup.html', {'startup': startup})
+    return render(request, 'startup/Frontoffice/edit_startup.html', {'startup': startup})
 
 
 @login_required
@@ -186,7 +186,7 @@ def edit_startup(request, id):
             startup.category = cat
             startup.fond_desire = fond_desire  
 
-            return render(request, 'Frontoffice/edit_startup.html', {
+            return render(request, 'startup/Frontoffice/edit_startup.html', {
                 'startup': startup,
                 'errors': errors
             })
@@ -208,7 +208,7 @@ def edit_startup(request, id):
         return redirect('my_startups')
 
     # GET method → just load form
-    return render(request, 'Frontoffice/edit_startup.html', {
+    return render(request, 'startup/Frontoffice/edit_startup.html', {
         'startup': startup
     })
 
@@ -285,7 +285,7 @@ def create_startup(request):
                 'fond_desire': fond_desire
             }
 
-            return render(request, 'Frontoffice/create_startup.html', {
+            return render(request, 'startup/Frontoffice/create_startup.html', {
                 'errors': errors,
                 'old': old_data
             })
@@ -319,7 +319,7 @@ def create_startup(request):
 
         return redirect('startup_list')
 
-    return render(request, 'Frontoffice/create_startup.html')
+    return render(request, 'startup/Frontoffice/create_startup.html')
 
 from django.shortcuts import render
 from Startup.models import Startup
@@ -332,7 +332,7 @@ def backoffice_dashboard(request):
     total_invests = Investissement.objects.count()
     pending_invests = Investissement.objects.filter(statut="pending").count()
 
-    return render(request, "backoffice/dashboard_overview.html", {
+    return render(request, "startup/Backoffice/dashboard_overview.html", {
         "total_startups": total_startups,
         "pending_startups": pending_startups,
         "total_invests": total_invests,
@@ -368,7 +368,7 @@ def dashboard_startup(request):
         "total_investments": Investissement.objects.count(),
     }
 
-    return render(request, "Backoffice/dashboard_startup.html", context)
+    return render(request, "startup/Backoffice/dashboard_startup.html", context)
 
 
 # ----------------------------------------------------------
@@ -391,7 +391,7 @@ def startupList(request):
         else:
             s.pct_funded = 0
 
-    return render(request, "Backoffice/startupList.html", {"startups": startups})
+    return render(request, "startup/Backoffice/startupList.html", {"startups": startups})
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from .models import Startup
@@ -430,7 +430,7 @@ def reject_startup(request, id):
 def investmentList(request):
     investments = Investissement.objects.select_related("startup", "investor").order_by("-date")
 
-    return render(request, "Backoffice/investmentList.html", {
+    return render(request, "startup/Backoffice/investmentList.html", {
         "investments": investments,
         "pending_count": Investissement.objects.filter(statut="pending").count()
     })
@@ -440,7 +440,7 @@ def investmentList(request):
 def investmentList(request):
     investments = Investissement.objects.select_related("startup", "investor").order_by("-date")
 
-    return render(request, "Backoffice/investmentList.html", {
+    return render(request, "startup/Backoffice/investmentList.html", {
         "investments": investments,
         "pending_count": Investissement.objects.filter(statut="pending").count()
     })

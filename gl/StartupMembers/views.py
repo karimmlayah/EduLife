@@ -19,7 +19,7 @@ def startup_members(request, startup_id):
     from django.contrib.auth.models import User
     all_users = User.objects.all()
 
-    return render(request, "Frontoffice/startup_members.html", {
+    return render(request, "startup/Frontoffice/startup_members.html", {
         "startup": startup,
         "members": members,
         "is_lead": lead,
