@@ -540,6 +540,56 @@ def binome_contact(request, request_id):
 
 
 @login_required
+def binome_edit(request, request_id):
+    """Modifier une demande de binôme"""
+    from .models import BinomeRequest
+    from .forms import BinomeRequestForm
+    
+    binome_request = get_object_or_404(BinomeRequest, id=request_id)
+    
+    # Vérifier que l'utilisateur est le propriétaire de la demande
+    if binome_request.user != request.user:
+        messages.error(request, "Vous n'avez pas la permission de modifier cette demande.")
+        return redirect('binome_search')
+    
+    if request.method == 'POST':
+        form = BinomeRequestForm(request.POST, instance=binome_request, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Votre demande de binôme a été modifiée avec succès!')
+            return redirect('binome_search')
+    else:
+        form = BinomeRequestForm(instance=binome_request, user=request.user)
+    
+    return render(request, 'User/LogementApp/binome_edit.html', {
+        'form': form,
+        'binome_request': binome_request
+    })
+
+
+@login_required
+def binome_delete(request, request_id):
+    """Supprimer une demande de binôme"""
+    from .models import BinomeRequest
+    
+    binome_request = get_object_or_404(BinomeRequest, id=request_id)
+    
+    # Vérifier que l'utilisateur est le propriétaire de la demande
+    if binome_request.user != request.user:
+        messages.error(request, "Vous n'avez pas la permission de supprimer cette demande.")
+        return redirect('binome_search')
+    
+    if request.method == 'POST':
+        binome_request.delete()
+        messages.success(request, 'Votre demande de binôme a été supprimée avec succès!')
+        return redirect('binome_search')
+    
+    return render(request, 'User/LogementApp/binome_delete.html', {
+        'binome_request': binome_request
+    })
+
+
+@login_required
 @user_passes_test(is_superuser_or_admin, login_url='/login/')
 def approve_logement(request, logement_id):
     """Approuver un logement"""

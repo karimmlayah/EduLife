@@ -14,6 +14,8 @@ urlpatterns = [
     path('binome/', views.binome_search, name='binome_search'),
     path('binome/add/', views.binome_add, name='binome_add'),
     path('binome/<int:request_id>/', views.binome_detail, name='binome_detail'),
+    path('binome/<int:request_id>/edit/', views.binome_edit, name='binome_edit'),
+    path('binome/<int:request_id>/delete/', views.binome_delete, name='binome_delete'),
     path('binome/<int:request_id>/contact/', views.binome_contact, name='binome_contact'),
     path('dashboard/', views.dashboard, name='dashboard'),
 ]

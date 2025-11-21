@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Invest in {{ startup.nom_startup }}</title>
+
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+  <style>
+    .user-avatar-mini {display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 0 0 3px rgba(37,117,252,.18)}
+    .user-avatar-initials{font-size:.9rem;letter-spacing:.5px}
+    .avatar-c0{background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);box-shadow:0 0 0 3px rgba(17,205,239,.55)}
+    .avatar-c1{background:linear-gradient(135deg,#11cdef 0%,#2dce89 100%);box-shadow:0 0 0 3px rgba(45,206,137,.55)}
+    .avatar-c2{background:linear-gradient(135deg,#2dce89 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c3{background:linear-gradient(135deg,#f5365c 0%,#fb6340 100%);box-shadow:0 0 0 3px rgba(251,99,64,.55)}
+    .avatar-c4{background:linear-gradient(135deg,#172b4d 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c5{background:linear-gradient(135deg,#11cdef 0%,#6a11cb 100%);box-shadow:0 0 0 3px rgba(106,17,203,.45)}
+    .user-menu{ position: relative; display:inline-block; }
+    .user-dropdown{ position:absolute; right:0; top:46px; min-width:160px; background:rgba(16,23,42,.92); color:#fff; border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset; padding:6px; display:none; z-index:1050; backdrop-filter: blur(8px); }
+    .user-dropdown a{ display:block; padding:10px 12px; border-radius:8px; color:#e5e7eb; text-decoration:none; font-weight:600; font-size:.9rem; }
+    .user-dropdown a:hover{ background: rgba(59,130,246,.18); color:#fff; }
+    .user-menu.open .user-dropdown{ display:block; }
+    .user-avatar-mini.has-avatar {
+      background: none;
+      box-shadow: none;
+      padding: 0;
+    }
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+
+<body class="buy-tickets-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">EduLife</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'logement_add' %}"><i class="bi bi-plus-circle me-1"></i> Ajouter un logement</a></li>
+                <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
+                <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' or request.resolver_match.url_name == 'home' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      {% if request.user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+            {% if unread_notifications_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+            {% if unread_messages_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
+          {% with user_id=request.user.id|default:0 %}
+          <div class="user-menu" id="idxUserMenu">
+            <a href="#" onclick="return false;"
+               class="user-avatar-mini {% if request.user.avatar %}has-avatar{% else %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+               title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}">
+              {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+              {% else %}
+                <span class="user-avatar-initials">
+                  {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                </span>
+              {% endif %}
+            </a>
+          <div class="user-dropdown" id="idxUserDropdown">
+            <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+            <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+            {% if request.user.is_superuser %}
+              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+            {% endif %}
+            <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+            <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+          </div>
+        </div>
+        {% endwith %}
+        </div>
+      {% else %}
+        <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
+      {% endif %}
+
+    </div>
+  </header>
+
+<main class="main">
+
+  <div class="page-title dark-background"
+       style="background-image: url(https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1920&h=1080&fit=crop);">
+    <div class="container">
+      <h1>Invest in {{ startup.nom_startup }}</h1>
+      <p>Support this startup by submitting your investment details.</p>
+    </div>
+  </div>
+
+  <section id="invest-startup" class="buy-tickets section">
+    <div class="container">
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+          <div class="ticket-form-wrapper">
+
+            <div class="event-info mb-4">
+              <h3>Startup Summary</h3>
+              <div class="event-meta">
+                <span><i class="bi bi-lightbulb"></i> {{ startup.nom_startup }}</span>
+                <span><i class="bi bi-wallet2"></i> Goal: {{ startup.fond_desire }} TND</span>
+                <span><i class="bi bi-graph-up"></i> Raised: {{ startup.fond_actuel }} TND</span>
+              </div>
+            </div>
+
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="POST"
+                  action="{% url 'create_investissement' startup.id_startup %}"
+                  class="ticket-form">
+              {% csrf_token %}
+
+              <!-- Investment Amount -->
+              <div class="form-group mb-4">
+                <label for="montant">Investment Amount (TND) *</label>
+                <input type="number"
+                       name="montant"
+                       id="montant"
+                       class="form-control"
+                       min="1"
+                       step="1"
+                       value="{{ old.montant|default:'' }}"
+                       placeholder="Enter the amount you wish to invest">
+
+                <!-- Server error -->
+                <small class="text-danger server-error">
+                  {% if errors and errors.montant %}{{ errors.montant }}{% endif %}
+                </small>
+
+                <!-- JS error -->
+                <small class="text-danger live-error"></small>
+              </div>
+
+              <!-- Comment -->
+              <div class="form-group mb-4">
+                <label for="commentaire">Comment (optional)</label>
+                <textarea name="commentaire"
+                          id="commentaire"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Why are you investing?">{{ old.commentaire|default:'' }}</textarea>
+
+                <!-- Server error -->
+                <small class="text-danger server-error">
+                  {% if errors and errors.commentaire %}{{ errors.commentaire }}{% endif %}
+                </small>
+
+                <!-- JS error -->
+                <small class="text-danger live-error"></small>
+              </div>
+
+              <div class="pricing-summary">
+                <h5>Before You Submit</h5>
+                <div class="summary-row">
+                  <span><i class="bi bi-check-circle text-success"></i> Pending Review</span>
+                  <span>Your investment will remain pending.</span>
+                </div>
+              </div>
+
+              <div class="form-submit mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-currency-dollar me-2"></i> Confirm Investment
+                </button>
+                <a href="{% url 'startup_list' %}" class="btn btn-outline-secondary btn-lg ms-2">Back</a>
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const rules = {
+
+        montant: value => {
+            const errors = [];
+            if (!value) errors.push("Amount is required.");
+
+            const num = parseFloat(value);
+            if (isNaN(num)) errors.push("Amount must be a valid number.");
+            else if (num <= 0) errors.push("Amount must be greater than 0.");
+
+            return errors.join(" ");
+        },
+
+        commentaire: value => {
+            const errors = [];
+            if (!value) return ""; // optional
+
+            if (value.length < 10)
+                errors.push("Comment must be at least 10 characters.");
+
+            const cleaned = value.replace(/ /g, "");
+            const invalid = cleaned.replace(/[A-Za-z0-9\-\_\.\,\!\?]/g, "");
+            if (invalid.length)
+                errors.push(`Invalid characters detected: "${invalid}"`);
+
+            return errors.join(" ");
+        }
+    };
+
+    const form = document.querySelector("form.ticket-form");
+
+    form.addEventListener("input", e => {
+        const input = e.target;
+        if (!rules[input.id]) return;
+
+        input.parentElement.querySelectorAll(".server-error")
+            .forEach(el => el.textContent = "");
+
+        const error = rules[input.id](input.value.trim());
+        input.parentElement.querySelector(".live-error").textContent = error;
+    });
+
+    form.addEventListener("submit", e => {
+        let stop = false;
+
+        ["montant", "commentaire"].forEach(id => {
+            const input = document.getElementById(id);
+            const error = rules[id](input.value.trim());
+            input.parentElement.querySelector(".live-error").textContent = error;
+            if (error) stop = true;
+        });
+
+        if (stop) e.preventDefault();
+    });
+
+});
+</script>
+
+
+<script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<script>
+  // Dropdown for avatar (index page)
+  (function(){
+    const menu = document.getElementById('idxUserMenu');
+    if (!menu) return;
+    const toggle = menu.querySelector('.user-avatar-mini');
+    function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+    toggle.addEventListener('click', function(){
+      menu.classList.toggle('open');
+      if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+    });
+  })();
+</script>
+
+</body>
+</html>

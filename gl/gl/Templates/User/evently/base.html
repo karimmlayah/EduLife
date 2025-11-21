@@ -274,61 +274,65 @@
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
-          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
           <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
           {% endif %}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
-      {# Afficher l'élément de droite seulement sur la page d'accueil #}
-      {% if True %}
-        {% if request.user.is_authenticated %}
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <!-- Notifications Icon -->
-            <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
-              <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
-              {% if unread_notifications_count > 0 %}
-                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+      {% if request.user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+            {% if unread_notifications_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+            {% if unread_messages_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
+          {% with user_id=request.user.id|default:0 %}
+          <div class="user-menu" id="idxUserMenu">
+            <a href="#" onclick="return false;"
+               class="user-avatar-mini {% if request.user.avatar %}has-avatar{% else %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+               title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}">
+              {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+              {% else %}
+                <span class="user-avatar-initials">
+                  {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                </span>
               {% endif %}
             </a>
-            <!-- Messages Icon -->
-            <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
-              <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
-              {% if unread_messages_count > 0 %}
-                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
-              {% endif %}
-            </a>
-            {% with user_id=request.user.id|default:0 %}
-            <div class="user-menu" id="hdrUserMenu">
-              <a href="#" onclick="return false;"
-                 class="user-avatar-mini {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
-                 title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}"
-                 style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0;{% endif %}">
-                {% if request.user.avatar %}
-                  <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                {% else %}
-                  <span class="user-avatar-initials">
-                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
-                  </span>
-                {% endif %}
-              </a>
-            <div class="user-dropdown" id="hdrUserDropdown">
+          <div class="user-dropdown" id="idxUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
-              {% if request.user.is_superuser %}
-                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
-              {% endif %}
-              <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
-              <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
-            </div>
+            {% if request.user.is_superuser %}
+              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+            {% endif %}
+            <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+            <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
           </div>
-          {% endwith %}
-          </div>
-         {% else %}
-           <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
-         {% endif %}
+        </div>
+        {% endwith %}
+        </div>
+      {% else %}
+        <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
       {% endif %}
     </div>
   </header>
@@ -352,10 +356,10 @@
   <script>
     // Dropdown for avatar (header)
     (function(){
-      const menu = document.getElementById('hdrUserMenu');
+      const menu = document.getElementById('idxUserMenu');
       if (!menu) return;
       const toggle = menu.querySelector('.user-avatar-mini');
-      const dd = document.getElementById('hdrUserDropdown');
+      const dd = document.getElementById('idxUserDropdown');
       function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
       toggle.addEventListener('click', function(){
         menu.classList.toggle('open');

@@ -24,6 +24,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from LogementApp.views import dashboard as admin_dashboard_view, argon_page, tables, dashboard_logements, manage_logements, approve_logement, reject_logement
 from EventApp import views
+from EventApp.views import dashboard_events
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from ReservationApp.views import mes_reservations_passager
@@ -422,15 +423,18 @@ urlpatterns = [
     path('admin/logements/<int:logement_id>/reject/', reject_logement, name='reject_logement'),
     path('admin/<str:page>/', argon_page, name='admin_page'),
     path('dj-admin/', admin.site.urls),
-    
+
     # --- APPLICATIONS PRINCIPALES ---
+    # UserApp.urls doit être avant Startup.urls pour que la route racine pointe vers index.html
+    path('', include('UserApp.urls')),
+    path('api/', include('UserApp.api_urls')),
     path('Logement/', include('LogementApp.urls')),
     path('Event/', include('EventApp.urls')),  # AJOUT CRITIQUE: URLs pour EventApp
-    path('api/', include('UserApp.api_urls')),
-    path('', include('UserApp.urls')),
+    path('startup/', include('Startup.urls')),  # your app routes
+    path('investissements/', include('Investissement.urls')),
+    path('startupMembers/', include('StartupMembers.urls')),
     
     # --- DASHBOARD STAGES ---
-    path('dashboard/', dashboard, name='dashboard'),
     path('dashboard/internship/', dashboard, name='dashboard_internships'),
     path('dashboard/offres-stage/', offres_stage, name='offres_stage'),
     path('dashboard/postulations/', postulations, name='postulations'),
@@ -438,7 +442,7 @@ urlpatterns = [
     path('dashboard/startup/', startup, name='startup'),
     path('dashboard/housing/', housing, name='housing'),
     path('dashboard/ride-sharing/', ride_sharing, name='ride_sharing'),
-    path('dashboard/events/', events, name='events'),
+    path('dashboard/events/', dashboard_events, name='dashboard_events'),
     
     # --- FRONTEND STAGES ---
     path('my-applications/', my_applications, name='my_applications'),
@@ -475,6 +479,10 @@ urlpatterns = [
 
     # --- MODULE RÉSERVATIONS ---
     path('reservation/', include('ReservationApp.urls')),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+    # --- MODULE STARTUP ---
+    
 
     # Gestion des demandes pour le conducteur
     path('mes_reservations/', mes_reservations, name='mes_reservations'),

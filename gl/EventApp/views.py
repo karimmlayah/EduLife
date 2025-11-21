@@ -3,8 +3,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.utils import timezone
+from django.db.models import Sum, Count, Avg
 import stripe
 from django.http import JsonResponse
 from django.conf import settings
@@ -53,6 +54,66 @@ def event_home(request):
         "upcoming_event": upcoming_event,
         "my_reservations": my_reservations,  # 👈 indispensable
     })
+@login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
+def dashboard_events(request):
+    """Dashboard avec statistiques des événements"""
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+        return redirect('index')
+    
+    today = timezone.now().date()
+    first_day_of_month = today.replace(day=1)
+    
+    all_events = Event.objects.all()
+    
+    # --- EVENT STATS ---
+    total_events = all_events.count()
+    upcoming_events = all_events.filter(date__gte=today).count()
+    past_events = all_events.filter(date__lt=today).count()
+    events_this_month = all_events.filter(date__gte=first_day_of_month).count()
+    
+    # --- SEATS STATS ---
+    total_seats = all_events.aggregate(Sum('total_seats'))['total_seats__sum'] or 0
+    total_reserved_seats = all_events.aggregate(Sum('reserved_seats'))['reserved_seats__sum'] or 0
+    total_available_seats = total_seats - total_reserved_seats
+    occupancy_rate = 0
+    if total_seats > 0:
+        occupancy_rate = (total_reserved_seats / total_seats) * 100
+    
+    # --- FINANCIAL STATS ---
+    total_revenue = 0
+    for event in all_events:
+        total_revenue += event.reserved_seats * event.price
+    avg_price = all_events.aggregate(Avg('price'))['price__avg'] or 0
+    
+    # --- CATEGORY STATS ---
+    events_by_category = all_events.values('category').annotate(count=Count('id')).order_by('-count')
+    
+    # --- LOCATION STATS ---
+    events_by_location = all_events.values('location').annotate(count=Count('id')).order_by('-count')[:5]
+    
+    # --- RECENT DATA ---
+    recent_events = all_events.order_by('-date')[:5]
+    
+    context = {
+        "total_events": total_events,
+        "upcoming_events": upcoming_events,
+        "past_events": past_events,
+        "events_this_month": events_this_month,
+        "total_seats": total_seats,
+        "total_reserved_seats": total_reserved_seats,
+        "total_available_seats": total_available_seats,
+        "occupancy_rate": round(occupancy_rate, 2),
+        "total_revenue": round(total_revenue, 2),
+        "avg_price": round(avg_price, 2),
+        "events_by_category": events_by_category,
+        "events_by_location": events_by_location,
+        "recent_events": recent_events,
+    }
+    
+    return render(request, "Backoffice/pages/dashboard_events.html", context)
+
 @login_required
 @user_passes_test(is_superuser_or_admin, login_url='/login/')
 def dashboard(request):

@@ -673,11 +673,11 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{% url 'index' %}" class="">Home</a></li>
-          <li><a href="{% url 'evently_schedule' %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
-          <li><a href="{% url 'dashboard' %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
           <li class="dropdown">
-            <a href="#"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
               {% if request.user.is_authenticated %}
@@ -688,14 +688,33 @@
             </ul>
           </li>
           <li class="dropdown">
-            <a href="{% url 'internships' %}" class="active">Internships <i class="bi bi-chevron-down"></i></a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' or request.resolver_match.url_name == 'home' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li><a href="{% url 'about' %}">About</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
           <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
           {% endif %}

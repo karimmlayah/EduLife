@@ -157,7 +157,7 @@
               <i class="ni ni-briefcase-24 me-1"></i>
               <span>Internship</span>
             </a>
-            <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
+            <a href="{% url 'dashboard_startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_startup' or request.resolver_match.url_name == 'startupList' or request.resolver_match.url_name == 'investmentList' or 'startup' in request.path %}active{% endif %}">
               <i class="ni ni-building me-1"></i>
               <span>Startup</span>
             </a>

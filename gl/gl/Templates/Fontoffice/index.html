@@ -634,44 +634,58 @@
     /* Fix dropdown menu visibility */
     .navmenu .dropdown ul {
       background: #ffffff !important;
-      color: #40372e !important;
-      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      color: #1a1a1a !important;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
       z-index: 9999 !important;
       min-width: 220px !important;
-      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15) !important;
+      box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.2) !important;
+      border-radius: 12px !important;
+      padding: 8px 0 !important;
+      margin-top: 10px !important;
     }
     
     .navmenu .dropdown:hover ul {
       opacity: 1 !important;
       visibility: visible !important;
+      display: block !important;
     }
     
     .navmenu .dropdown ul li {
       background: transparent !important;
       list-style: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     
     .navmenu .dropdown ul a {
-      color: #40372e !important;
+      color: #1a1a1a !important;
       display: flex !important;
       align-items: center !important;
       gap: 8px !important;
-      padding: 10px 20px !important;
+      padding: 12px 20px !important;
       text-decoration: none !important;
       white-space: nowrap !important;
-      transition: all 0.3s !important;
+      transition: all 0.3s ease !important;
+      font-weight: 500 !important;
+      font-size: 0.95rem !important;
+      border-radius: 0 !important;
     }
     
     .navmenu .dropdown ul a:hover {
-      color: #f87500 !important;
-      background: rgba(248, 117, 0, 0.1) !important;
+      color: #ffffff !important;
+      background: #f87500 !important;
     }
     
     .navmenu .dropdown ul a i {
       color: inherit !important;
-      font-size: 14px !important;
-      width: 18px !important;
+      font-size: 16px !important;
+      width: 20px !important;
       display: inline-flex !important;
+      justify-content: center !important;
+    }
+    
+    .navmenu .dropdown ul a:hover i {
+      color: #ffffff !important;
     }
     /* User actions container */
     .user-actions {
@@ -725,7 +739,7 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
       <a href="{% url 'index' %}" class="logo d-flex align-items-center">
-        <h1 class="sitename">Evently</h1>
+        <h1 class="sitename">EduLife</h1>
       </a>
       <nav id="navmenu" class="navmenu">
         <ul>
@@ -761,8 +775,16 @@
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
-          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
           <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
           {% endif %}
@@ -910,96 +932,6 @@
     </section>
     <!-- /Hero Section -->
 
-    <!-- Tech Innovation Summit Section -->
-    <section id="innovation-summit" class="intro section py-5">
-      <div class="container">
-        <div class="row g-4 align-items-center">
-          <!-- Text Content -->
-          <div class="col-lg-6">
-            <div class="content">
-              <h2 class="fw-bold mb-3">Sommet de l'Innovation Technologique</h2>
-              <p class="lead text-muted mb-3">
-                Découvrez les dernières avancées technologiques et rencontrez les visionnaires qui façonnent notre avenir numérique. Une expérience immersive au cœur de l'innovation.
-              </p>
-              <p class="text-muted">
-                Ce sommet rassemble les esprits les plus brillants de l'industrie pour partager leurs connaissances, inspirer de nouvelles idées et créer des collaborations durables.
-              </p>
-
-              <!-- Stats -->
-              <div class="stats-grid d-flex flex-wrap mt-4 mb-4">
-                <div class="stat-item text-center me-4 mb-3">
-                  <div class="stat-number display-6 fw-bold text-warning">3</div>
-                  <div class="stat-label text-uppercase small text-muted">Jours</div>
-                </div>
-                <div class="stat-item text-center me-4 mb-3">
-                  <div class="stat-number display-6 fw-bold text-warning">8</div>
-                  <div class="stat-label text-uppercase small text-muted">Thématiques</div>
-                </div>
-                <div class="stat-item text-center me-4 mb-3">
-                  <div class="stat-number display-6 fw-bold text-warning">150+</div>
-                  <div class="stat-label text-uppercase small text-muted">Intervenants</div>
-                </div>
-                <div class="stat-item text-center mb-3">
-                  <div class="stat-number display-6 fw-bold text-warning">3500+</div>
-                  <div class="stat-label text-uppercase small text-muted">Participants</div>
-                </div>
-              </div>
-
-              <!-- Buttons -->
-              <div class="cta-section d-flex flex-wrap gap-3">
-                <a href="#featured-events" class="btn btn-warning text-white fw-semibold px-4 py-2 rounded-pill shadow-sm">Voir le programme complet</a>
-                <a href="#speakers" class="btn btn-outline-warning fw-semibold px-4 py-2 rounded-pill">Rencontrer les intervenants</a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Image & Highlights -->
-          <div class="col-lg-6">
-            <div class="visual-section text-center position-relative">
-              <div class="image-wrapper position-relative">
-                <img src="{% static 'frontoffice/assets/img/events/showcase-5.webp' %}" alt="Sommet Technologique" class="img-fluid rounded-4 shadow">
-                <div class="gradient-overlay position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.5)); border-radius: 1rem;"></div>
-                <div class="floating-badge position-absolute top-0 end-0 bg-warning text-white fw-semibold px-3 py-2 rounded-pill" style="transform: translate(-20%, 20%);">
-                  <i class="bi bi-calendar-event me-2"></i> 15–17 Mars 2026
-                </div>
-              </div>
-
-              <!-- Highlights -->
-              <div class="highlight-cards d-flex justify-content-center gap-3 mt-4 flex-wrap">
-                <div class="highlight-card p-3 bg-white rounded-4 shadow-sm text-center" style="width:220px;">
-                  <i class="bi bi-people-fill text-warning fs-3 mb-2"></i>
-                  <h5 class="fw-bold mb-1">Réseautage Global</h5>
-                  <p class="text-muted small mb-0">Connectez-vous avec des leaders de 60+ pays</p>
-                </div>
-                <div class="highlight-card p-3 bg-white rounded-4 shadow-sm text-center" style="width:220px;">
-                  <i class="bi bi-lightbulb-fill text-warning fs-3 mb-2"></i>
-                  <h5 class="fw-bold mb-1">Vitrine d'Innovation</h5>
-                  <p class="text-muted small mb-0">Découvrez les technologies et startups de pointe</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Founder Quote -->
-        <div class="founder-quote mt-5 pt-4 border-top">
-          <div class="row align-items-center g-4">
-            <div class="col-lg-3 text-center">
-              <img src="{% static 'frontoffice/assets/img/person/person-m-8.webp' %}" alt="Sarah Johnson" class="founder-img rounded-circle shadow" style="width:120px; height:120px; object-fit:cover;">
-            </div>
-            <div class="col-lg-9">
-              <blockquote class="mb-0">
-                <p class="fst-italic text-muted">"Notre mission a toujours été de combler le fossé entre les idées visionnaires et leur mise en œuvre pratique. Ce sommet représente l'aboutissement d'années de rassemblement des esprits les plus brillants de la technologie."</p>
-                <cite class="d-block mt-3">
-                  <strong class="text-dark">Sarah Johnson</strong><br>
-                  <span class="text-muted small">Fondatrice & Directrice des Événements</span>
-                </cite>
-              </blockquote>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
     <!-- /Tech Innovation Summit Section -->
 
   </main>

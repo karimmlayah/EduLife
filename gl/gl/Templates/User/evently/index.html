@@ -26,6 +26,10 @@
 
   <!-- Main CSS File -->
   <link href="{% static 'User/evently/css/main.css' %}" rel="stylesheet">
+  
+  <!-- Spline 3D Viewer Script -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
+  
   <style>
     .user-avatar-mini {display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 0 0 3px rgba(37,117,252,.18)}
     .user-avatar-initials{font-size:.9rem;letter-spacing:.5px}
@@ -90,59 +94,2108 @@
       width: 18px !important;
       display: inline-flex !important;
     }
-    /* Spline 3D Viewer in Hero Section - Full image visible, not cut */
-    .spline-container-hero {
-      top: -10%;
-      right: 10%;
-      width: 240%;
-      height: 480%;
-      z-index: 1;
-      overflow: visible;
-      pointer-events: auto;
-    }
-    canvas.spline-viewer {
+    
+    /* Header Navigation - Always transparent */
+    #header.header {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
       width: 100%;
-      height: 100%;
-      display: block;
-      pointer-events: auto;
-      object-fit: contain;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      box-shadow: none !important;
+      transition: all 0.3s ease !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-    .spline-container-hero spline-viewer {
-      width: 100%;
-      height: 100%;
-      display: block;
-      pointer-events: auto;
-      object-fit: contain;
+    
+    #header.header.scrolled {
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      box-shadow: none !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-    /* Make background overlay more transparent to show Spline colors */
-    .hero .background-overlay {
-      background: linear-gradient(135deg, rgba(16, 9, 1, 0.3) 0%, rgba(37, 37, 37, 0.2) 100%);
+    
+    /* Logo styling - Visible on transparent background */
+    .header .logo .sitename {
+      font-size: 28px !important;
+      font-weight: 700 !important;
+      color: #1a202c !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+      transition: all 0.3s ease;
+    }
+    
+    .header .logo:hover .sitename {
+      color: #f87500 !important;
+      text-shadow: 0 2px 6px rgba(248, 117, 0, 0.4) !important;
+      transform: scale(1.05);
+    }
+    
+    /* Navigation links improved - Visible on transparent background */
+    .navmenu > ul > li > a {
+      color: #1a202c !important;
+      font-weight: 600 !important;
+      position: relative;
+      transition: all 0.3s ease !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    .navmenu > ul > li > a:hover,
+    .navmenu > ul > li > a.active {
+      color: #f87500 !important;
+      text-shadow: 0 1px 3px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    .navmenu > ul > li > a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      transition: width 0.3s ease;
+    }
+    
+    .navmenu > ul > li > a:hover::after,
+    .navmenu > ul > li > a.active::after {
+      width: 80%;
+    }
+    
+    /* Navigation hover effects */
+    .navmenu > ul > li > a:hover {
+      color: #f87500 !important;
+      transform: translateY(-2px);
+    }
+    
+    /* Icons in header - Visible on transparent background */
+    .notifications-icon-link,
+    .messages-icon-link {
+      color: #1a202c !important;
+      transition: all 0.3s ease !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      color: #f87500 !important;
+      transform: scale(1.1);
+      text-shadow: 0 2px 4px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    /* Body padding for fixed header */
+    body.index-page {
+      padding-top: 70px;
+    }
+    
+    /* Improved button styles */
+    .btn-cta,
+    .btn-primary,
+    .btn-secondary {
+      transition: all 0.3s ease !important;
+      font-weight: 600 !important;
+      padding: 12px 30px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .btn-cta:hover,
+    .btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    /* Improved sections spacing */
+    section {
+      scroll-margin-top: 100px;
+    }
+    
+    /* Smooth transitions for all elements */
+    * {
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Hero Section Layout - Improved design */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      max-height: 700px;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      background-image: none !important; /* Remove background image from hero */
+      background: linear-gradient(135deg, #e3f2fd 0%, #fff3e0 50%, #f3e5f5 100%) !important;
+      margin-top: 0;
+      padding: 0;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(248, 117, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
       z-index: 0;
     }
-    /* Ensure hero content is above Spline and scrollable */
+    
+    .hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 700px;
+      background-image: url("{% static 'User/evently/img/hero-background.webp' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+      opacity: 1;
+    }
+    
+    /* Fallback gradient if image not loaded - matching the blue gradient */
+    .hero .background-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 700px;
+      background: linear-gradient(180deg, 
+        rgba(230, 240, 255, 0.95) 0%, 
+        rgba(200, 220, 255, 0.9) 50%, 
+        rgba(240, 248, 255, 0.95) 100%);
+      z-index: -1;
+    }
+    
     .hero-content {
       position: relative;
       z-index: 2;
-      pointer-events: none;
+      width: 100%;
+      padding: 15px 0 15px;
+      max-height: 700px;
+      animation: fadeInUp 0.8s ease-out;
     }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hero-content .container {
+      pointer-events: auto;
+    }
+    
+    /* Hero Text Section */
+    .hero-text-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+    
+    .hero-text {
+      text-align: left;
+    }
+    
+    /* Change text color to black/dark for better visibility */
+    .hero-title,
+    .hero-subtitle,
+    .hero-text,
+    .hero-text *,
+    .event-details,
+    .event-details *,
+    .detail-item,
+    .detail-item span,
+    .detail-item i,
+    .countdown-section,
+    .countdown-section *,
+    .countdown-label,
+    .countdown h3,
+    .countdown h4,
+    .cta-section,
+    .cta-section *,
+    .cta-note {
+      color: #000000 !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 
+                   0 1px 2px rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    .hero-title {
+      font-weight: 700 !important;
+      text-shadow: 0 3px 6px rgba(255, 255, 255, 0.9), 
+                   0 2px 4px rgba(255, 255, 255, 1) !important;
+    }
+    
+    /* Icons visibility */
+    .detail-item i {
+      color: #000000 !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
+    }
+    
+    @media (max-width: 991px) {
+      .hero-text {
+        text-align: center;
+      }
+      
+      .countdown-section .countdown {
+        justify-content: center !important;
+      }
+    }
+    
+    /* Spline 3D Viewer Container - Agrandi avec animation */
+    .spline-container-hero {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      animation: fadeInRight 1s ease-out 0.3s both;
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .spline-container-hero spline-viewer {
+      width: 80%;
+      height: 100%;
+      max-width: 700px !important;
+      max-height: 400px !important;
+      min-width: 400px !important;
+      min-height: 600px !important;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+      transition: transform 0.3s ease;
+    }
+    
+    .spline-container-hero:hover spline-viewer {
+      transform: scale(1.02);
+    }
+    
+    canvas.spline-viewer {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      .spline-container-hero {
+        min-height: 400px;
+        margin-top: 2rem;
+      }
+      
+      .spline-container-hero spline-viewer {
+        max-width: 100% !important;
+        max-height: 450px !important;
+        min-width: unset !important;
+        min-height: unset !important;
+      }
+    }
+    
     /* Make interactive elements clickable */
     .hero-content a,
     .hero-content button,
     .hero-content .btn {
       pointer-events: auto;
     }
-    /* Ensure page can scroll normally - allow scroll on left side */
-    .hero {
-      overflow: visible;
+    
+    /* ============================================
+       EDULIFE DESIGN IMPROVEMENTS
+       ============================================ */
+    
+    /* Global Section Improvements */
+    section {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Global Design Enhancements */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.7;
+      color: #40372e;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Enhanced transitions for all interactive elements */
+    a, button, .btn, .card, .stat-item, .speaker-card, .ticket-card, .session-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Improved typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+    
+    /* Enhanced shadows and depth */
+    .card, .speaker-card, .ticket-card, .session-card, .highlight-card {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card:hover, .speaker-card:hover, .ticket-card:hover, .session-card:hover, .highlight-card:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(-8px);
+    }
+    
+    /* Improved button styles */
+    .btn {
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 14px 32px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn-primary, .btn-cta {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    .btn-primary:hover, .btn-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+    }
+    
+    /* Enhanced section spacing */
+    section {
+      padding: 80px 0;
       position: relative;
     }
-    /* Allow scrolling on the left side of hero */
-    .hero-content .container {
+    
+    /* Section transitions on scroll */
+    section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 0;
+      }
+    }
+    
+    /* Improved image effects */
+    img {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .image-wrapper:hover img,
+    .speaker-image:hover img,
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+    
+    /* Better focus states for accessibility */
+    a:focus, button:focus, .btn:focus {
+      outline: 2px solid #f87500;
+      outline-offset: 4px;
+    }
+    
+    /* Remove outline on navigation links when clicked */
+    .navmenu > ul > li > a:focus,
+    .navmenu > ul > li > a:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Enhanced gradient backgrounds */
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Improved container max-width */
+    .container {
+      max-width: 1200px;
+    }
+    
+    /* Better spacing utilities */
+    .section-spacing {
+      margin: 4rem 0;
+    }
+    
+    /* Enhanced text shadows for better readability */
+    .hero-title, .hero-subtitle {
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Improved border radius consistency */
+    .card, .btn, .badge, .ticket-card, .speaker-card {
+      border-radius: 16px;
+    }
+    
+    /* Better color contrast */
+    .text-muted {
+      color: #6b7280 !important;
+    }
+    
+    /* Enhanced loading states */
+    .loading {
+      opacity: 0.6;
       pointer-events: none;
     }
-    .hero-content .container > * {
-      pointer-events: auto;
+    
+    /* Improved responsive images */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
+    
+    /* Better form elements */
+    input, textarea, select {
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+      padding: 12px 16px;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      border-color: #f87500;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+      outline: none;
+    }
+    
+    /* Intro Section - Beautiful Design - Fil d'actualité */
+    #intro {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 120px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #intro::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #intro::after {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: floatBackground 25s ease-in-out infinite;
+    }
+    
+    @keyframes floatBackground {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+      50% { transform: translate(-50px, 50px) scale(1.1); opacity: 1; }
+    }
+    
+    #intro .content {
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    #intro .content h2 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    
+    #intro .content h2::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 0;
+      width: 100px;
+      height: 5px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      border-radius: 3px;
+      animation: expandWidth 1s ease-out 0.3s both;
+    }
+    
+    @keyframes expandWidth {
+      from {
+        width: 0;
+      }
+      to {
+        width: 100px;
+      }
+    }
+    
+    #intro .content .lead {
+      font-size: 1.25rem;
+      line-height: 1.9;
+      color: #40372e;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+    }
+    
+    #intro .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin: 3rem 0;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+    
+    
+    #intro .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    #intro .stat-item:hover::before {
+      left: 100%;
+    }
+    
+    #intro .stat-item:hover {
+      transform: translateY(-8px) scale(1.02);
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, rgba(248, 117, 0, 0.05) 100%);
+      box-shadow: 0 12px 30px rgba(248, 117, 0, 0.2);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+    
+    #intro .stat-item:hover .stat-number {
+      transform: scale(1.1);
+    }
+    
+    #intro .stat-label {
+      font-size: 0.9rem;
+      color: #40372e;
+      font-weight: 500;
+    }
+    
+    /* CTA Section Improvements */
+    #intro .cta-section {
+      margin-top: 2.5rem;
+    }
+    
+    #intro .cta-section .btn {
+      padding: 16px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 14px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+    
+    #intro .cta-section .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    #intro .cta-section .btn:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+    
+    #intro .cta-section .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.35);
+      position: relative;
+      z-index: 1;
+    }
+    
+    #intro .cta-section .btn-primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 35px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+    
+    #intro .cta-section .btn-primary:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+    
+    #intro .cta-section .btn i {
+      font-size: 1.2rem;
+      margin-right: 8px;
+      transition: transform 0.3s ease;
+    }
+    
+    #intro .cta-section .btn:hover i {
+      transform: scale(1.2) rotate(5deg);
+    }
+    
+    @media (max-width: 768px) {
+      #intro .cta-section .btn {
+        width: 100%;
+        padding: 18px 40px;
+      }
+      
+      #intro .content h2 {
+        font-size: 2.5rem;
+      }
+    }
+    
+    
+    /* Visual Section Improvements */
+    #intro .visual-section {
+      position: relative;
+    }
+    
+    #intro .visual-section {
+      position: relative;
+      z-index: 2;
+      animation: fadeInRight 1s ease-out 0.2s both;
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    #intro .image-wrapper {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.08) 0%, rgba(255, 149, 0, 0.03) 100%);
+      padding: 12px;
+    }
+    
+    #intro .image-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.12) 0%, transparent 60%);
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    #intro .image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.2) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+      z-index: 1;
+    }
+    
+    #intro .image-wrapper:hover::before {
+      opacity: 1;
+    }
+    
+    #intro .image-wrapper:hover::after {
+      width: 400px;
+      height: 400px;
+    }
+    
+    #intro .image-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 24px;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 2;
+    }
+    
+    #intro .image-wrapper:hover {
+      transform: translateY(-12px) scale(1.01);
+      box-shadow: 0 35px 100px rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro .image-wrapper:hover img {
+      transform: scale(1.08);
+    }
+    
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    #intro .highlight-cards {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
+    #intro .highlight-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(248, 117, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #intro .highlight-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    #intro .highlight-card:hover::after {
+      opacity: 1;
+    }
+    
+    #intro .highlight-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(248, 117, 0, 0.25);
+      border-color: rgba(248, 117, 0, 0.4);
+    }
+    
+    
+    #intro .highlight-card h4 {
+      color: #281a0c;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Founder Quote Section */
+    #intro .founder-quote {
+      margin-top: 4rem;
+      padding: 3rem;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      border-radius: 20px;
+      border-left: 4px solid #f87500;
+    }
+    
+    #intro .founder-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #f87500;
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro blockquote p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      color: #40372e;
+      font-style: italic;
+    }
+    
+    #intro cite strong {
+      color: #f87500;
+      font-size: 1.1rem;
+    }
+    
+    /* Featured Events Section - Enhanced */
+    #featured-speakers {
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 50%, #f0f8ff 100%);
+      padding: 120px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #featured-speakers::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.5), rgba(248, 117, 0, 0.8), rgba(248, 117, 0, 0.5), transparent);
+    }
+    
+    #featured-speakers::after {
+      content: '';
+      position: absolute;
+      top: -300px;
+      right: -300px;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: floatBackground 30s ease-in-out infinite;
+    }
+    
+    #featured-speakers .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #featured-speakers .section-title {
+      position: relative;
+      z-index: 2;
+    }
+    
+    #featured-speakers .section-title h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 20px rgba(248, 117, 0, 0.2);
+    }
+    
+    #featured-speakers .section-title h2::after {
+      display: none;
+    }
+    
+    #featured-speakers .section-title p {
+      font-size: 1.2rem;
+      color: #6b7280;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    #featured-speakers .speaker-card {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(248, 117, 0, 0.1);
+      position: relative;
+    }
+    
+    #featured-speakers .speaker-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    
+    #featured-speakers .speaker-card:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 25px 70px rgba(248, 117, 0, 0.3);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .speaker-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    #featured-speakers .speaker-category {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    
+    #featured-speakers .speaker-name {
+      color: #281a0c;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    
+    #featured-speakers .btn-speaker {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .btn-speaker:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4);
+    }
+    
+    /* Event badges and info */
+    #featured-speakers .speaker-social {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 3;
+    }
+    
+    #featured-speakers .event-date,
+    #featured-speakers .event-location {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: #281a0c;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    #featured-speakers .event-date i,
+    #featured-speakers .event-location i {
+      color: #f87500;
+      font-size: 1rem;
+    }
+    
+    #featured-speakers .event-badge {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .speaker-overlay {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 3;
+    }
+    
+    #featured-speakers .speaker-image {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #featured-speakers .speaker-image img {
+      transition: transform 0.4s ease;
+    }
+    
+    #featured-speakers .speaker-card:hover .speaker-image img {
+      transform: scale(1.1);
+    }
+    
+    /* Schedule Section */
+    #schedule {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #schedule::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #schedule .session-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid #f87500;
+    }
+    
+    #schedule .session-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.15);
+    }
+    
+    /* Tickets/Pricing Section */
+    #tickets {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #tickets::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #tickets .ticket-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      height: 100%;
+    }
+    
+    #tickets .ticket-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 60px rgba(248, 117, 0, 0.2);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #tickets .ticket-card.featured {
+      border: 2px solid #f87500;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+    }
+    
+    #tickets .popular-badge {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      position: absolute;
+      top: -15px;
+      right: 20px;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    #tickets .ticket-price .amount {
+      color: #f87500;
+      font-size: 3rem;
+      font-weight: 700;
+    }
+    
+    #tickets .btn-ticket {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    #tickets .btn-ticket:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4);
+    }
+    
+    /* Call to Action Section */
+    #call-to-action {
+      background: linear-gradient(135deg, #281a0c 0%, #40372e 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #call-to-action::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("{% static 'User/evently/img/hero-background.webp' %}") center/cover;
+      opacity: 0.1;
+      z-index: 0;
+    }
+    
+    #call-to-action .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #call-to-action h2,
+    #call-to-action h3,
+    #call-to-action p {
+      color: white;
+    }
+    
+    #call-to-action .stat-item {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    #call-to-action .stat-number {
+      color: #f87500;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    
+    #call-to-action .stat-label {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* Testimonials Section */
+    #testimonials {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #testimonials::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #testimonials .testimonial-item {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      height: 100%;
+      border-top: 4px solid #f87500;
+    }
+    
+    #testimonials .rating i {
+      color: #f87500;
+    }
+    
+    /* Gallery Section */
+    #gallery {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #gallery::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #gallery .gallery-item {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    #gallery .gallery-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(248, 117, 0, 0.2);
+    }
+    
+    /* Logement Section - Card Style */
+    #logement {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #logement::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f87500' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+    
+    #logement .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #logement .content {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      border-left: 5px solid #f87500;
+      transition: transform 0.3s ease;
+    }
+    
+    #logement .content:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 70px rgba(248, 117, 0, 0.2);
+    }
+    
+    #logement h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    #logement h2::before {
+      content: '🏠';
+      font-size: 3rem;
+      position: absolute;
+      left: -60px;
+      top: 0;
+      opacity: 0.1;
+    }
+    
+    #logement .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+      transform: rotate(-2deg);
+      transition: transform 0.3s ease;
+    }
+    
+    #logement .image-wrapper:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+    
+    /* Covoiturage Section - Gradient Background */
+    #covoiturage {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+    
+    #covoiturage::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    #covoiturage .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #covoiturage .content {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 3rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+    
+    #covoiturage h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    #covoiturage .lead {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.2rem;
+    }
+    
+    #covoiturage .btn-primary {
+      background: white;
+      color: #667eea;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    #covoiturage .btn-primary:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    #covoiturage .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 5px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Internships Section - Modern Card Grid */
+    #internships {
+      background: #ffffff;
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #internships::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #f87500, transparent);
+    }
+    
+    #internships .content {
+      position: relative;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 100%);
+      border-radius: 25px;
+      box-shadow: 0 15px 50px rgba(248, 117, 0, 0.1);
+      border: 2px solid rgba(248, 117, 0, 0.1);
+    }
+    
+    #internships h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-left: 3rem;
+    }
+    
+    #internships h2::before {
+      content: '💼';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 2.5rem;
+    }
+    
+    #internships .image-wrapper {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+    
+    #internships .image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    
+    /* Startups Section - Dark Theme */
+    #startups {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+    
+    #startups::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(248, 117, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
+      z-index: 0;
+    }
+    
+    #startups .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #startups .content {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 3rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    #startups h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    #startups h2::after {
+      content: '🚀';
+      font-size: 2rem;
+      margin-left: 1rem;
+      display: inline-block;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    #startups .lead {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.2rem;
+    }
+    
+    #startups .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.4);
+    }
+    
+    #startups .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(248, 117, 0, 0.6);
+    }
+    
+    #startups .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(248, 117, 0, 0.3);
+      position: relative;
+    }
+    
+    #startups .image-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.2) 0%, transparent 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* About Section - Enhanced */
+    #about {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #about::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #about .container {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    }
+    
+    #about h2 {
+      color: #281a0c;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    #about p {
+      color: #40372e;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    
+    #about img {
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+    
+    #about img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Contact Section - Enhanced */
+    #contact {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #contact::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #contact .container {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    }
+    
+    #contact h2 {
+      color: #281a0c;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    #contact p {
+      color: #40372e;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    
+    #contact .contact-info {
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 100%);
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 2rem 0;
+    }
+    
+    #contact .contact-info p {
+      margin-bottom: 1rem;
+      color: #40372e;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    #contact .contact-info i {
+      color: #f87500;
+      font-size: 1.3rem;
+      margin-right: 0.75rem;
+      width: 25px;
+    }
+    
+    #contact img {
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+    
+    #contact img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Sponsors Section */
+    #sponsors {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 80px 0;
+    }
+    
+    #sponsors .section-title h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #281a0c;
+      margin-bottom: 1rem;
+    }
+    
+    #sponsors .client-logo {
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      filter: grayscale(100%);
+      opacity: 0.6;
+    }
+    
+    #sponsors .client-logo:hover {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    
+    /* Section Titles Global */
+    .section-title {
+      text-align: center;
+      margin-bottom: 4rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .section-title h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #281a0c;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .section-title h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      border-radius: 2px;
+      animation: expandWidth 0.8s ease-out 0.3s both;
+    }
+    
+    @keyframes expandWidth {
+      from {
+        width: 0;
+      }
+      to {
+        width: 80px;
+      }
+    }
+    
+    .section-title p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    /* Buttons Global Improvements */
+    .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-primary:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+    
+    .btn-outline,
+    .btn-outline-primary,
+    .btn-outline-secondary {
+      border: 2px solid #f87500;
+      color: #f87500;
+      background: transparent;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-outline::before,
+    .btn-outline-primary::before,
+    .btn-outline-secondary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: #f87500;
+      transition: left 0.4s ease;
+      z-index: -1;
+    }
+    
+    .btn-outline:hover,
+    .btn-outline-primary:hover,
+    .btn-outline-secondary:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.3);
+      border-color: #f87500;
+    }
+    
+    .btn-outline:hover::before,
+    .btn-outline-primary:hover::before,
+    .btn-outline-secondary:hover::before {
+      left: 0;
+    }
+    
+    /* Download CTA in Schedule */
+    .download-cta {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      padding: 3rem;
+      border-radius: 20px;
+      margin-top: 3rem;
+      border: 1px solid rgba(248, 117, 0, 0.1);
+    }
+    
+    .download-cta h4 {
+      color: #281a0c;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    /* Ticket Info Bar */
+    .ticket-info-bar {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      box-shadow: 0 10px 40px rgba(248, 117, 0, 0.3);
+    }
+    
+    .ticket-info-bar h4 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .ticket-info-bar .countdown h3 {
+      color: white;
+    }
+    
+    .ticket-info-bar .support-info {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .ticket-info-bar .contact-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    /* Nav Pills in Schedule */
+    .schedule-tabs .nav-pills .nav-link {
+      background: white;
+      color: #40372e;
+      border: 2px solid rgba(248, 117, 0, 0.2);
+      border-radius: 25px;
+      padding: 10px 25px;
+      margin: 0 5px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .schedule-tabs .nav-pills .nav-link:hover {
+      border-color: #f87500;
+      color: #f87500;
+    }
+    
+    .schedule-tabs .nav-pills .nav-link.active {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-color: #f87500;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    /* Track Headers */
+    .track-header {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, rgba(248, 117, 0, 0.05) 100%);
+      border-left: 4px solid #f87500;
+      padding: 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #281a0c;
+    }
+    
+    /* Speaker Quote Section */
+    .speaker-quote {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      padding: 3rem;
+      border-radius: 20px;
+      border-left: 4px solid #f87500;
+      margin-top: 3rem;
+    }
+    
+    .speaker-quote blockquote p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      color: #40372e;
+      font-style: italic;
+    }
+    
+    /* Footer Improvements */
+    #footer {
+      background: linear-gradient(180deg, #281a0c 0%, #1a1308 100%);
+    }
+    
+    #footer .footer-about .sitename {
+      color: #f87500;
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    
+    #footer .social-links a {
+      background: rgba(248, 117, 0, 0.1);
+      color: #f87500;
+      border: 1px solid rgba(248, 117, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    #footer .social-links a:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    #footer .footer-links a:hover {
+      color: #f87500;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      #intro .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      #intro .highlight-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      #intro .content h2 {
+        font-size: 2rem;
+      }
+      
+      .ticket-info-bar {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .section-title h2 {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      #intro .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      section {
+        padding: 60px 0 !important;
+      }
+      
+    }
+
   </style>
 
   <!-- =======================================================
@@ -169,7 +2222,7 @@
         <ul>
           <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
           <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
-          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
           <li class="dropdown">
             <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
@@ -199,8 +2252,16 @@
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
             </ul>
           </li>
-          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
-          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
           <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
           {% endif %}
@@ -261,50 +2322,27 @@
     <!-- Hero Section -->
     <section id="hero" class="hero section dark-background">
       <div class="background-overlay"></div>
-      <!-- Spline 3D Viewer -->
-      <div class="spline-container-hero">
-        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
-        <spline-viewer url="https://prod.spline.design/zpQ8cAh3-ZTcG2JV/scene.splinecode"></spline-viewer>
-      </div>
       <div class="hero-content">
         <div class="container">
-          <div class="row justify-content-center text-center">
-            <div class="col-lg-10">
-              <div class="hero-text">
-                <h1 class="hero-title">Transform Your Future with&nbsp;<br>EduLife Education</h1>
-                <p class="hero-subtitle">Discover innovative learning solutions, connect with expert educators, and unlock your potential through our comprehensive educational platform designed for lifelong learners.</p>
-                <div class="event-details">
-                  <div class="detail-item"><i class="bi bi-book"></i><span>1000+ Courses Available</span></div>
-                  <div class="detail-item"><i class="bi bi-people"></i><span>50,000+ Active Students</span></div>
+          <div class="row align-items-center">
+            <!-- Text Content - Left Side -->
+            <div class="col-lg-6">
+              <div class="hero-text-wrapper">
+                <div class="hero-text">
+                  <h1 class="hero-title">Transform Your Future with&nbsp;<br>EduLife Education</h1>
+                  <p class="hero-subtitle">Discover innovative learning solutions, connect with expert educators, and unlock your potential through our comprehensive educational platform designed for lifelong learners.</p>
+                  <div class="event-details">
+                    <div class="detail-item"><i class="bi bi-book"></i><span>1000+ Courses Available</span></div>
+                    <div class="detail-item"><i class="bi bi-people"></i><span>50,000+ Active Students</span></div>
+                  </div>
                 </div>
-              </div>
-              <div class="countdown-section">
-                <h3 class="countdown-label">New Semester Starts In</h3>
-                <div class="countdown d-flex justify-content-center" data-count="2026/09/01">
-                  <div><h3 class="count-days">239</h3><h4>Days</h4></div>
-                  <div><h3 class="count-hours">8</h3><h4>Hours</h4></div>
-                  <div><h3 class="count-minutes">53</h3><h4>Minutes</h4></div>
-                  <div><h3 class="count-seconds">23</h3><h4>Seconds</h4></div>
-                </div>
-              </div>
-              <div class="cta-section">
-                <div class="cta-buttons">
-                  <a href="{% url 'evently_tickets' %}" class="btn btn-primary btn-cta">Start Learning Today</a>
-                  <a href="{% url 'evently_speakers' %}" class="btn btn-secondary btn-cta">Meet Our Instructors</a>
-                </div>
-                <p class="cta-note">Free trial available • Access to all courses • Certificate upon completion</p>
               </div>
             </div>
-          </div>
-          <div class="sponsors-section">
-            <p class="sponsors-label">Trusted by leading educational institutions</p>
-            <div class="sponsors-logos">
-              <img src="{% static 'User/evently/img/clients/clients-1.webp' %}" alt="Partner Logo" class="sponsor-logo">
-              <img src="{% static 'User/evently/img/clients/clients-3.webp' %}" alt="Partner Logo" class="sponsor-logo">
-              <img src="{% static 'User/evently/img/clients/clients-5.webp' %}" alt="Partner Logo" class="sponsor-logo">
-              <img src="{% static 'User/evently/img/clients/clients-7.webp' %}" alt="Partner Logo" class="sponsor-logo">
-              <img src="{% static 'User/evently/img/clients/clients-9.webp' %}" alt="Partner Logo" class="sponsor-logo">
-              <img src="{% static 'User/evently/img/clients/clients-11.webp' %}" alt="Partner Logo" class="sponsor-logo">
+            <!-- Spline 3D Viewer - Right Side -->
+            <div class="col-lg-6">
+              <div class="spline-container-hero">
+                <spline-viewer url="https://prod.spline.design/zpQ8cAh3-ZTcG2JV/scene.splinecode"></spline-viewer>
+              </div>
             </div>
           </div>
         </div>
@@ -312,49 +2350,25 @@
     </section><!-- /Hero Section -->
 
 
-    <!-- Intro Section -->
+    <!-- Intro Section - Fil d'actualité -->
     <section id="intro" class="intro section">
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-6">
             <div class="content">
-              <h2>Your Gateway to Excellence in Education</h2>
-              <p class="lead">EduLife is a comprehensive online learning platform that brings together world-class educators, cutting-edge curriculum, and innovative teaching methods to help you achieve your educational goals.</p>
-              <p>Whether you're looking to advance your career, learn new skills, or pursue a passion, EduLife offers flexible, accessible, and engaging courses designed to fit your lifestyle. Join thousands of successful learners who have transformed their lives through education.</p>
-              <div class="stats-grid">
-                <div class="stat-item"><div class="stat-number">1000+</div><div class="stat-label">Courses</div></div>
-                <div class="stat-item"><div class="stat-number">200+</div><div class="stat-label">Instructors</div></div>
-                <div class="stat-item"><div class="stat-number">50K+</div><div class="stat-label">Students</div></div>
-                <div class="stat-item"><div class="stat-number">95%</div><div class="stat-label">Success Rate</div></div>
-              </div>
-              <div class="cta-section">
-                <a href="{% url 'evently_schedule' %}" class="btn btn-primary">Browse Courses</a>
-                <a href="{% url 'evently_speakers' %}" class="btn btn-outline">Meet Our Teachers</a>
+              <h2>Fil d'Actualité</h2>
+              <p class="lead">Restez informé des dernières nouvelles et événements de la communauté EduLife. Partagez vos expériences et découvrez ce qui se passe autour de vous.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'evently_schedule' %}" class="btn btn-primary btn-lg"><i class="bi bi-newspaper me-2"></i>Voir le Fil d'Actualité</a>
               </div>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="visual-section">
               <div class="image-wrapper">
-                <img src="{% static 'User/evently/img/events/showcase-5.webp' %}" alt="EduLife Education" class="img-fluid">
-                <div class="gradient-overlay"></div>
-                <div class="floating-badge"><i class="bi bi-book"></i><span>New Courses Every Month</span></div>
+                <img src="{% static 'User/evently/img/events/gallery-3.webp' %}" alt="Fil d'actualité EduLife" class="img-fluid">
               </div>
-              <div class="highlight-cards">
-                <div class="highlight-card"><i class="bi bi-people-fill"></i><h4>Expert Instructors</h4><p>Learn from industry professionals and academic experts</p></div>
-                <div class="highlight-card"><i class="bi bi-award-fill"></i><h4>Certified Programs</h4><p>Earn recognized certificates upon course completion</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="founder-quote">
-          <div class="row align-items-center">
-            <div class="col-lg-3 text-center"><img src="{% static 'User/evently/img/person/person-m-8.webp' %}" alt="Sarah Johnson" class="founder-img"></div>
-            <div class="col-lg-9">
-              <blockquote>
-                <p>"Education is the most powerful weapon which you can use to change the world. At EduLife, we believe that quality education should be accessible to everyone, everywhere. Our platform empowers learners to achieve their dreams and unlock their full potential."</p>
-                <cite><strong>Dr. Sarah Johnson</strong><span>Founder &amp; Chief Education Officer</span></cite>
-              </blockquote>
             </div>
           </div>
         </div>
@@ -364,8 +2378,8 @@
     <!-- Featured Speakers Section -->
     <section id="featured-speakers" class="featured-speakers section">
       <div class="container section-title">
-        <h2>Featured Instructors</h2>
-        <p>Learn from world-class educators and industry experts who are passionate about sharing knowledge</p>
+        <h2>Événements à Venir en Tunisie</h2>
+        <p>Découvrez nos hackathons, conférences, workshops et autres événements passionnants pour développer vos compétences et rencontrer la communauté éducative tunisienne</p>
       </div>
       <div class="container">
         <div class="row gy-4">
@@ -374,18 +2388,21 @@
               <div class="row">
                 <div class="col-md-5">
                   <div class="speaker-image">
-                    <img src="{% static 'User/evently/img/events/speaker-8.webp' %}" alt="Emily Rodriguez" class="img-fluid">
-                    <div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div>
+                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop" alt="Hackathon Tunisie" class="img-fluid">
+                    <div class="speaker-social">
+                      <span class="event-date"><i class="bi bi-calendar-event"></i> 20-22 Avril</span>
+                      <span class="event-location"><i class="bi bi-geo-alt"></i> Tunis, Cité des Sciences</span>
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-7">
                   <div class="speaker-content">
-                    <span class="speaker-category">Lead Instructor</span>
-                    <h3 class="speaker-name">Dr. Emily Rodriguez</h3>
-                    <p class="speaker-title">Professor of Computer Science</p>
-                    <p class="speaker-company">EduLife University</p>
-                    <div class="speaker-session"><h4>Course: "Artificial Intelligence & Machine Learning"</h4></div>
-                    <a href="#" class="btn-speaker">View Profile</a>
+                    <span class="speaker-category">Hackathon</span>
+                    <h3 class="speaker-name">Hackathon National IA Tunisie</h3>
+                    <p class="speaker-title">48 heures de développement intensif</p>
+                    <p class="speaker-company">Organisé par EduLife & Cité des Sciences</p>
+                    <div class="speaker-session"><h4>Thème: "IA pour le Développement Durable en Tunisie"</h4></div>
+                    <a href="/Event/" class="btn-speaker">S'inscrire</a>
                   </div>
                 </div>
               </div>
@@ -396,18 +2413,21 @@
               <div class="row">
                 <div class="col-md-5">
                   <div class="speaker-image">
-                    <img src="{% static 'User/evently/img/events/speaker-1.webp' %}" alt="Marcus Thompson" class="img-fluid">
-                    <div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div>
+                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop" alt="Conférence Tunisie" class="img-fluid">
+                    <div class="speaker-social">
+                      <span class="event-date"><i class="bi bi-calendar-event"></i> 5 Mai</span>
+                      <span class="event-location"><i class="bi bi-geo-alt"></i> Sfax, Technopole</span>
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-7">
                   <div class="speaker-content">
-                    <span class="speaker-category">Senior Instructor</span>
-                    <h3 class="speaker-name">Dr. Marcus Thompson</h3>
-                    <p class="speaker-title">Business Strategy Expert</p>
-                    <p class="speaker-company">EduLife Business School</p>
-                    <div class="speaker-session"><h4>Course: "Digital Business Transformation"</h4></div>
-                    <a href="#" class="btn-speaker">View Profile</a>
+                    <span class="speaker-category">Conférence</span>
+                    <h3 class="speaker-name">Conférence Innovation & Startups Tunisie</h3>
+                    <p class="speaker-title">Journée complète d'inspiration</p>
+                    <p class="speaker-company">Avec des entrepreneurs tunisiens à succès</p>
+                    <div class="speaker-session"><h4>Thème: "L'Écosystème Startup en Tunisie"</h4></div>
+                    <a href="/Event/" class="btn-speaker">Réserver</a>
                   </div>
                 </div>
               </div>
@@ -418,563 +2438,216 @@
           <div class="col-lg-3 col-md-6">
             <div class="speaker-card compact">
               <div class="speaker-image">
-                <img src="{% static 'User/evently/img/events/speaker-11.webp' %}" alt="Sarah Chen" class="img-fluid">
-                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop" alt="Workshop Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-clock"></i> 3h</span>
+                  </div>
+                </div>
               </div>
               <div class="speaker-content">
-                <h4 class="speaker-name">Sarah Chen</h4>
-                <p class="speaker-title">UX/UI Design Instructor</p>
-                <p class="speaker-company">EduLife Design Academy</p>
-                <span class="speaker-topic">"Design Thinking & Innovation"</span>
+                <h4 class="speaker-name">Workshop Design Thinking</h4>
+                <p class="speaker-title">Session pratique interactive</p>
+                <p class="speaker-company">Sousse, Centre d'Innovation</p>
+                <span class="speaker-topic">"Créativité & Innovation"</span>
               </div>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
             <div class="speaker-card compact">
               <div class="speaker-image">
-                <img src="{% static 'User/evently/img/events/speaker-12.webp' %}" alt="David Wilson" class="img-fluid">
-                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" alt="Hackathon Blockchain Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-trophy"></i> Prix 10K DT</span>
+                  </div>
+                </div>
               </div>
               <div class="speaker-content">
-                <h4 class="speaker-name">Dr. David Wilson</h4>
-                <p class="speaker-title">Data Science Professor</p>
-                <p class="speaker-company">EduLife Data Institute</p>
-                <span class="speaker-topic">"Data Science & Analytics"</span>
+                <h4 class="speaker-name">Hackathon Blockchain Tunisie</h4>
+                <p class="speaker-title">Blockchain & FinTech</p>
+                <p class="speaker-company">Tunis, Technopole El Ghazala</p>
+                <span class="speaker-topic">"L'Avenir de la Finance"</span>
               </div>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
             <div class="speaker-card compact">
               <div class="speaker-image">
-                <img src="{% static 'User/evently/img/events/speaker-3.webp' %}" alt="Lisa Martinez" class="img-fluid">
-                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop" alt="Meetup Tech Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-people"></i> Networking</span>
+                  </div>
+                </div>
               </div>
               <div class="speaker-content">
-                <h4 class="speaker-name">Lisa Martinez</h4>
-                <p class="speaker-title">Marketing Instructor</p>
-                <p class="speaker-company">EduLife Marketing School</p>
-                <span class="speaker-topic">"Digital Marketing Mastery"</span>
+                <h4 class="speaker-name">Tech Meetup Mensuel Tunis</h4>
+                <p class="speaker-title">Rencontre de la communauté tech</p>
+                <p class="speaker-company">Tunis, Coworking Space</p>
+                <span class="speaker-topic">"Partage & Networking"</span>
               </div>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
             <div class="speaker-card compact">
               <div class="speaker-image">
-                <img src="{% static 'User/evently/img/events/speaker-9.webp' %}" alt="James Parker" class="img-fluid">
-                <div class="speaker-overlay"><div class="speaker-social"><a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a></div></div>
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" alt="Bootcamp Data Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-graph-up"></i> Intensif</span>
               </div>
+              </div>
+            </div>
               <div class="speaker-content">
-                <h4 class="speaker-name">James Parker</h4>
-                <p class="speaker-title">Entrepreneurship Coach</p>
-                <p class="speaker-company">EduLife Entrepreneurship Lab</p>
-                <span class="speaker-topic">"Startup & Entrepreneurship"</span>
+                <h4 class="speaker-name">Bootcamp Data Science Tunisie</h4>
+                <p class="speaker-title">Formation intensive 5 jours</p>
+                <p class="speaker-company">Tunis, Institut Supérieur</p>
+                <span class="speaker-topic">"Maîtrisez les Données"</span>
+          </div>
+        </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row mt-5">
-          <div class="col-lg-8 mx-auto">
-            <div class="speaker-quote">
-              <blockquote>
-                <p>"EduLife has transformed the way I learn. The quality of instruction and the flexibility of the platform have allowed me to advance my career while balancing my personal life. I highly recommend it to anyone serious about their education."</p>
-              </blockquote>
-              <div class="quote-author">
-                <img src="{% static 'User/evently/img/events/speaker-2.webp' %}" alt="Emily Rodriguez" class="img-fluid">
-                <div class="author-info"><h5>Emily Rodriguez</h5><span>EduLife Student & Software Engineer</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section><!-- /Featured Speakers Section -->
+    </section><!-- /Featured Events Section -->
 
-    <!-- Schedule Section -->
-    <section id="schedule" class="schedule section light-background">
-      <div class="container section-title">
-        <h2>Learning Paths</h2>
-        <p>Structured curriculum designed to guide you from beginner to expert in your chosen field</p>
-      </div>
+    <!-- Logement Section -->
+    <section id="logement" class="intro section">
       <div class="container">
-        <div class="schedule-tabs">
-          <ul class="nav nav-pills justify-content-center mb-5">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#schedule-day1">Day 1 - March 15</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedule-day2">Day 2 - March 16</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedule-day3">Day 3 - March 17</button></li>
-          </ul>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Logement en Tunisie</h2>
+              <p class="lead">Trouvez le logement idéal pour vos études en Tunisie. Explorez nos offres de logements étudiants, colocations et appartements disponibles dans les principales villes universitaires tunisiennes.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'logement' %}" class="btn btn-primary btn-lg"><i class="bi bi-house-door me-2"></i>Voir les Logements</a>
         </div>
-        <div class="tab-content schedule-content">
-          <div class="tab-pane fade show active" id="schedule-day1">
-            <div class="track-headers">
-              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
-              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
-              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
             </div>
-            <div class="schedule-timeline">
-              <div class="time-slot">
-                <div class="time-label"><span class="time">9:00 AM</span><span class="duration">45 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card keynote" colspan="3">
-                    <div class="session-type"><i class="bi bi-megaphone"></i><span>Keynote</span></div>
-                    <h4>Future of Digital Innovation</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-1.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Dr. Sarah Johnson</h5><span>Chief Technology Officer, TechCorp</span></div>
                     </div>
-                    <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                    <div class="session-meta"><span class="venue">Main Hall</span></div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop" alt="Logement en Tunisie" class="img-fluid">
                   </div>
                 </div>
               </div>
-              <div class="time-slot">
-                <div class="time-label"><span class="time">10:15 AM</span><span class="duration">60 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card development">
-                    <div class="session-type"><i class="bi bi-laptop"></i><span>Workshop</span></div>
-                    <h4>Advanced React Patterns</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-2.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Michael Chen</h5><span>Senior Developer</span></div>
                     </div>
-                    <p>Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
-                    <div class="session-meta"><span class="venue">Room A</span><span class="level beginner">Beginner</span></div>
                   </div>
-                  <div class="session-card design">
-                    <div class="session-type"><i class="bi bi-brush"></i><span>Talk</span></div>
-                    <h4>Design Systems at Scale</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-3.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Emily Rodriguez</h5><span>UX Director</span></div>
-                    </div>
-                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.</p>
-                    <div class="session-meta"><span class="venue">Room B</span><span class="level intermediate">Intermediate</span></div>
-                  </div>
-                  <div class="session-card business">
-                    <div class="session-type"><i class="bi bi-people"></i><span>Panel</span></div>
-                    <h4>Scaling Tech Teams</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-4.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>David Park</h5><span>VP of Engineering</span></div>
-                    </div>
-                    <p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit.</p>
-                    <div class="session-meta"><span class="venue">Room C</span><span class="level advanced">Advanced</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="time-slot break-slot">
-                <div class="time-label"><span class="time">11:15 AM</span><span class="duration">30 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card break">
-                    <div class="session-type"><i class="bi bi-cup-hot"></i><span>Break</span></div>
-                    <h4>Coffee Break &amp; Networking</h4>
-                    <div class="session-meta"><span class="venue">Main Lobby</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="time-slot">
-                <div class="time-label"><span class="time">11:45 AM</span><span class="duration">45 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card development">
-                    <div class="session-type"><i class="bi bi-code"></i><span>Talk</span></div>
-                    <h4>Microservices Architecture</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-5.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Alex Thompson</h5><span>Solutions Architect</span></div>
-                    </div>
-                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
-                    <div class="session-meta"><span class="venue">Room A</span><span class="level advanced">Advanced</span></div>
-                  </div>
-                  <div class="session-card design">
-                    <div class="session-type"><i class="bi bi-phone"></i><span>Workshop</span></div>
-                    <h4>Mobile-First Design</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-6.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Lisa Zhang</h5><span>Product Designer</span></div>
-                    </div>
-                    <p>Totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae.</p>
-                    <div class="session-meta"><span class="venue">Room B</span><span class="level beginner">Beginner</span></div>
-                  </div>
-                  <div class="session-card business">
-                    <div class="session-type"><i class="bi bi-graph-up"></i><span>Talk</span></div>
-                    <h4>Product Growth Strategies</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-7.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>James Wilson</h5><span>Growth Manager</span></div>
-                    </div>
-                    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia.</p>
-                    <div class="session-meta"><span class="venue">Room C</span><span class="level intermediate">Intermediate</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Day 1 -->
-          <div class="tab-pane fade" id="schedule-day2">
-            <div class="track-headers">
-              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
-              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
-              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
-            </div>
-            <div class="schedule-timeline">
-              <div class="time-slot">
-                <div class="time-label"><span class="time">9:30 AM</span><span class="duration">45 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card keynote">
-                    <div class="session-type"><i class="bi bi-megaphone"></i><span>Keynote</span></div>
-                    <h4>AI Revolution in Development</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-8.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Dr. Maria Santos</h5><span>AI Research Director</span></div>
-                    </div>
-                    <p>Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute.</p>
-                    <div class="session-meta"><span class="venue">Main Hall</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="time-slot">
-                <div class="time-label"><span class="time">10:45 AM</span><span class="duration">60 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card development">
-                    <div class="session-type"><i class="bi bi-gear"></i><span>Workshop</span></div>
-                    <h4>DevOps Best Practices</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-9.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Robert Kim</h5><span>DevOps Engineer</span></div>
-                    </div>
-                    <p>Irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-                    <div class="session-meta"><span class="venue">Room A</span><span class="level intermediate">Intermediate</span></div>
-                  </div>
-                  <div class="session-card design">
-                    <div class="session-type"><i class="bi bi-eye"></i><span>Talk</span></div>
-                    <h4>Accessibility in Design</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-10.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Anna Martinez</h5><span>Accessibility Expert</span></div>
-                    </div>
-                    <p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim.</p>
-                    <div class="session-meta"><span class="venue">Room B</span><span class="level beginner">Beginner</span></div>
-                  </div>
-                  <div class="session-card business">
-                    <div class="session-type"><i class="bi bi-currency-dollar"></i><span>Panel</span></div>
-                    <h4>Funding Strategies for Startups</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-11.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Thomas Brown</h5><span>Investment Partner</span></div>
-                    </div>
-                    <p>Ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation.</p>
-                    <div class="session-meta"><span class="venue">Room C</span><span class="level advanced">Advanced</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Day 2 -->
-          <div class="tab-pane fade" id="schedule-day3">
-            <div class="track-headers">
-              <div class="track-header development"><i class="bi bi-code-slash"></i><span>Development Track</span></div>
-              <div class="track-header design"><i class="bi bi-palette"></i><span>Design Track</span></div>
-              <div class="track-header business"><i class="bi bi-briefcase"></i><span>Business Track</span></div>
-            </div>
-            <div class="schedule-timeline">
-              <div class="time-slot">
-                <div class="time-label"><span class="time">10:00 AM</span><span class="duration">90 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card workshop">
-                    <div class="session-type"><i class="bi bi-tools"></i><span>Hands-on Workshop</span></div>
-                    <h4>Building Your First App</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-12.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Kevin Lee</h5><span>Full-stack Developer</span></div>
-                    </div>
-                    <p>Ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit.</p>
-                    <div class="session-meta"><span class="venue">Workshop Room</span><span class="level beginner">Beginner</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="time-slot">
-                <div class="time-label"><span class="time">12:00 PM</span><span class="duration">45 min</span></div>
-                <div class="sessions-row">
-                  <div class="session-card keynote">
-                    <div class="session-type"><i class="bi bi-award"></i><span>Closing Keynote</span></div>
-                    <h4>The Future is Collaborative</h4>
-                    <div class="speaker">
-                      <img src="{% static 'User/evently/img/events/speaker-13.webp' %}" alt="Speaker" class="speaker-image">
-                      <div class="speaker-details"><h5>Jennifer Adams</h5><span>CEO, FutureTech</span></div>
-                    </div>
-                    <p>In voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat.</p>
-                    <div class="session-meta"><span class="venue">Main Hall</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Day 3 -->
-        </div>
-        <div class="text-center">
-          <div class="download-cta">
-            <h4>Get the Complete Schedule</h4>
-            <p>Download the full agenda as PDF or add events to your calendar</p>
-            <div class="cta-buttons">
-              <a href="#" class="btn btn-primary"><i class="bi bi-download"></i> Download PDF</a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-calendar-plus"></i> Add to Calendar</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section><!-- /Schedule Section -->
+    </section><!-- /Logement Section -->
 
-    <!-- Pricing Plans Section -->
-    <section id="tickets" class="tickets section">
+    <!-- Covoiturage Section -->
+    <section id="covoiturage" class="intro section">
       <div class="container">
-        <div class="row gy-4">
-          <div class="col-lg-4 col-md-6">
-            <div class="ticket-card">
-              <div class="ticket-header">
-                <h3>Basic Plan</h3>
-                <div class="ticket-price"><span class="currency">$</span><span class="amount">29</span><span class="period">/month</span></div>
-                <p class="ticket-duration">Perfect for beginners</p>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=600&fit=crop" alt="Covoiturage en Tunisie" class="img-fluid">
               </div>
-              <div class="ticket-body">
-                <ul class="ticket-features">
-                  <li><i class="bi bi-check-circle-fill"></i>Access to 50+ courses</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Certificate of completion</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Mobile app access</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Community support</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Downloadable resources</li>
-                </ul>
               </div>
-              <div class="ticket-footer">
-                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Start Learning</a>
-                <p class="availability-info">7-day free trial</p>
               </div>
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Covoiturage en Tunisie</h2>
+              <p class="lead">Partagez vos trajets et économisez sur vos déplacements en Tunisie. Trouvez ou proposez un covoiturage pour vos voyages entre villes universitaires et découvrez une façon écologique et économique de voyager.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="/covoiturage/" class="btn btn-primary btn-lg"><i class="bi bi-car-front me-2"></i>Voir les Offres</a>
             </div>
           </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="ticket-card featured">
-              <div class="popular-badge">Most Popular</div>
-              <div class="ticket-header">
-                <h3>Premium Plan</h3>
-                <div class="ticket-price"><span class="currency">$</span><span class="amount">79</span><span class="period">/month</span></div>
-                <p class="ticket-duration">Best value for professionals</p>
               </div>
-              <div class="ticket-body">
-                <ul class="ticket-features">
-                  <li><i class="bi bi-check-circle-fill"></i>Access to all 1000+ courses</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Professional certificates</li>
-                  <li><i class="bi bi-check-circle-fill"></i>1-on-1 instructor support</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Live Q&A sessions</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Career counseling</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Priority support</li>
-                </ul>
               </div>
-              <div class="ticket-footer">
-                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Get Premium</a>
-                <p class="availability-info">Save 20% with annual plan</p>
               </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="ticket-card">
-              <div class="ticket-header">
-                <h3>Student Plan</h3>
-                <div class="ticket-price"><span class="original-price">$79</span><span class="currency">$</span><span class="amount">39</span><span class="period">/month</span></div>
-                <p class="ticket-duration">Special discount for students</p>
-              </div>
-              <div class="ticket-body">
-                <ul class="ticket-features">
-                  <li><i class="bi bi-check-circle-fill"></i>All Premium features</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Student networking events</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Internship opportunities</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Mentorship program</li>
-                  <li><i class="bi bi-check-circle-fill"></i>Student resource center</li>
-                </ul>
-              </div>
-              <div class="ticket-footer">
-                <a href="{% url 'evently_buy_tickets' %}" class="btn btn-ticket">Student Enrollment</a>
-                <p class="availability-info">Valid student ID required</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row mt-5">
-          <div class="col-12">
-            <div class="ticket-info-bar">
-              <div class="countdown-info">
-                <h4><i class="bi bi-clock"></i> Limited Time Offer - 30% Off!</h4>
-                <div class="countdown d-flex justify-content-center" data-count="2026/12/15">
-                  <div><h3 class="count-days"></h3><h4>Days</h4></div>
-                  <div><h3 class="count-hours"></h3><h4>Hours</h4></div>
-                  <div><h3 class="count-minutes"></h3><h4>Minutes</h4></div>
-                  <div><h3 class="count-seconds"></h3><h4>Seconds</h4></div>
-                </div>
-              </div>
-              <div class="support-info">
-                <p><strong>Need help choosing a plan?</strong> Contact our support team</p>
-                <a href="mailto:info@edulife.com" class="contact-link">info@edulife.com</a>
-                <span class="divider">|</span>
-                <a href="tel:+15551234567" class="contact-link">+1 (555) 123-4567</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section><!-- /Pricing Plans Section -->
+    </section><!-- /Covoiturage Section -->
 
-    <!-- Partners Section -->
-    <section id="sponsors" class="sponsors section">
+    <!-- Internships Section -->
+    <section id="internships" class="intro section">
       <div class="container">
-        <div class="section-title text-center mb-5">
-          <h2>Our Educational Partners</h2>
-          <p>Trusted by leading universities and educational institutions worldwide</p>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Stages & Internships</h2>
+              <p class="lead">Découvrez des opportunités de stages et d'internships en Tunisie et à l'international. Développez vos compétences professionnelles et construisez votre carrière avec nos offres de stages dans les meilleures entreprises.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'internships' %}" class="btn btn-primary btn-lg"><i class="bi bi-briefcase me-2"></i>Voir les Stages</a>
+          </div>
         </div>
-        <div class="row g-0 clients-wrap">
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-1.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-2.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-3.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-4.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-5.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-6.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-7.webp' %}" class="img-fluid" alt="Partner University"></div>
-          <div class="col-xl-3 col-md-4 client-logo"><img src="{% static 'User/evently/img/clients/clients-8.webp' %}" class="img-fluid" alt="Partner University"></div>
+              </div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop" alt="Stages et Internships" class="img-fluid">
+            </div>
+          </div>
         </div>
-      </div>
-    </section><!-- /Partners Section -->
+              </div>
+              </div>
+    </section><!-- /Internships Section -->
 
-    <!-- Call To Action Section -->
-    <section id="call-to-action" class="call-to-action section dark-background">
+    <!-- Startups Section -->
+    <section id="startups" class="intro section">
       <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-8 text-center">
-            <h2 class="display-4 mb-4">Ready to Transform Your Future?</h2>
-            <p class="lead mb-5">Join thousands of successful learners on EduLife. Start your educational journey today and unlock opportunities for career growth, personal development, and lifelong learning.</p>
-          </div>
-        </div>
-        <div class="row justify-content-center mb-5">
-          <div class="col-lg-10">
-            <div class="stats-wrapper">
-              <div class="row g-4">
-                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-people"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="50000" data-purecounter-duration="2">50000</div><div class="stat-label">Active Students</div></div></div>
-                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="200" data-purecounter-duration="2">200</div><div class="stat-label">Expert Instructors</div></div></div>
-                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-book"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="1000" data-purecounter-duration="2">1000</div><div class="stat-label">Available Courses</div></div></div>
-                <div class="col-lg-3 col-md-6"><div class="stat-item"><div class="stat-icon"><i class="bi bi-award"></i></div><div class="stat-number" data-purecounter-start="0" data-purecounter-end="95" data-purecounter-duration="2">95</div><div class="stat-label">Success Rate %</div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row justify-content-center">
-          <div class="col-lg-6 text-center">
-            <div class="cta-content">
-              <h3 class="mb-4">Start Your Learning Journey Today</h3>
-              <p class="mb-4">Enroll now and get access to all courses. Special discount available for new students. Learn at your own pace with lifetime access to course materials.</p>
-              <div class="cta-buttons">
-                <a href="#" class="btn btn-primary btn-lg me-3">Enroll Now</a>
-                <a href="#" class="btn btn-outline-secondary btn-lg">View Course Catalog</a>
-              </div>
-              <div class="security-note mt-4">
-                <small><i class="bi bi-shield-check me-2"></i>Secure payment • 30-day money-back guarantee • Accredited certificates</small>
-              </div>
-            </div>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop" alt="Startups en Tunisie" class="img-fluid">
           </div>
         </div>
       </div>
-    </section><!-- /Call To Action Section -->
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Startups & Innovation</h2>
+              <p class="lead">Rejoignez l'écosystème startup tunisien. Investissez dans des projets innovants, créez votre propre startup ou découvrez les opportunités d'investissement dans les entreprises émergentes de Tunisie.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'startup_list' %}" class="btn btn-primary btn-lg"><i class="bi bi-rocket-takeoff me-2"></i>Découvrir les Startups</a>
+              </div>
+            </div>
+          </div>
+              </div>
+            </div>
+    </section><!-- /Startups Section -->
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials section">
-      <div class="container section-title">
-        <h2>Student Testimonials</h2>
-        <p>Hear from our students about their learning experience and success stories</p>
-      </div>
+    <!-- About Section -->
+    <section id="about" class="about section">
       <div class="container">
-        <div class="testimonial-slider swiper init-swiper">
-          <script type="application/json" class="swiper-config">{"loop":true,"speed":600,"autoplay":{"delay":4000},"slidesPerView":1,"spaceBetween":30,"navigation":{"nextEl":".swiper-button-next","prevEl":".swiper-button-prev"},"breakpoints":{"768":{"slidesPerView":2},"1200":{"slidesPerView":3}}}</script>
-          <div class="swiper-wrapper">
-            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'User/evently/img/person/person-f-12.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit sed eiusmod tempor.</p></div><div class="testimonial-footer"><h5>Jessica Martinez</h5><span>UX Designer</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
-            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'User/evently/img/person/person-m-8.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa.</p></div><div class="testimonial-footer"><h5>David Rodriguez</h5><span>Software Engineer</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
-            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'User/evently/img/person/person-f-6.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud.</p></div><div class="testimonial-footer"><h5>Amanda Wilson</h5><span>Creative Director</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
-            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'User/evently/img/person/person-m-12.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis.</p></div><div class="testimonial-footer"><h5>Ryan Thompson</h5><span>Business Analyst</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
-            <div class="swiper-slide"><div class="testimonial-item"><div class="testimonial-header"><img src="{% static 'User/evently/img/person/person-f-10.webp' %}" alt="Client" class="img-fluid" loading="lazy"><div class="rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div></div><div class="testimonial-body"><p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi.</p></div><div class="testimonial-footer"><h5>Rachel Chen</h5><span>Project Manager</span><div class="quote-icon"><i class="bi bi-chat-quote-fill"></i></div></div></div></div>
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <h2>About EduLife</h2>
+            <p>EduLife is dedicated to providing accessible, high-quality education to learners worldwide. We believe that education is a fundamental right and should be available to everyone.</p>
+            <p>Our platform brings together world-class educators, innovative teaching methods, and cutting-edge technology to create an unparalleled learning experience.</p>
+            <a href="{% url 'evently_about' %}" class="btn btn-primary">Learn More</a>
           </div>
-          <div class="swiper-navigation"><div class="swiper-button-prev"></div><div class="swiper-button-next"></div></div>
-        </div>
-      </div>
-    </section><!-- /Testimonials Section -->
+          <div class="col-lg-6">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop" alt="About EduLife - Team" class="img-fluid rounded">
+              </div>
+            </div>
+          </div>
+    </section><!-- /About Section -->
 
-    <!-- Gallery Section -->
-    <section id="gallery" class="gallery section">
-      <div class="container-fluid">
-        <div class="row gy-4 justify-content-center">
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-1.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-1.webp' %}" title="Gallery 1" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
+    <!-- Contact Section -->
+    <section id="contact" class="contact section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <img src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=800&h=600&fit=crop" alt="Contact EduLife - Office" class="img-fluid rounded">
+              </div>
+          <div class="col-lg-6">
+            <h2>Contact Us</h2>
+            <p>Get in touch with us. We'd love to hear from you!</p>
+            <div class="contact-info">
+              <p><i class="bi bi-geo-alt me-2"></i> A108 Adam Street, New York, NY 535022</p>
+              <p><i class="bi bi-telephone me-2"></i> +1 5589 55488 55</p>
+              <p><i class="bi bi-envelope me-2"></i> info@edulife.com</p>
+            </div>
+            <a href="{% url 'evently_contact' %}" class="btn btn-primary">Contact Us</a>
+          </div>
               </div>
             </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-2.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-2.webp' %}" title="Gallery 2" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-3.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-3.webp' %}" title="Gallery 3" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-4.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-4.webp' %}" title="Gallery 4" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-5.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-5.webp' %}" title="Gallery 5" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-6.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-6.webp' %}" title="Gallery 6" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-7.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-7.webp' %}" title="Gallery 7" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="gallery-item h-100">
-              <img src="{% static 'User/evently/img/events/gallery-8.webp' %}" class="img-fluid" alt="">
-              <div class="gallery-links d-flex align-items-center justify-content-center">
-                <a href="{% static 'User/evently/img/events/gallery-8.webp' %}" title="Gallery 8" class="glightbox preview-link"><i class="bi bi-arrows-angle-expand"></i></a>
-                <a href="{% url 'evently_gallery' %}" class="details-link"><i class="bi bi-link-45deg"></i></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section><!-- /Gallery Section -->
+    </section><!-- /Contact Section -->
 
   </main>
 
@@ -1031,7 +2704,6 @@
         <div class="col-lg-2 col-md-3 footer-links">
           <h4>Support</h4>
           <ul>
-            <li><a href="{% url 'evently_contact' %}">Contact Us</a></li>
             <li><a href="#">Help Center</a></li>
             <li><a href="#">FAQ</a></li>
             <li><a href="#">Student Portal</a></li>
@@ -1064,6 +2736,63 @@
         menu.classList.toggle('open');
         if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
       });
+    })();
+    
+    // Header always transparent - no scroll effect
+    (function() {
+      const header = document.getElementById('header');
+      if (!header) return;
+      
+      // Keep header transparent always (remove scrolled class if present)
+      header.classList.remove('scrolled');
+    })();
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && href.length > 1) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            const headerOffset = 80;
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      });
+    });
+    
+     // Scroll animations for sections
+    (function() {
+       const observerOptions = {
+         threshold: 0.1,
+         rootMargin: '0px 0px -100px 0px'
+       };
+       
+       const observer = new IntersectionObserver(function(entries) {
+         entries.forEach(entry => {
+           if (entry.isIntersecting) {
+             entry.target.classList.add('visible');
+              }
+            });
+       }, observerOptions);
+              
+       // Observe all sections except hero (already visible)
+       document.querySelectorAll('section:not(#hero)').forEach(section => {
+         observer.observe(section);
+        });
+        
+       // Make hero visible immediately
+       const hero = document.getElementById('hero');
+       if (hero) {
+         hero.classList.add('visible');
+       }
     })();
   </script>
 

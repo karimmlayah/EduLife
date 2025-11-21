@@ -337,25 +337,77 @@
     }
 
     .btn-edit {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-edit:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .btn-edit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
+    }
+
+    .btn-edit:active {
+      transform: translateY(-1px) scale(0.98);
     }
 
     .btn-delete {
-      background: #dc3545;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-delete::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-delete:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .btn-delete:hover {
-      background: #c82333;
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
       color: white;
-      transform: translateY(-2px);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-delete:active {
+      transform: translateY(-1px) scale(0.98);
     }
 
     .btn-back {
@@ -369,14 +421,40 @@
     }
 
     .btn-contact {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-contact::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-contact:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .btn-contact:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
+    }
+
+    .btn-contact:active {
+      transform: translateY(-1px) scale(0.98);
     }
 
     .badge-available {

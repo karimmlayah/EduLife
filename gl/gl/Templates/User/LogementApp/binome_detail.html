@@ -7,6 +7,127 @@
 
 {% block extra_css %}
   <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background: transparent;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+      z-index: 1;
+    }
+
+    .logement-hero .hero-images {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      z-index: 0;
+    }
+
+    .logement-hero .hero-images img {
+      width: 50%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+      position: relative;
+      z-index: 1;
+    }
+
     .binome-detail-container {
       max-width: 900px;
       margin: 0 auto;
@@ -119,24 +240,50 @@
     .btn-contact-detail {
       flex: 1;
       padding: 14px 24px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
-      border-radius: 8px;
+      border-radius: 12px;
       text-decoration: none;
       text-align: center;
       font-weight: 600;
       font-size: 1rem;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-contact-detail::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-contact-detail:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-contact-detail:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
+    }
+
+    .btn-contact-detail:active {
+      transform: translateY(-1px) scale(0.98);
     }
 
     .btn-back-detail {
@@ -161,18 +308,40 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
-      border-radius: 8px;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: 600;
       margin-top: 1rem;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logement-link::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .logement-link:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .logement-link:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
     }
   </style>
@@ -180,6 +349,10 @@
 
 {% block content %}
   <section class="logement-hero section dark-background">
+    <div class="hero-images">
+      <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&h=1080&fit=crop" alt="Recherche de binôme">
+      <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&h=1080&fit=crop" alt="Colocation">
+    </div>
     <div class="background-overlay"></div>
     <div class="hero-content">
       <div class="container">

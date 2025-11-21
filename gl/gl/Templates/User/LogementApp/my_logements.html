@@ -13,7 +13,7 @@
       min-height: 60vh;
       display: flex;
       align-items: center;
-      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&h=1080&fit=crop');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -123,20 +123,46 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 14px 32px;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-logement-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .add-logement-btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .add-logement-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
+    }
+
+    .add-logement-btn:active {
+      transform: translateY(-1px) scale(0.98);
     }
 
     /* Logements Grid */
@@ -294,23 +320,69 @@
     }
 
     .btn-edit {
-      background: #667eea;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
       color: white;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-edit:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .btn-edit:hover {
-      background: #5568d3;
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
       color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
     }
 
     .btn-delete {
-      background: #ef4444;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-delete::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-delete:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .btn-delete:hover {
-      background: #dc2626;
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
       color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
     }
 
     .empty-state {
@@ -396,7 +468,7 @@
               </div>
             </div>
             <div class="logement-card-actions">
-              <a href="{% url 'logement_detail' logement.id %}" class="btn-card-action" style="background: #10b981; color: white; text-decoration: none;">
+              <a href="{% url 'logement_detail' logement.id %}" class="btn-card-action" style="background: linear-gradient(135deg, #f87500 0%, #ff9500 100%); color: white; text-decoration: none; box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);">
                 <i class="bi bi-eye"></i> Voir
               </a>
               <a href="{% url 'logement_edit' logement.id %}" class="btn-card-action btn-edit" style="text-decoration: none;">

@@ -1,0 +1,714 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Modifier une demande de binôme • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background: transparent;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      overflow: hidden;
+    }
+
+    .logement-hero .hero-images {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      z-index: 0;
+    }
+
+    .logement-hero .hero-images img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+      z-index: 1;
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .binome-form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #f87500;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+    }
+
+    /* Validation styles */
+    .form-group {
+      position: relative;
+    }
+
+    .form-control.valid {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-control.invalid {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .validation-icon {
+      position: absolute;
+      right: 12px;
+      top: 38px;
+      font-size: 1.2rem;
+      pointer-events: none;
+      transition: all 0.3s;
+      opacity: 0;
+      display: none;
+    }
+
+    .form-control.valid + .validation-icon {
+      opacity: 0;
+      display: none;
+    }
+
+    .form-control.invalid + .validation-icon {
+      opacity: 0;
+      display: none;
+    }
+
+    .validation-message {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    .validation-message.show {
+      display: block;
+    }
+
+    .validation-message.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border-left: 3px solid #ef4444;
+    }
+
+    .validation-message.success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border-left: 3px solid #10b981;
+    }
+
+    .validation-message.info {
+      background: #eff6ff;
+      color: #2563eb;
+      border-left: 3px solid #3b82f6;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .char-counter.warning {
+      color: #f59e0b;
+    }
+
+    .char-counter.danger {
+      color: #ef4444;
+    }
+
+    .form-control-wrapper {
+      position: relative;
+    }
+
+    .form-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0 0;
+      color: #dc3545;
+      font-size: 0.85rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-submit:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-submit:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn-cancel {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 24px;
+      background: #e5e7eb;
+      color: #374151;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+      background: #d1d5db;
+      color: #1f2937;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background">
+      <div class="hero-images">
+        <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1920&h=1080&fit=crop" alt="Modifier demande de binôme">
+      </div>
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Modifier une demande de binôme</h1>
+              <p class="hero-subtitle">Modifiez les informations de votre recherche de colocataire</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'binome_search' %}">Chercher un binôme</a>
+              <span>/</span>
+              <span class="current">Modifier</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="binome-form-container">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }} <span style="color: #ef4444;">*</span></label>
+            <div class="form-control-wrapper">
+              {{ form.title }}
+              <span class="validation-icon"></span>
+            </div>
+            <div class="validation-message" id="title-message"></div>
+            {% if form.title.help_text %}
+              <small class="form-text">{{ form.title.help_text }}</small>
+            {% endif %}
+            {% if form.title.errors %}
+              <ul class="errorlist">
+                {% for error in form.title.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }} <span style="color: #ef4444;">*</span></label>
+            <div class="form-control-wrapper">
+              {{ form.description }}
+              <span class="validation-icon"></span>
+            </div>
+            <div class="char-counter" id="description-counter">0 / 500 caractères</div>
+            <div class="validation-message" id="description-message"></div>
+            {% if form.description.help_text %}
+              <small class="form-text">{{ form.description.help_text }}</small>
+            {% endif %}
+            {% if form.description.errors %}
+              <ul class="errorlist">
+                {% for error in form.description.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }} <span style="color: #ef4444;">*</span></label>
+            <div class="form-control-wrapper">
+              {{ form.city }}
+              <span class="validation-icon"></span>
+            </div>
+            <div class="validation-message" id="city-message"></div>
+            {% if form.city.help_text %}
+              <small class="form-text">{{ form.city.help_text }}</small>
+            {% endif %}
+            {% if form.city.errors %}
+              <ul class="errorlist">
+                {% for error in form.city.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.budget_max.id_for_label }}" class="form-label">Budget maximum (DT) <span style="color: #ef4444;">*</span></label>
+            <div class="form-control-wrapper">
+              {{ form.budget_max }}
+              <span class="validation-icon"></span>
+            </div>
+            <div class="validation-message" id="budget-message"></div>
+            {% if form.budget_max.help_text %}
+              <small class="form-text">Entrez uniquement des chiffres</small>
+            {% endif %}
+            {% if form.budget_max.errors %}
+              <ul class="errorlist">
+                {% for error in form.budget_max.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.logement.id_for_label }}" class="form-label">{{ form.logement.label }}</label>
+            {{ form.logement }}
+            {% if form.logement.help_text %}
+              <small class="form-text">{{ form.logement.help_text }}</small>
+            {% endif %}
+            {% if form.logement.errors %}
+              <ul class="errorlist">
+                {% for error in form.logement.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <i class="bi bi-check-circle"></i> Enregistrer les modifications
+          </button>
+          <a href="{% url 'binome_search' %}" class="btn-cancel">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Récupérer les champs du formulaire
+      const titleField = document.querySelector('#{{ form.title.id_for_label }}');
+      const descriptionField = document.querySelector('#{{ form.description.id_for_label }}');
+      const cityField = document.querySelector('#{{ form.city.id_for_label }}');
+      const budgetField = document.querySelector('#{{ form.budget_max.id_for_label }}');
+      const form = document.querySelector('form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      // Fonction pour afficher un message de validation
+      function showMessage(fieldId, message, type) {
+        const messageDiv = document.getElementById(fieldId + '-message');
+        if (messageDiv) {
+          messageDiv.textContent = message;
+          messageDiv.className = 'validation-message show ' + type;
+        }
+      }
+
+      // Fonction pour masquer le message
+      function hideMessage(fieldId) {
+        const messageDiv = document.getElementById(fieldId + '-message');
+        if (messageDiv) {
+          messageDiv.className = 'validation-message';
+        }
+      }
+
+      // Fonction pour mettre à jour l'icône de validation
+      function updateValidationIcon(field, isValid) {
+        const icon = field.parentElement.querySelector('.validation-icon');
+        if (icon) {
+          if (isValid) {
+            icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            field.classList.remove('invalid');
+            field.classList.add('valid');
+          } else {
+            icon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+            field.classList.remove('valid');
+            field.classList.add('invalid');
+          }
+        }
+      }
+
+      // Validation du titre
+      function validateTitle() {
+        const value = titleField.value.trim();
+        if (value.length === 0) {
+          showMessage('title', 'Le titre est obligatoire', 'error');
+          updateValidationIcon(titleField, false);
+          return false;
+        } else if (value.length < 5) {
+          showMessage('title', 'Le titre doit contenir au moins 5 caractères', 'error');
+          updateValidationIcon(titleField, false);
+          return false;
+        } else if (value.length > 100) {
+          showMessage('title', 'Le titre ne doit pas dépasser 100 caractères', 'error');
+          updateValidationIcon(titleField, false);
+          return false;
+        } else {
+          showMessage('title', 'Titre valide', 'success');
+          updateValidationIcon(titleField, true);
+          return true;
+        }
+      }
+
+      // Validation de la description
+      function validateDescription() {
+        const value = descriptionField.value.trim();
+        const counter = document.getElementById('description-counter');
+        const charCount = value.length;
+        
+        if (counter) {
+          counter.textContent = charCount + ' / 500 caractères';
+          if (charCount > 450) {
+            counter.className = 'char-counter danger';
+          } else if (charCount > 400) {
+            counter.className = 'char-counter warning';
+          } else {
+            counter.className = 'char-counter';
+          }
+        }
+
+        if (value.length === 0) {
+          showMessage('description', 'La description est obligatoire', 'error');
+          updateValidationIcon(descriptionField, false);
+          return false;
+        } else if (value.length < 20) {
+          showMessage('description', 'La description doit contenir au moins 20 caractères', 'error');
+          updateValidationIcon(descriptionField, false);
+          return false;
+        } else if (value.length > 500) {
+          showMessage('description', 'La description ne doit pas dépasser 500 caractères', 'error');
+          updateValidationIcon(descriptionField, false);
+          return false;
+        } else {
+          showMessage('description', 'Description valide', 'success');
+          updateValidationIcon(descriptionField, true);
+          return true;
+        }
+      }
+
+      // Validation de la ville
+      function validateCity() {
+        const value = cityField.value.trim();
+        if (value.length === 0) {
+          showMessage('city', 'La ville est obligatoire', 'error');
+          updateValidationIcon(cityField, false);
+          return false;
+        } else if (value.length < 2) {
+          showMessage('city', 'Le nom de la ville doit contenir au moins 2 caractères', 'error');
+          updateValidationIcon(cityField, false);
+          return false;
+        } else if (!/^[a-zA-ZÀ-ÿ\s-']+$/.test(value)) {
+          showMessage('city', 'Le nom de la ville ne doit contenir que des lettres', 'error');
+          updateValidationIcon(cityField, false);
+          return false;
+        } else {
+          showMessage('city', 'Ville valide', 'success');
+          updateValidationIcon(cityField, true);
+          return true;
+        }
+      }
+
+      // Validation du budget
+      function validateBudget() {
+        const value = budgetField.value.trim().replace(/\s/g, '');
+        const numValue = parseFloat(value);
+        
+        if (value.length === 0) {
+          showMessage('budget', 'Le budget est obligatoire', 'error');
+          updateValidationIcon(budgetField, false);
+          return false;
+        } else if (isNaN(numValue) || numValue <= 0) {
+          showMessage('budget', 'Le budget doit être un nombre positif', 'error');
+          updateValidationIcon(budgetField, false);
+          return false;
+        } else if (numValue < 100) {
+          showMessage('budget', 'Le budget minimum est de 100 DT', 'error');
+          updateValidationIcon(budgetField, false);
+          return false;
+        } else {
+          showMessage('budget', 'Budget valide', 'success');
+          updateValidationIcon(budgetField, true);
+          return true;
+        }
+      }
+
+      // Formatage automatique du budget - seulement des chiffres
+      if (budgetField) {
+        budgetField.addEventListener('input', function(e) {
+          // Permettre uniquement les chiffres
+          let value = e.target.value.replace(/\D/g, '');
+          e.target.value = value;
+          validateBudget();
+        });
+
+        budgetField.addEventListener('keypress', function(e) {
+          // Empêcher la saisie de caractères non numériques
+          const char = String.fromCharCode(e.which);
+          if (!/[0-9]/.test(char)) {
+            e.preventDefault();
+          }
+        });
+
+        budgetField.addEventListener('paste', function(e) {
+          e.preventDefault();
+          const paste = (e.clipboardData || window.clipboardData).getData('text');
+          const numbersOnly = paste.replace(/\D/g, '');
+          e.target.value = numbersOnly;
+          validateBudget();
+        });
+      }
+
+      // Événements de validation en temps réel
+      if (titleField) {
+        titleField.addEventListener('input', validateTitle);
+        titleField.addEventListener('blur', validateTitle);
+      }
+
+      if (descriptionField) {
+        descriptionField.addEventListener('input', validateDescription);
+        descriptionField.addEventListener('blur', validateDescription);
+      }
+
+      if (cityField) {
+        cityField.addEventListener('input', validateCity);
+        cityField.addEventListener('blur', validateCity);
+      }
+
+      if (budgetField) {
+        budgetField.addEventListener('blur', validateBudget);
+      }
+
+      // Validation avant soumission
+      form.addEventListener('submit', function(e) {
+        const isTitleValid = validateTitle();
+        const isDescriptionValid = validateDescription();
+        const isCityValid = validateCity();
+        const isBudgetValid = validateBudget();
+
+        if (!isTitleValid || !isDescriptionValid || !isCityValid || !isBudgetValid) {
+          e.preventDefault();
+          showMessage('title', 'Veuillez corriger les erreurs avant de soumettre', 'error');
+          submitBtn.style.animation = 'shake 0.5s';
+          setTimeout(() => {
+            submitBtn.style.animation = '';
+          }, 500);
+          return false;
+        }
+      });
+
+      // Animation de secousse pour le bouton
+      const shakeStyle = document.createElement('style');
+      shakeStyle.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+          20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+      `;
+      document.head.appendChild(shakeStyle);
+
+      // Initialiser le compteur de caractères pour la description
+      if (descriptionField) {
+        const initialLength = descriptionField.value.length;
+        const counter = document.getElementById('description-counter');
+        if (counter) {
+          counter.textContent = initialLength + ' / 500 caractères';
+          if (initialLength > 450) {
+            counter.className = 'char-counter danger';
+          } else if (initialLength > 400) {
+            counter.className = 'char-counter warning';
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}
+

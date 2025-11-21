@@ -288,9 +288,19 @@
         <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
             <ul class="navbar-nav">
 
+                <!-- ✅ Dashboard -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard_events' %}active{% endif %}" href="{% url 'dashboard_events' %}">
+                        <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Dashboard</span>
+                    </a>
+                </li>
+
                 <!-- ✅ Événements -->
                 <li class="nav-item mb-2">
-                    <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <a class="nav-link {% if request.path == '/dashboard/' or request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                         <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
                         </div>
@@ -311,10 +321,9 @@
             </ul>
         </div>
 
-        <div class="sidenav-footer mx-3 mt-4">
-            <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout mt-2">
-                <i class="ni ni-button-power"></i>
-                <span>Déconnexion</span>
+        <div class="sidenav-footer mx-3">
+            <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout">
+                <i class="ni ni-button-power"></i><span>Déconnexion</span>
             </a>
         </div>
     </aside>
@@ -344,7 +353,7 @@
                                 <i class="ni ni-briefcase-24 me-1"></i>
                                 <span>Internship</span>
                             </a>
-                            <a href="{% url 'startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'startup' %}active{% endif %}">
+                            <a href="{% url 'dashboard_startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_startup' or request.resolver_match.url_name == 'startupList' or request.resolver_match.url_name == 'investmentList' or 'startup' in request.path %}active{% endif %}">
                                 <i class="ni ni-building me-1"></i>
                                 <span>Startup</span>
                             </a>
@@ -356,7 +365,7 @@
                                 <i class="ni ni-delivery-fast me-1"></i>
                                 <span>Ride sharing</span>
                             </a>
-                        <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' or request.path == '/dashboard/' or '/event/' in request.path and '/seats/' in request.path %}active{% endif %}">
+                         <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' or 'events' in request.path %}active{% endif %}">
                                 <i class="ni ni-calendar-grid-58 me-1"></i>
                                 <span>Events</span>
                             </a>
