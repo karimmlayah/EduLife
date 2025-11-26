@@ -21,6 +21,23 @@
   <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
 
   <style>
+    .map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid #444;
+}
+
+.mapboxgl-popup {
+    max-width: 200px;
+}
+
+.mapboxgl-popup-content {
+    background: var(--card-bg);
+    color: var(--text-light);
+    border-radius: 8px;
+    padding: 10px;
+}
     :root {
       --primary-color: #de6900;
       --primary-dark: #b85400;
@@ -472,31 +489,34 @@
 
       <div class="row g-4">
         <!-- Détails de l'événement -->
-        <div class="col-lg-4">
-          <div class="detail-card">
-            <div class="detail-icon">
-              <i class="bi bi-info-circle"></i>
-            </div>
-            <h4>Détails de l'événement</h4>
-            <div class="mt-4">
-              <p><strong><i class="bi bi-calendar-event me-2" style="color: var(--primary-color);"></i>Date :</strong><br>{{ event.date }}</p>
-              <p><strong><i class="bi bi-geo-alt me-2" style="color: var(--primary-color);"></i>Lieu :</strong><br>{{ event.location }}</p>
-              <p><strong><i class="bi bi-clock me-2" style="color: var(--primary-color);"></i>Durée :</strong><br>3 heures</p>
-            </div>
-          </div>
-
-          <div class="detail-card mt-4">
-            <div class="detail-icon">
-              <i class="bi bi-credit-card"></i>
-            </div>
-            <h4>Tarifs</h4>
-            <div class="mt-4">
-              <p><strong>Place standard :</strong> {{ event.price }} DT</p>
-              <p><strong>Place VIP :</strong> {{ event.price|add:"30" }} DT</p>
-              <p class="text-muted small">* Taxes incluses</p>
-            </div>
-          </div>
+       <div class="col-lg-4">
+    <div class="detail-card">
+        <div class="detail-icon">
+            <i class="bi bi-info-circle"></i>
         </div>
+        <h4>Détails de l'événement</h4>
+        <div class="mt-4">
+            <p><strong><i class="bi bi-calendar-event me-2" style="color: var(--primary-color);"></i>Date :</strong><br>{{ event.date }}</p>
+            <p><strong><i class="bi bi-geo-alt me-2" style="color: var(--primary-color);"></i>Lieu :</strong><br>{{ event.location }}</p>
+            {% if event.latitude and event.longitude %}
+            <div id="event-map" data-lat="{{ event.latitude }}" data-lng="{{ event.longitude }}" style="height: 200px; border-radius: 8px; margin-top: 10px; border: 1px solid #444;"></div>
+            {% endif %}
+            <p class="mt-3"><strong><i class="bi bi-clock me-2" style="color: var(--primary-color);"></i>Durée :</strong><br>3 heures</p>
+        </div>
+    </div>
+
+    <div class="detail-card mt-4">
+        <div class="detail-icon">
+            <i class="bi bi-credit-card"></i>
+        </div>
+        <h4>Tarifs</h4>
+        <div class="mt-4">
+            <p><strong>Place standard :</strong> {{ event.price }} DT</p>
+            <p><strong>Place VIP :</strong> {{ event.price|add:"30" }} DT</p>
+            <p class="text-muted small">* Taxes incluses</p>
+        </div>
+    </div>
+</div>
 
         <!-- Sélection des sièges -->
         <div class="col-lg-8">
@@ -716,9 +736,57 @@
   const data = await response.json();
 
   const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
-  stripe.redirectToCheckout({ sessionId: data.id });
+stripe.redirectToCheckout({ sessionId: data.sessionId });
 });
     });
   </script>
+  <!-- Mapbox CSS -->
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css' rel='stylesheet' />
+
+<!-- Mapbox JS -->
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Vérifier si l'événement a des coordonnées
+        const mapEl = document.getElementById('event-map');
+        const eventLatitude = mapEl && mapEl.dataset.lat ? parseFloat(mapEl.dataset.lat) : null;
+        const eventLongitude = mapEl && mapEl.dataset.lng ? parseFloat(mapEl.dataset.lng) : null;
+        if (eventLatitude !== null && eventLongitude !== null) {
+            // Initialiser Mapbox
+            mapboxgl.accessToken = '{{ MAPBOX_ACCESS_TOKEN }}'; // Vous devrez passer ce token depuis vos settings
+            
+            const map = new mapboxgl.Map({
+                container: 'event-map',
+                style: 'mapbox://styles/mapbox/dark-v10', // Style sombre qui correspond à votre thème
+                center: [eventLongitude, eventLatitude],
+                zoom: 14,
+                interactive: true // Permet l'interaction avec la carte
+            });
+
+            // Ajouter les contrôles de navigation
+            map.addControl(new mapboxgl.NavigationControl());
+
+            // Ajouter un marqueur pour l'événement
+            new mapboxgl.Marker({
+                color: 'var(--primary-color)'
+            })
+            .setLngLat([eventLongitude, eventLatitude])
+            .setPopup(new mapboxgl.Popup({ offset: 25 })
+                .setHTML(`
+                    <div class="text-center">
+                        <h6 style="color: var(--primary-color); margin-bottom: 5px;">{{ event.name }}</h6>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-light);">{{ event.location }}</p>
+                    </div>
+                `))
+            .addTo(map);
+
+            // Ajuster la carte pour s'assurer qu'elle est correctement rendue
+            map.on('load', function() {
+                map.resize();
+            });
+        }
+    });
+</script>
 </body>
 </html>

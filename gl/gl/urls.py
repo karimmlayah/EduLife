@@ -27,7 +27,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
         path('', include("EventApp.urls")),
-                path('dashboard/', views.dashboard, name='dashboard'), # back-office
         path('event/<int:event_id>/seats/', views.view_seats, name='view_seats'),
     path('seats/', views.seats_list, name='seats_list'),
 

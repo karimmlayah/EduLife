@@ -1,4 +1,4 @@
-{% extends 'backoffice/base.html' %}
+{% extends 'Event/backoffice/base.html' %}
 {% load static %}
 {% block content %}
 
@@ -35,8 +35,8 @@
 .add-panel {
     position: fixed;
     top: 0;
-    right: -400px;
-    width: 400px;
+    right: -500px;
+    width: 500px;
     height: 100%;
     background-color: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
@@ -189,9 +189,40 @@
     font-size: 0.875rem;
     color: #6c757d;
 }
+
+/* Styles Mapbox */
+.mapboxgl-ctrl-geocoder {
+    width: 100%;
+    max-width: none;
+    border-radius: 4px;
+}
+
+#map {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.mapboxgl-ctrl-geocoder--input {
+    padding: 6px 35px;
+}
+
+.mapboxgl-ctrl-geocoder .suggestions {
+    z-index: 1001;
+}
 </style>
 
+<!-- Inclure Mapbox CSS et JS -->
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <a id="addBtn" class="btn btn-primary mb-3">+ Ajouter un événement</a>
+<button id="exportPDF" class="btn btn-secondary mb-3 ms-3">
+    Exporter en PDF
+</button>
 
 <div class="overlay" id="overlay"></div>
 
@@ -243,17 +274,19 @@
                     </button>
                 </form>
                 <button class="btn btn-warning btn-sm edit-btn"
-                        data-id="{{ event.id }}"
-                        data-name="{{ event.name }}"
-                        data-category="{{ event.category }}"
-                        data-description="{{ event.description }}"
-                        data-price="{{ event.price }}"
-                        data-date="{{ event.date|date:'Y-m-d' }}"
-                        data-location="{{ event.location }}"
-                        data-total="{{ event.total_seats }}"
-                        data-photo="{{ event.photo_url }}">
-                    Modifier
-                </button>
+                    data-id="{{ event.id }}"
+                    data-name="{{ event.name }}"
+                    data-category="{{ event.category }}"
+                    data-description="{{ event.description }}"
+                    data-price="{{ event.price }}"
+                    data-date="{{ event.date|date:'Y-m-d' }}"
+                    data-location="{{ event.location }}"
+                    data-total="{{ event.total_seats }}"
+                    data-photo="{{ event.photo_url }}"
+                    data-latitude="{{ event.latitude }}"
+                    data-longitude="{{ event.longitude }}">
+                Modifier
+                 </button>
                 <a href="{% url 'view_seats' event.id %}" class="btn btn-info btn-sm">
                     Voir chaises
                 </a>
@@ -274,7 +307,7 @@
 <!-- ADD EVENT PANEL (SIDE PANEL) -->
 <div class="add-panel" id="addPanel">
     <button class="close-panel" id="closePanel">×</button>
-    <h3>Ajouter un événement</h3>
+    <h3 id="panelTitle">Ajouter un événement</h3>
 
     <form method="POST" id="eventForm">
         {% csrf_token %}
@@ -318,11 +351,26 @@
             <span id="dateError" class="error-message"></span>
         </div>
 
+        <!-- Section Mapbox -->
         <div class="form-group">
             <label>Lieu</label>
-            <input type="text" id="location" name="location" class="form-control" required>
+            <input type="text" id="location" name="location" class="form-control" required readonly>
             <span id="locationError" class="error-message"></span>
         </div>
+
+        <div class="form-group">
+            <label>Rechercher un lieu</label>
+            <div id="geocoder" class="geocoder"></div>
+            <small class="form-text text-muted">Commencez à taper pour rechercher un lieu</small>
+        </div>
+
+        <div class="form-group">
+            <div id="map" style="height: 250px; width: 100%; border-radius: 8px; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Champs cachés pour les coordonnées -->
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
 
         <div class="form-group">
             <label>URL de l'image ou image encodée</label>
@@ -351,14 +399,21 @@
 </div>
 
 <script>
+// Variables globales pour la carte et le marqueur
+let map;
+let currentMarker = null;
+let geocoder;
+
 // Fonctions utilitaires pour afficher/masquer les messages
 function showError(element, message) {
     element.textContent = message;
     element.classList.add('show');
     element.classList.remove('valid-message');
     element.classList.add('error-message');
-    element.previousElementSibling.classList.add('error');
-    element.previousElementSibling.classList.remove('valid');
+    if (element.previousElementSibling && element.previousElementSibling.classList) {
+        element.previousElementSibling.classList.add('error');
+        element.previousElementSibling.classList.remove('valid');
+    }
 }
 
 function showValid(element) {
@@ -366,16 +421,119 @@ function showValid(element) {
     element.classList.add('show');
     element.classList.remove('error-message');
     element.classList.add('valid-message');
-    element.previousElementSibling.classList.remove('error');
-    element.previousElementSibling.classList.add('valid');
+    if (element.previousElementSibling && element.previousElementSibling.classList) {
+        element.previousElementSibling.classList.remove('error');
+        element.previousElementSibling.classList.add('valid');
+    }
 }
 
 function hideMessage(element) {
     element.classList.remove('show');
-    element.previousElementSibling.classList.remove('error', 'valid');
+    if (element.previousElementSibling && element.previousElementSibling.classList) {
+        element.previousElementSibling.classList.remove('error', 'valid');
+    }
 }
 
-// Fonction pour prévisualiser l'image (support data URI)
+function initializeMap() {
+    // Initialiser la carte seulement si elle n'existe pas déjà
+    if (map) return;
+    
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [10.1815, 36.8065],
+        zoom: 10
+    });
+
+    // Créer le géocoder
+    geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        marker: false,
+        placeholder: 'Rechercher une adresse...',
+        countries: 'tn',
+        language: 'fr',
+        proximity: [10.1815, 36.8065]
+    });
+
+    // Ajouter le géocoder à son conteneur
+    document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+    // Ajouter les contrôles de navigation
+    map.addControl(new mapboxgl.NavigationControl());
+
+    // Événement lorsque un lieu est sélectionné
+    geocoder.on('result', function(e) {
+        const result = e.result;
+        const location = result.place_name;
+        const coordinates = result.geometry.coordinates;
+        
+        updateLocationFields(location, coordinates[1], coordinates[0]);
+        updateMarker(coordinates);
+        
+        map.flyTo({
+            center: coordinates,
+            zoom: 14
+        });
+    });
+
+    // Événement lorsque la recherche est effacée
+    geocoder.on('clear', function() {
+        clearLocationFields();
+        removeMarker();
+    });
+
+    // Événement de clic sur la carte
+    map.on('click', function(e) {
+        const coordinates = e.lngLat;
+        
+        updateMarker([coordinates.lng, coordinates.lat]);
+        
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates.lng},${coordinates.lat}.json?access_token=${mapboxgl.accessToken}&language=fr`)
+            .then(response => response.json())
+            .then(data => {
+                const location = data.features[0] ? data.features[0].place_name : 'Lieu sélectionné';
+                updateLocationFields(location, coordinates.lat, coordinates.lng);
+            })
+            .catch(error => {
+                console.error('Erreur de géocodage inverse:', error);
+                updateLocationFields('Lieu sélectionné', coordinates.lat, coordinates.lng);
+            });
+    });
+
+    map.on('load', function() {
+        console.log('Carte Mapbox chargée');
+    });
+}
+
+function updateLocationFields(location, lat, lng) {
+    document.getElementById('location').value = location;
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    validateLocation();
+}
+
+function clearLocationFields() {
+    document.getElementById('location').value = '';
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+    validateLocation();
+}
+
+function updateMarker(coordinates) {
+    removeMarker();
+    currentMarker = new mapboxgl.Marker()
+        .setLngLat(coordinates)
+        .addTo(map);
+}
+
+function removeMarker() {
+    if (currentMarker) {
+        currentMarker.remove();
+        currentMarker = null;
+    }
+}
+
 function previewImage() {
     const url = document.getElementById('photo_url').value.trim();
     const preview = document.getElementById('previewImage');
@@ -388,20 +546,16 @@ function previewImage() {
     }
 }
 
-// Fonction de validation de l'URL - ACCEPTE LES DATA URI
 function validatePhotoUrl() {
     const photoUrl = document.getElementById('photo_url').value.trim();
     const errorElement = document.getElementById('photoUrlError');
     
-    // L'URL est optionnelle
     if (photoUrl === '') {
         hideMessage(errorElement);
         return true;
     }
     
-    // Accepter les URLs data URI
     if (photoUrl.startsWith('data:image/')) {
-        // Vérification basique du format data URI
         const dataUriRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/;
         if (dataUriRegex.test(photoUrl)) {
             showValid(errorElement);
@@ -412,7 +566,6 @@ function validatePhotoUrl() {
         }
     }
     
-    // Vérifier le format de l'URL HTTP/HTTPS
     try {
         const url = new URL(photoUrl);
         if (!url.protocol.startsWith('http')) {
@@ -427,8 +580,58 @@ function validatePhotoUrl() {
     }
 }
 
+function validateLocation() {
+    const location = document.getElementById('location').value.trim();
+    const errorElement = document.getElementById('locationError');
+    
+    if (location.length < 3) {
+        showError(errorElement, "Veuillez sélectionner un lieu sur la carte");
+        return false;
+    } else {
+        showValid(errorElement);
+        return true;
+    }
+}
+
+function closePanel() {
+    document.getElementById("addPanel").classList.remove("open");
+    document.getElementById("overlay").classList.remove("show");
+}
+
+function openPanel() {
+    document.getElementById("addPanel").classList.add("open");
+    document.getElementById("overlay").classList.add("show");
+}
+
+function resetForm() {
+    document.getElementById('eventForm').reset();
+    document.querySelectorAll('.error-message, .valid-message').forEach(el => {
+        el.classList.remove('show');
+    });
+    document.querySelectorAll('.form-control').forEach(el => {
+        el.classList.remove('error', 'valid');
+    });
+    document.getElementById('previewImage').style.display = 'none';
+    document.getElementById('submitEventBtn').disabled = true;
+    document.getElementById('form_action').value = "create";
+    document.getElementById('edit_event_id').value = "";
+    document.getElementById('panelTitle').textContent = "Ajouter un événement";
+    
+    clearLocationFields();
+    removeMarker();
+    if (map) {
+        map.flyTo({
+            center: [10.1815, 36.8065],
+            zoom: 10
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     console.log('Initializing dashboard...');
+    
+    // Initialiser Mapbox
+    mapboxgl.accessToken = 'pk.eyJ1IjoiaGFvYXVzMDEiLCJhIjoiY21hOHhqcGttMWJ5NjJtczg3eGJxazM0MiJ9.lm0YeqM7TkpDT4r6_Pf6aw';
     
     // Définir la date minimale comme aujourd'hui
     const today = new Date().toISOString().split('T')[0];
@@ -506,19 +709,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function validateLocation() {
-        const location = document.getElementById('location').value.trim();
-        const errorElement = document.getElementById('locationError');
-        
-        if (location.length < 3) {
-            showError(errorElement, "Le lieu doit contenir au moins 3 caractères");
-            return false;
-        } else {
-            showValid(errorElement);
-            return true;
-        }
-    }
-
     function validateTotalSeats() {
         const seats = parseInt(document.getElementById('total_seats').value);
         const errorElement = document.getElementById('totalSeatsError');
@@ -541,16 +731,19 @@ document.addEventListener("DOMContentLoaded", function() {
         submitButton.disabled = !isValid;
     }
 
-    // Ajouter les écouteurs d'événements pour chaque champ
+    // Écouteurs d'événements pour la validation
     document.getElementById('category').addEventListener('change', () => { validateCategory(); updateSubmitButton(); });
     document.getElementById('name').addEventListener('input', () => { validateName(); updateSubmitButton(); });
     document.getElementById('description').addEventListener('input', () => { validateDescription(); updateSubmitButton(); });
     document.getElementById('price').addEventListener('input', () => { validatePrice(); updateSubmitButton(); });
     document.getElementById('date').addEventListener('change', () => { validateDate(); updateSubmitButton(); });
-    document.getElementById('location').addEventListener('input', () => { validateLocation(); updateSubmitButton(); });
+    document.getElementById('photo_url').addEventListener('input', () => { validatePhotoUrl(); updateSubmitButton(); });
     document.getElementById('total_seats').addEventListener('input', () => { validateTotalSeats(); updateSubmitButton(); });
 
-    // Validation à la soumission du formulaire
+    // Prévisualisation d'image
+    document.getElementById('photo_url').addEventListener('input', previewImage);
+
+    // Validation à la soumission
     document.getElementById('eventForm').addEventListener('submit', function(e) {
         const isValid = validateCategory() && validateName() && validateDescription() && 
                        validatePrice() && validateDate() && validateLocation() && 
@@ -563,35 +756,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Contrôles du panneau
-    document.getElementById("addBtn").addEventListener("click", () => {
-        document.getElementById("addPanel").classList.add("open");
-        document.getElementById("overlay").classList.add("show");
-        
-        // Réinitialiser le formulaire quand on ouvre le panneau
-        document.getElementById('eventForm').reset();
-        document.querySelectorAll('.error-message, .valid-message').forEach(el => {
-            el.classList.remove('show');
-        });
-        document.querySelectorAll('.form-control').forEach(el => {
-            el.classList.remove('error', 'valid');
-        });
-        document.getElementById('previewImage').style.display = 'none';
-        document.getElementById('submitEventBtn').disabled = true;
-        
-        // Réinitialiser le formulaire en mode création
-        document.getElementById('form_action').value = "create";
-        document.getElementById('edit_event_id').value = "";
+    document.getElementById("addBtn").addEventListener("click", function() {
+        resetForm();
+        openPanel();
+        // Initialiser la carte seulement quand on ouvre le panneau
+        setTimeout(() => {
+            if (!map) {
+                initializeMap();
+            }
+        }, 100);
     });
 
-    document.getElementById("closePanel").addEventListener("click", () => {
-        document.getElementById("addPanel").classList.remove("open");
-        document.getElementById("overlay").classList.remove("show");
-    });
-
-    document.getElementById("overlay").addEventListener("click", () => {
-        document.getElementById("addPanel").classList.remove("open");
-        document.getElementById("overlay").classList.remove("show");
-    });
+    document.getElementById("closePanel").addEventListener("click", closePanel);
+    document.getElementById("overlay").addEventListener("click", closePanel);
 
     // Initialiser le bouton de soumission comme désactivé
     document.getElementById('submitEventBtn').disabled = true;
@@ -609,8 +786,10 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
     document.getElementById('location').value = this.dataset.location;
     document.getElementById('total_seats').value = this.dataset.total;
     document.getElementById('photo_url').value = this.dataset.photo || '';
+    document.getElementById('latitude').value = this.dataset.latitude || '';
+    document.getElementById('longitude').value = this.dataset.longitude || '';
 
-    // Afficher l'aperçu de l'image si une URL existe
+    // Afficher l'aperçu de l'image
     if (this.dataset.photo) {
         document.getElementById('previewImage').src = this.dataset.photo;
         document.getElementById('previewImage').style.display = 'block';
@@ -621,12 +800,75 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
     // Passer en mode édition
     document.getElementById('form_action').value = "edit";
     document.getElementById('edit_event_id').value = this.dataset.id;
+    document.getElementById('panelTitle').textContent = "Modifier l'événement";
 
-    // Ouvrir le panneau si fermé
-    document.getElementById("addPanel").classList.add("open");
-    document.getElementById("overlay").classList.add("show");
+    // Ouvrir le panneau
+    openPanel();
+    
+    // Mettre à jour la carte après un délai pour s'assurer qu'elle est visible
+    setTimeout(() => {
+        if (!map) {
+            initializeMap();
+        }
+        
+        const lat = this.dataset.latitude;
+        const lng = this.dataset.longitude;
+        
+        if (lat && lng) {
+            const coordinates = [parseFloat(lng), parseFloat(lat)];
+            
+            map.flyTo({
+                center: coordinates,
+                zoom: 14
+            });
+            
+            updateMarker(coordinates);
+        }
+    }, 300);
   });
 });
 </script>
+<script>
+document.getElementById("exportPDF").addEventListener("click", function () {
+    const { jsPDF } = window.jspdf;
+
+    // Sélection de la colonne Actions
+    const actionCells = document.querySelectorAll("td:last-child, th:last-child");
+
+    // On cache la colonne Actions
+    actionCells.forEach(cell => cell.style.display = "none");
+
+    const table = document.querySelector(".table-responsive");
+
+    html2canvas(table, { scale: 2 }).then(canvas => {
+
+        // Après capture -> on ré-affiche la colonne
+        actionCells.forEach(cell => cell.style.display = "");
+
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const imgWidth = 190;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let position = 10;
+
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+
+        if (imgHeight > pageHeight) {
+            let heightLeft = imgHeight - pageHeight;
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = 0;
+                pdf.addImage(imgData, "PNG", 10, position - (imgHeight - heightLeft), imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+        }
+
+        pdf.save("events.pdf");
+    });
+});
+</script>
+
 
 {% endblock %}
