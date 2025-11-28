@@ -1,0 +1,313 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Messages Marketplace{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .marketplace-messages-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f8f9fa;
+      min-height: 70vh;
+    }
+
+    .messages-header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .messages-header h2 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 1.5rem;
+    }
+
+    .messages-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.3);
+    }
+
+    .tab-btn:hover {
+      border-color: #f87500;
+      color: #f87500;
+    }
+
+    .tab-btn.active:hover {
+      color: white;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .conversations-list {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s;
+    }
+
+    .conversation-item:hover {
+      background: #f9fafb;
+    }
+
+    .conversation-item:last-child {
+      border-bottom: none;
+    }
+
+    .conversation-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .conversation-image-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .conversation-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .conversation-preview {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+
+    .conversation-time {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .unread-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .btn-message {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-message::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-message:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-message:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Messages Marketplace</h1>
+              <p class="hero-subtitle">Vos conversations concernant les logements</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="marketplace-messages-container">
+        <div class="messages-header">
+          <h2>Messages Marketplace</h2>
+        </div>
+
+        <div class="messages-tabs">
+          <a href="{% url 'messages' %}" class="tab-btn">
+            <i class="bi bi-chat-dots"></i> Messages personnels
+          </a>
+          <a href="{% url 'marketplace_messages' %}" class="tab-btn active">
+            <i class="bi bi-house"></i> Messages Marketplace
+          </a>
+        </div>
+
+        <div class="conversations-list">
+          {% if conversations %}
+            {% for conv in conversations %}
+              <a href="{% url 'logement_messages' conv.logement.id %}?user_id={{ conv.other_user.id }}" class="conversation-item">
+                {% if conv.logement.image %}
+                  <img src="{{ conv.logement.image.url }}" alt="{{ conv.logement.title }}" class="conversation-image">
+                {% else %}
+                  <div class="conversation-image-placeholder">
+                    <i class="bi bi-house"></i>
+                  </div>
+                {% endif %}
+                <div class="conversation-info">
+                  <h3 class="conversation-title">{{ conv.logement.title }}</h3>
+                  <p class="conversation-subtitle">
+                    {{ conv.other_user.get_full_name|default:conv.other_user.username }}
+                    • {{ conv.logement.price|floatformat:0 }} DZD
+                  </p>
+                  {% if conv.last_message %}
+                    <p class="conversation-preview">
+                      {% if conv.last_message.sender == request.user %}
+                        Vous: 
+                      {% endif %}
+                      {{ conv.last_message.text|truncatewords:15 }}
+                    </p>
+                  {% endif %}
+                </div>
+                <div class="conversation-meta">
+                  {% if conv.last_message %}
+                    <span class="conversation-time">{{ conv.last_message.sent_at|date:"d/m H:i" }}</span>
+                  {% endif %}
+                  {% if conv.unread_count > 0 %}
+                    <span class="unread-badge">{{ conv.unread_count }}</span>
+                  {% endif %}
+                </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <i class="bi bi-chat-left"></i>
+              </div>
+              <h3>Aucune conversation</h3>
+              <p>Vous n'avez pas encore de messages concernant les logements.</p>
+              <a href="{% url 'logement' %}" class="btn-message" style="margin-top: 1rem; display: inline-block;">
+                <i class="bi bi-house"></i> Voir les logements
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+

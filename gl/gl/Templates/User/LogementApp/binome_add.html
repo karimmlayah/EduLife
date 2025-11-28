@@ -1,0 +1,576 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Créer une demande de binôme • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1920&h=1080&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .binome-form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0 0;
+      color: #dc3545;
+      font-size: 0.85rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-submit:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-submit:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Styles pour la validation */
+    .form-control.error {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .form-control.valid {
+      border-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .error-message.hidden {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group.has-error .form-label {
+      color: #dc3545;
+    }
+
+    .form-group.has-success .form-label {
+      color: #28a745;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Créer une demande de binôme</h1>
+              <p class="hero-subtitle">Publiez votre recherche de colocataire</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'binome_search' %}">Chercher un binôme</a>
+              <span>/</span>
+              <span class="current">Créer une demande</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="binome-form-container">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="form-group" id="title-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }} <span class="text-danger">*</span></label>
+            {{ form.title }}
+            <span class="error-message hidden" id="title-error"></span>
+            {% if form.title.help_text %}
+              <small class="form-text">{{ form.title.help_text }}</small>
+            {% endif %}
+            {% if form.title.errors %}
+              <ul class="errorlist">
+                {% for error in form.title.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="description-group">
+            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }} <span class="text-danger">*</span></label>
+            {{ form.description }}
+            <span class="error-message hidden" id="description-error"></span>
+            {% if form.description.help_text %}
+              <small class="form-text">{{ form.description.help_text }}</small>
+            {% endif %}
+            {% if form.description.errors %}
+              <ul class="errorlist">
+                {% for error in form.description.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="city-group">
+            <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }} <span class="text-danger">*</span></label>
+            {{ form.city }}
+            <span class="error-message hidden" id="city-error"></span>
+            {% if form.city.help_text %}
+              <small class="form-text">{{ form.city.help_text }}</small>
+            {% endif %}
+            {% if form.city.errors %}
+              <ul class="errorlist">
+                {% for error in form.city.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="budget_max-group">
+            <label for="{{ form.budget_max.id_for_label }}" class="form-label">{{ form.budget_max.label }} <span class="text-danger">*</span></label>
+            {{ form.budget_max }}
+            <span class="error-message hidden" id="budget_max-error"></span>
+            {% if form.budget_max.help_text %}
+              <small class="form-text">{{ form.budget_max.help_text }}</small>
+            {% endif %}
+            {% if form.budget_max.errors %}
+              <ul class="errorlist">
+                {% for error in form.budget_max.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="logement-group">
+            <label for="{{ form.logement.id_for_label }}" class="form-label">{{ form.logement.label }}</label>
+            {{ form.logement }}
+            <span class="error-message hidden" id="logement-error"></span>
+            {% if form.logement.help_text %}
+              <small class="form-text">{{ form.logement.help_text }}</small>
+            {% endif %}
+            {% if form.logement.errors %}
+              <ul class="errorlist">
+                {% for error in form.logement.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="bi bi-check-circle"></i> Publier la demande
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form[method="post"]');
+
+      // ========== FONCTIONS DE VALIDATION ==========
+      
+      function showError(fieldId, errorId, message) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        const errorElement = document.getElementById(errorId);
+        const groupElement = field?.closest('.form-group');
+        
+        if (field) {
+          field.classList.remove('valid');
+          field.classList.add('error');
+        }
+        
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.classList.remove('hidden');
+        }
+        
+        if (groupElement) {
+          groupElement.classList.remove('has-success');
+          groupElement.classList.add('has-error');
+        }
+      }
+
+      function showSuccess(fieldId, errorId) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        const errorElement = document.getElementById(errorId);
+        const groupElement = field?.closest('.form-group');
+        
+        if (field) {
+          field.classList.remove('error');
+          field.classList.add('valid');
+        }
+        
+        if (errorElement) {
+          errorElement.classList.add('hidden');
+        }
+        
+        if (groupElement) {
+          groupElement.classList.remove('has-error');
+          groupElement.classList.add('has-success');
+        }
+      }
+
+      function validateRequired(fieldId, errorId, fieldName) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '' || value === '0' || value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      function validateTextLength(fieldId, errorId, fieldName, minLength = 3, maxLength = null) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        if (value.length < minLength) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit contenir au moins ${minLength} caractères`);
+          return false;
+        }
+        if (maxLength && value.length > maxLength) {
+          showError(field.id || fieldId, errorId, `${fieldName} ne doit pas dépasser ${maxLength} caractères`);
+          return false;
+        }
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      function validateNumber(fieldId, errorId, fieldName, min = null, max = null) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        
+        const numValue = parseFloat(value);
+        
+        if (isNaN(numValue)) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit être un nombre valide`);
+          return false;
+        }
+        
+        if (min !== null && numValue < min) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit être supérieur ou égal à ${min}`);
+          return false;
+        }
+        
+        if (max !== null && numValue > max) {
+          showError(field.id || fieldId, errorId, `${fieldName} ne doit pas dépasser ${max}`);
+          return false;
+        }
+        
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      // Fonction helper pour trouver un champ par son name
+      function getFieldByName(name) {
+        return form.querySelector(`[name="${name}"]`);
+      }
+
+      // ========== VALIDATION EN TEMPS RÉEL ==========
+      
+      // Titre
+      const titleField = getFieldByName('title');
+      if (titleField) {
+        titleField.addEventListener('blur', () => {
+          validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200);
+        });
+        titleField.addEventListener('input', () => {
+          if (titleField.value.trim().length >= 3) {
+            validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200);
+          }
+        });
+      }
+
+      // Description
+      const descField = getFieldByName('description');
+      if (descField) {
+        descField.addEventListener('blur', () => {
+          validateTextLength(descField.id || 'description', 'description-error', 'La description', 10);
+        });
+        descField.addEventListener('input', () => {
+          if (descField.value.trim().length >= 10) {
+            validateTextLength(descField.id || 'description', 'description-error', 'La description', 10);
+          }
+        });
+      }
+
+      // Ville
+      const cityField = getFieldByName('city');
+      if (cityField) {
+        cityField.addEventListener('blur', () => {
+          validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100);
+        });
+        cityField.addEventListener('input', () => {
+          if (cityField.value.trim().length >= 2) {
+            validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100);
+          }
+        });
+      }
+
+      // Budget maximum
+      const budgetField = getFieldByName('budget_max');
+      if (budgetField) {
+        budgetField.addEventListener('blur', () => {
+          validateNumber(budgetField.id || 'budget_max', 'budget_max-error', 'Le budget maximum', 0);
+        });
+        budgetField.addEventListener('input', () => {
+          const value = parseFloat(budgetField.value);
+          if (!isNaN(value) && value >= 0) {
+            validateNumber(budgetField.id || 'budget_max', 'budget_max-error', 'Le budget maximum', 0);
+          }
+        });
+      }
+
+      // Logement (optionnel, pas de validation nécessaire)
+
+      // ========== VALIDATION À LA SOUMISSION ==========
+      form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        // Valider tous les champs obligatoires
+        if (titleField) {
+          isValid = validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200) && isValid;
+        }
+        if (descField) {
+          isValid = validateTextLength(descField.id || 'description', 'description-error', 'La description', 10) && isValid;
+        }
+        if (cityField) {
+          isValid = validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100) && isValid;
+        }
+        if (budgetField) {
+          isValid = validateNumber(budgetField.id || 'budget_max', 'budget_max-error', 'Le budget maximum', 0) && isValid;
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          // Scroll vers le premier champ en erreur
+          const firstError = document.querySelector('.form-control.error');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.focus();
+          }
+          return false;
+        }
+      });
+    });
+  </script>
+{% endblock %}
+

@@ -1,0 +1,129 @@
+{% extends "startup/Backoffice/base.html" %}
+{% block breadcrumb %}Investissements{% endblock %}
+{% block page_title %}Liste des Investissements{% endblock %}
+{% block content %}
+
+<!-- Load bootstrap icons -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4>Investment List</h4>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 25%">Startup</th>
+                        <th style="width: 12%">Amount</th>
+                        <th style="width: 12%">Status</th>
+                        <th style="width: 18%">Date</th>
+                        <th style="width: 25%">Comment</th>
+                        <th style="width: 8%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for inv in investments %}
+                    <tr>
+
+                        <!-- STARTUP NAME -->
+                        <td>
+                            <strong class="text-dark">{{ inv.startup.nom_startup }}</strong><br>
+                            <span class="text-xs text-muted">
+                                Investor: {{ inv.investor.username }}
+                            </span>
+                        </td>
+
+                        <!-- AMOUNT -->
+                        <td class="fw-bold">
+                            {{ inv.montant }} DT
+                        </td>
+
+                        <!-- STATUS BADGE -->
+                        <!-- STATUS BADGE -->
+<td>
+    {% if inv.statut == "pending" %}
+        <span class="badge bg-warning text-dark px-3 py-2">
+            <i class="fa fa-clock me-1"></i> Pending
+        </span>
+
+    {% elif inv.statut == "accepted" %}
+        <span class="badge bg-success px-3 py-2">
+            <i class="fa fa-check-circle me-1"></i> Accepted
+        </span>
+
+    {% elif inv.statut == "rejected" %}
+        <span class="badge bg-danger px-3 py-2">
+            <i class="fa fa-times-circle me-1"></i> Rejected
+        </span>
+
+    {% else %}
+        <span class="badge bg-secondary px-3 py-2">
+            {{ inv.statut }}
+        </span>
+    {% endif %}
+</td>
+
+
+                        <!-- DATE -->
+                        <td>
+                            <span class="fw-bold text-dark">{{ inv.date|date:"Y-m-d" }}</span><br>
+                            <span class="text-xs text-muted">{{ inv.date|timesince }} ago</span>
+                        </td>
+
+                        <!-- COMMENT -->
+                        <td>
+                            {% if inv.commentaire %}
+                                {{ inv.commentaire }}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                       <!-- ACTIONS -->
+<td class="text-center">
+
+    {% if inv.statut == "pending" %}
+    <div class="btn-group">
+
+        <!-- Approve -->
+        <form method="POST" action="{% url 'approve_investment' inv.id_invest %}">
+            {% csrf_token %}
+            <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm me-2">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+        </form>
+
+        <!-- Reject -->
+        <form method="POST" action="{% url 'reject_investment' inv.id_invest %}">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+        </form>
+
+    </div>
+
+    {% else %}
+    <span class="text-muted small">
+        <i class="fa fa-check text-success"></i> Reviewed
+    </span>
+    {% endif %}
+
+</td>
+
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

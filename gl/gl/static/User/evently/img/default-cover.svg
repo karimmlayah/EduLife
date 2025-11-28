@@ -1,0 +1,45 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="coverGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1E3A5F;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#2E5A8F;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="dotPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1.5" fill="#5BA3F5" opacity="0.6"/>
+    </pattern>
+    <pattern id="diamondPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M15,5 L25,15 L15,25 L5,15 Z" fill="#6BB6FF" opacity="0.4"/>
+    </pattern>
+  </defs>
+  
+  <!-- Main background gradient -->
+  <rect width="1200" height="400" fill="url(#coverGradient)"/>
+  
+  <!-- Large wave shape from top-left -->
+  <path d="M 0 0 Q 200 100, 400 80 T 800 60 T 1200 40 L 1200 400 L 0 400 Z" fill="#2E5A8F" opacity="0.7"/>
+  
+  <!-- Dense dotted grid pattern (mid-left to center) -->
+  <rect x="0" y="100" width="600" height="200" fill="url(#dotPattern)" opacity="0.5"/>
+  
+  <!-- Sparse diamond grid (top-right) -->
+  <rect x="700" y="0" width="500" height="200" fill="url(#diamondPattern)" opacity="0.3"/>
+  
+  <!-- Faint dotted pattern (bottom-right) -->
+  <circle cx="1050" cy="350" r="2" fill="#6BB6FF" opacity="0.3"/>
+  <circle cx="1100" cy="360" r="1.5" fill="#6BB6FF" opacity="0.3"/>
+  <circle cx="1150" cy="370" r="2" fill="#6BB6FF" opacity="0.3"/>
+  
+  <!-- Geometric structure (bottom-right corner - geodesic dome pattern) -->
+  <g opacity="0.4">
+    <!-- Triangle panels -->
+    <path d="M 1000 300 L 1100 280 L 1050 320 Z" fill="#1E3A5F" stroke="#4A90E2" stroke-width="1"/>
+    <path d="M 1100 280 L 1200 260 L 1150 300 Z" fill="#2E5A8F" stroke="#5BA3F5" stroke-width="1"/>
+    <path d="M 1050 320 L 1150 300 L 1100 340 Z" fill="#1E3A5F" stroke="#4A90E2" stroke-width="1"/>
+    <path d="M 1100 340 L 1200 320 L 1150 360 Z" fill="#2E5A8F" stroke="#5BA3F5" stroke-width="1"/>
+    <!-- Quadrilateral panels -->
+    <path d="M 1000 300 L 1050 320 L 1100 340 L 1050 360 Z" fill="#1E3A5F" stroke="#4A90E2" stroke-width="1"/>
+    <path d="M 1100 280 L 1150 300 L 1200 320 L 1150 340 Z" fill="#2E5A8F" stroke="#5BA3F5" stroke-width="1"/>
+  </g>
+</svg>

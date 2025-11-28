@@ -1,0 +1,214 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer un logement • EduLife{% endblock %}
+
+{% block body_class %}logement-delete-page{% endblock %}
+
+{% block extra_css %}
+<style>
+  .logement-delete-hero {
+    position: relative;
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    margin-top: 0;
+    padding-top: 120px;
+    padding-bottom: 60px;
+  }
+
+  .logement-delete-hero .hero-content {
+    text-align: center;
+    color: white;
+  }
+
+  .logement-delete-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .logement-delete-section {
+    padding: 60px 0;
+  }
+
+  .delete-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .delete-warning {
+    background: #fef2f2;
+    border: 2px solid #fecaca;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+  }
+
+  .delete-warning i {
+    font-size: 3rem;
+    color: #ef4444;
+    margin-bottom: 15px;
+  }
+
+  .delete-warning h3 {
+    color: #991b1b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .delete-warning p {
+    color: #7f1d1d;
+    margin: 0;
+  }
+
+  .logement-info {
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+  }
+
+  .logement-info h4 {
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+
+  .logement-info p {
+    color: #475569;
+    margin-bottom: 8px;
+  }
+
+  .delete-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  .btn-delete-confirm {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 14px 40px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-delete-confirm::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn-delete-confirm:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .btn-delete-confirm:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  }
+
+  .btn-delete-confirm:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  .btn-cancel {
+    background: #e2e8f0;
+    color: #64748b;
+    padding: 14px 40px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    flex: 1;
+    text-align: center;
+  }
+
+  .btn-cancel:hover {
+    background: #cbd5e1;
+    color: #475569;
+    text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    .delete-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="logement-delete-hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1>Supprimer le logement</h1>
+      <p>Cette action est irréversible</p>
+    </div>
+  </div>
+</section>
+
+<!-- Delete Section -->
+<section class="logement-delete-section">
+  <div class="container">
+    <div class="delete-container">
+      <div class="delete-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        <h3>Attention !</h3>
+        <p>Vous êtes sur le point de supprimer définitivement ce logement. Cette action ne peut pas être annulée.</p>
+      </div>
+
+      <div class="logement-info">
+        <h4>Informations du logement à supprimer :</h4>
+        <p><strong>Titre :</strong> {{ logement.title }}</p>
+        <p><strong>Type :</strong> {{ logement.get_type_logement_display }}</p>
+        <p><strong>Localisation :</strong> {{ logement.city }}, {{ logement.address }}</p>
+        <p><strong>Prix :</strong> {{ logement.price|floatformat:0 }} DZD</p>
+      </div>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="delete-actions">
+          <button type="submit" class="btn-delete-confirm">
+            <i class="bi bi-trash me-2"></i> Confirmer la suppression
+          </button>
+          <a href="{% url 'logement_detail' logement.id %}" class="btn-cancel">
+            <i class="bi bi-x-circle me-2"></i> Annuler
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

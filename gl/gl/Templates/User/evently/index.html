@@ -1,0 +1,3652 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Index - EduLife Education Platform</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'User/evently/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'User/evently/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'User/evently/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'User/evently/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'User/evently/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'User/evently/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'User/evently/css/main.css' %}" rel="stylesheet">
+  
+  <!-- Spline 3D Viewer Script -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
+  
+  <style>
+    .user-avatar-mini {display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 0 0 3px rgba(37,117,252,.18)}
+    .user-avatar-initials{font-size:.9rem;letter-spacing:.5px}
+    .avatar-c0{background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);box-shadow:0 0 0 3px rgba(17,205,239,.55)}
+    .avatar-c1{background:linear-gradient(135deg,#11cdef 0%,#2dce89 100%);box-shadow:0 0 0 3px rgba(45,206,137,.55)}
+    .avatar-c2{background:linear-gradient(135deg,#2dce89 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c3{background:linear-gradient(135deg,#f5365c 0%,#fb6340 100%);box-shadow:0 0 0 3px rgba(251,99,64,.55)}
+    .avatar-c4{background:linear-gradient(135deg,#172b4d 0%,#5e72e4 100%);box-shadow:0 0 0 3px rgba(94,114,228,.55)}
+    .avatar-c5{background:linear-gradient(135deg,#11cdef 0%,#6a11cb 100%);box-shadow:0 0 0 3px rgba(106,17,203,.45)}
+    /* Avatar dropdown styles */
+    .user-menu{ position: relative; display:inline-block; }
+    .user-dropdown{ position:absolute; right:0; top:46px; min-width:160px; background:rgba(16,23,42,.92); color:#fff; border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset; padding:6px; display:none; z-index:1050; backdrop-filter: blur(8px); }
+    .user-dropdown a{ display:block; padding:10px 12px; border-radius:8px; color:#e5e7eb; text-decoration:none; font-weight:600; font-size:.9rem; }
+    .user-dropdown a:hover{ background: rgba(59,130,246,.18); color:#fff; }
+    .user-menu.open .user-dropdown{ display:block; }
+    /* Style pour avatar avec image */
+    .user-avatar-mini.has-avatar {
+      background: none;
+      box-shadow: none;
+      padding: 0;
+    }
+    /* Notifications and Messages Icons */
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    /* Fix dropdown menu visibility */
+    .navmenu .dropdown ul {
+      background: #ffffff !important;
+      color: #40372e !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      z-index: 9999 !important;
+      min-width: 220px !important;
+      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    .navmenu .dropdown:hover ul {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .navmenu .dropdown ul li {
+      background: transparent !important;
+      list-style: none !important;
+    }
+    .navmenu .dropdown ul a {
+      color: #40372e !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 10px 20px !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: all 0.3s !important;
+    }
+    .navmenu .dropdown ul a:hover {
+      color: #f87500 !important;
+      background: rgba(248, 117, 0, 0.1) !important;
+    }
+    .navmenu .dropdown ul a i {
+      color: inherit !important;
+      font-size: 14px !important;
+      width: 18px !important;
+      display: inline-flex !important;
+    }
+    
+    /* Header Navigation - Always transparent */
+    #header.header {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      box-shadow: none !important;
+      transition: all 0.3s ease !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    #header.header.scrolled {
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      box-shadow: none !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Logo styling - Visible on transparent background */
+    .header .logo .sitename {
+      font-size: 28px !important;
+      font-weight: 700 !important;
+      color: #1a202c !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+      transition: all 0.3s ease;
+    }
+    
+    .header .logo:hover .sitename {
+      color: #f87500 !important;
+      text-shadow: 0 2px 6px rgba(248, 117, 0, 0.4) !important;
+      transform: scale(1.05);
+    }
+    
+    /* Navigation links improved - Visible on transparent background */
+    .navmenu > ul > li > a {
+      color: #1a202c !important;
+      font-weight: 600 !important;
+      position: relative;
+      transition: all 0.3s ease !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    .navmenu > ul > li > a:hover,
+    .navmenu > ul > li > a.active {
+      color: #f87500 !important;
+      text-shadow: 0 1px 3px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    .navmenu > ul > li > a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      transition: width 0.3s ease;
+    }
+    
+    .navmenu > ul > li > a:hover::after,
+    .navmenu > ul > li > a.active::after {
+      width: 80%;
+    }
+    
+    /* Navigation hover effects */
+    .navmenu > ul > li > a:hover {
+      color: #f87500 !important;
+      transform: translateY(-2px);
+    }
+    
+    /* Icons in header - Visible on transparent background */
+    .notifications-icon-link,
+    .messages-icon-link {
+      color: #1a202c !important;
+      transition: all 0.3s ease !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      color: #f87500 !important;
+      transform: scale(1.1);
+      text-shadow: 0 2px 4px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    /* Body padding for fixed header */
+    body.index-page {
+      padding-top: 70px;
+    }
+    
+    /* Improved button styles */
+    .btn-cta,
+    .btn-primary,
+    .btn-secondary {
+      transition: all 0.3s ease !important;
+      font-weight: 600 !important;
+      padding: 12px 30px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .btn-cta:hover,
+    .btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.3) !important;
+    }
+    
+    /* Improved sections spacing */
+    section {
+      scroll-margin-top: 100px;
+    }
+    
+    /* Smooth transitions for all elements */
+    * {
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Hero Section Layout - Improved design */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      max-height: 700px;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      background-image: none !important; /* Remove background image from hero */
+      background: linear-gradient(135deg, #e3f2fd 0%, #fff3e0 50%, #f3e5f5 100%) !important;
+      margin-top: 0;
+      padding: 0;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(248, 117, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+      z-index: 0;
+    }
+    
+    .hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 700px;
+      background-image: url("{% static 'User/evently/img/hero-background.webp' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+      opacity: 1;
+    }
+    
+    /* Fallback gradient if image not loaded - matching the blue gradient */
+    .hero .background-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 700px;
+      background: linear-gradient(180deg, 
+        rgba(230, 240, 255, 0.95) 0%, 
+        rgba(200, 220, 255, 0.9) 50%, 
+        rgba(240, 248, 255, 0.95) 100%);
+      z-index: -1;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 15px 0 15px;
+      max-height: 700px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hero-content .container {
+      pointer-events: auto;
+    }
+    
+    /* Hero Text Section */
+    .hero-text-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+    
+    .hero-text {
+      text-align: left;
+    }
+    
+    /* Change text color to black/dark for better visibility */
+    .hero-title,
+    .hero-subtitle,
+    .hero-text,
+    .hero-text *,
+    .event-details,
+    .event-details *,
+    .detail-item,
+    .detail-item span,
+    .detail-item i,
+    .countdown-section,
+    .countdown-section *,
+    .countdown-label,
+    .countdown h3,
+    .countdown h4,
+    .cta-section,
+    .cta-section *,
+    .cta-note {
+      color: #000000 !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 
+                   0 1px 2px rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    .hero-title {
+      font-weight: 700 !important;
+      text-shadow: 0 3px 6px rgba(255, 255, 255, 0.9), 
+                   0 2px 4px rgba(255, 255, 255, 1) !important;
+    }
+    
+    /* Icons visibility */
+    .detail-item i {
+      color: #000000 !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
+    }
+    
+    @media (max-width: 991px) {
+      .hero-text {
+        text-align: center;
+      }
+      
+      .countdown-section .countdown {
+        justify-content: center !important;
+      }
+    }
+    
+    /* Spline 3D Viewer Container - Agrandi avec animation */
+    .spline-container-hero {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      animation: fadeInRight 1s ease-out 0.3s both;
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .spline-container-hero spline-viewer {
+
+      min-height: 600px !important;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+      transition: transform 0.3s ease;
+    }
+    
+    .spline-container-hero:hover spline-viewer {
+      transform: scale(1.02);
+    }
+    
+    canvas.spline-viewer {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      pointer-events: auto;
+      object-fit: contain;
+    }
+    
+    /* Hide "Built with Spline" badge - Multiple approaches */
+    spline-viewer::part(badge),
+    spline-viewer::part(logo),
+    spline-viewer a[href*="spline"],
+    spline-viewer a[href*="Built"],
+    spline-viewer button,
+    spline-viewer .spline-badge,
+    spline-viewer [class*="badge"],
+    spline-viewer [class*="logo"],
+    spline-viewer [id*="badge"],
+    spline-viewer [id*="logo"],
+    spline-viewer [class*="spline"][class*="badge"],
+    spline-viewer [class*="spline"][class*="logo"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+    }
+    
+    /* Hide any button or link in spline-viewer except canvas */
+    spline-viewer *:not(canvas) {
+      pointer-events: none;
+    }
+    
+    /* Re-enable pointer events for canvas only */
+    spline-viewer canvas {
+      pointer-events: auto !important;
+    }
+    
+    /* Additional rule to hide badge using shadow DOM targeting */
+    spline-viewer {
+      --spline-badge-display: none !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      .spline-container-hero {
+        min-height: 400px;
+        margin-top: 2rem;
+      }
+      
+      .spline-container-hero spline-viewer {
+        max-width: 100% !important;
+        max-height: 450px !important;
+        min-width: unset !important;
+        min-height: unset !important;
+      }
+    }
+    
+    /* Make interactive elements clickable */
+    .hero-content a,
+    .hero-content button,
+    .hero-content .btn {
+      pointer-events: auto;
+    }
+    
+    /* ============================================
+       EDULIFE DESIGN IMPROVEMENTS
+       ============================================ */
+    
+    /* Global Section Improvements */
+    section {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Global Design Enhancements */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.7;
+      color: #40372e;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Enhanced transitions for all interactive elements */
+    a, button, .btn, .card, .stat-item, .speaker-card, .ticket-card, .session-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Improved typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+    
+    /* Enhanced shadows and depth */
+    .card, .speaker-card, .ticket-card, .session-card, .highlight-card {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card:hover, .speaker-card:hover, .ticket-card:hover, .session-card:hover, .highlight-card:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(-8px);
+    }
+    
+    /* Improved button styles */
+    .btn {
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 14px 32px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn-primary, .btn-cta {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    .btn-primary:hover, .btn-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+    }
+    
+    /* Enhanced section spacing */
+    section {
+      padding: 80px 0;
+      position: relative;
+    }
+    
+    /* Section transitions on scroll */
+    section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 0;
+      }
+    }
+    
+    /* Improved image effects */
+    img {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .image-wrapper:hover img,
+    .speaker-image:hover img,
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+    
+    /* Better focus states for accessibility */
+    a:focus, button:focus, .btn:focus {
+      outline: 2px solid #f87500;
+      outline-offset: 4px;
+    }
+    
+    /* Remove outline on navigation links when clicked */
+    .navmenu > ul > li > a:focus,
+    .navmenu > ul > li > a:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Enhanced gradient backgrounds */
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Improved container max-width */
+    .container {
+      max-width: 1200px;
+    }
+    
+    /* Better spacing utilities */
+    .section-spacing {
+      margin: 4rem 0;
+    }
+    
+    /* Enhanced text shadows for better readability */
+    .hero-title, .hero-subtitle {
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Improved border radius consistency */
+    .card, .btn, .badge, .ticket-card, .speaker-card {
+      border-radius: 16px;
+    }
+    
+    /* Better color contrast */
+    .text-muted {
+      color: #6b7280 !important;
+    }
+    
+    /* Enhanced loading states */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    /* Improved responsive images */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Better form elements */
+    input, textarea, select {
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+      padding: 12px 16px;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      border-color: #f87500;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+      outline: none;
+    }
+    
+    /* Intro Section - Beautiful Design - Fil d'actualité */
+    #intro {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 120px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #intro::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #intro::after {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: floatBackground 25s ease-in-out infinite;
+    }
+    
+    @keyframes floatBackground {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+      50% { transform: translate(-50px, 50px) scale(1.1); opacity: 1; }
+    }
+    
+    #intro .content {
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    #intro .content h2 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    
+    #intro .content h2::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 0;
+      width: 100px;
+      height: 5px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      border-radius: 3px;
+      animation: expandWidth 1s ease-out 0.3s both;
+    }
+    
+    @keyframes expandWidth {
+      from {
+        width: 0;
+      }
+      to {
+        width: 100px;
+      }
+    }
+    
+    #intro .content .lead {
+      font-size: 1.25rem;
+      line-height: 1.9;
+      color: #40372e;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+    }
+    
+    #intro .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin: 3rem 0;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+    
+    
+    #intro .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    #intro .stat-item:hover::before {
+      left: 100%;
+    }
+    
+    #intro .stat-item:hover {
+      transform: translateY(-8px) scale(1.02);
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, rgba(248, 117, 0, 0.05) 100%);
+      box-shadow: 0 12px 30px rgba(248, 117, 0, 0.2);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+    
+    #intro .stat-item:hover .stat-number {
+      transform: scale(1.1);
+    }
+    
+    #intro .stat-label {
+      font-size: 0.9rem;
+      color: #40372e;
+      font-weight: 500;
+    }
+    
+    /* CTA Section Improvements */
+    #intro .cta-section {
+      margin-top: 2.5rem;
+    }
+    
+    #intro .cta-section .btn {
+      padding: 16px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 14px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+    
+    #intro .cta-section .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    #intro .cta-section .btn:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+    
+    #intro .cta-section .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.35);
+      position: relative;
+      z-index: 1;
+    }
+    
+    #intro .cta-section .btn-primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 35px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+    
+    #intro .cta-section .btn-primary:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+    
+    #intro .cta-section .btn i {
+      font-size: 1.2rem;
+      margin-right: 8px;
+      transition: transform 0.3s ease;
+    }
+    
+    #intro .cta-section .btn:hover i {
+      transform: scale(1.2) rotate(5deg);
+    }
+    
+    @media (max-width: 768px) {
+      #intro .cta-section .btn {
+        width: 100%;
+        padding: 18px 40px;
+      }
+      
+      #intro .content h2 {
+        font-size: 2.5rem;
+      }
+    }
+    
+    
+    /* Visual Section Improvements */
+    #intro .visual-section {
+      position: relative;
+    }
+    
+    #intro .visual-section {
+      position: relative;
+      z-index: 2;
+      animation: fadeInRight 1s ease-out 0.2s both;
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    #intro .image-wrapper {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.08) 0%, rgba(255, 149, 0, 0.03) 100%);
+      padding: 12px;
+    }
+    
+    #intro .image-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.12) 0%, transparent 60%);
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    #intro .image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.2) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+      z-index: 1;
+    }
+    
+    #intro .image-wrapper:hover::before {
+      opacity: 1;
+    }
+    
+    #intro .image-wrapper:hover::after {
+      width: 400px;
+      height: 400px;
+    }
+    
+    #intro .image-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 24px;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 2;
+    }
+    
+    #intro .image-wrapper:hover {
+      transform: translateY(-12px) scale(1.01);
+      box-shadow: 0 35px 100px rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro .image-wrapper:hover img {
+      transform: scale(1.08);
+    }
+    
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    #intro .highlight-cards {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
+    #intro .highlight-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(248, 117, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #intro .highlight-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    #intro .highlight-card:hover::after {
+      opacity: 1;
+    }
+    
+    #intro .highlight-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(248, 117, 0, 0.25);
+      border-color: rgba(248, 117, 0, 0.4);
+    }
+    
+    
+    #intro .highlight-card h4 {
+      color: #281a0c;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Founder Quote Section */
+    #intro .founder-quote {
+      margin-top: 4rem;
+      padding: 3rem;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      border-radius: 20px;
+      border-left: 4px solid #f87500;
+    }
+    
+    #intro .founder-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #f87500;
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.3);
+    }
+    
+    #intro blockquote p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      color: #40372e;
+      font-style: italic;
+    }
+    
+    #intro cite strong {
+      color: #f87500;
+      font-size: 1.1rem;
+    }
+    
+    /* Featured Events Section - Enhanced */
+    #featured-speakers {
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 50%, #f0f8ff 100%);
+      padding: 120px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #featured-speakers::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.5), rgba(248, 117, 0, 0.8), rgba(248, 117, 0, 0.5), transparent);
+    }
+    
+    #featured-speakers::after {
+      content: '';
+      position: absolute;
+      top: -300px;
+      right: -300px;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(248, 117, 0, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: floatBackground 30s ease-in-out infinite;
+    }
+    
+    #featured-speakers .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #featured-speakers .section-title {
+      position: relative;
+      z-index: 2;
+    }
+    
+    #featured-speakers .section-title h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 20px rgba(248, 117, 0, 0.2);
+    }
+    
+    #featured-speakers .section-title h2::after {
+      display: none;
+    }
+    
+    #featured-speakers .section-title p {
+      font-size: 1.2rem;
+      color: #6b7280;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    #featured-speakers .speaker-card {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(248, 117, 0, 0.1);
+      position: relative;
+    }
+    
+    #featured-speakers .speaker-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    
+    #featured-speakers .speaker-card:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 25px 70px rgba(248, 117, 0, 0.3);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .speaker-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    #featured-speakers .speaker-category {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    
+    #featured-speakers .speaker-name {
+      color: #281a0c;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    
+    #featured-speakers .btn-speaker {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .btn-speaker:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4);
+    }
+    
+    /* Event badges and info */
+    #featured-speakers .speaker-social {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 3;
+    }
+    
+    #featured-speakers .event-date,
+    #featured-speakers .event-location {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: #281a0c;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    #featured-speakers .event-date i,
+    #featured-speakers .event-location i {
+      color: #f87500;
+      font-size: 1rem;
+    }
+    
+    #featured-speakers .event-badge {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.3);
+    }
+    
+    #featured-speakers .speaker-overlay {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 3;
+    }
+    
+    #featured-speakers .speaker-image {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #featured-speakers .speaker-image img {
+      transition: transform 0.4s ease;
+    }
+    
+    #featured-speakers .speaker-card:hover .speaker-image img {
+      transform: scale(1.1);
+    }
+    
+    /* Schedule Section */
+    #schedule {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #schedule::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #schedule .session-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid #f87500;
+    }
+    
+    #schedule .session-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.15);
+    }
+    
+    /* Tickets/Pricing Section */
+    #tickets {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #tickets::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #tickets .ticket-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      height: 100%;
+    }
+    
+    #tickets .ticket-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 60px rgba(248, 117, 0, 0.2);
+      border-color: rgba(248, 117, 0, 0.3);
+    }
+    
+    #tickets .ticket-card.featured {
+      border: 2px solid #f87500;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+    }
+    
+    #tickets .popular-badge {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      position: absolute;
+      top: -15px;
+      right: 20px;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    #tickets .ticket-price .amount {
+      color: #f87500;
+      font-size: 3rem;
+      font-weight: 700;
+    }
+    
+    #tickets .btn-ticket {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    #tickets .btn-ticket:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4);
+    }
+    
+    /* Call to Action Section */
+    #call-to-action {
+      background: linear-gradient(135deg, #281a0c 0%, #40372e 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #call-to-action::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("{% static 'User/evently/img/hero-background.webp' %}") center/cover;
+      opacity: 0.1;
+      z-index: 0;
+    }
+    
+    #call-to-action .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #call-to-action h2,
+    #call-to-action h3,
+    #call-to-action p {
+      color: white;
+    }
+    
+    #call-to-action .stat-item {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    #call-to-action .stat-number {
+      color: #f87500;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    
+    #call-to-action .stat-label {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* Testimonials Section */
+    #testimonials {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #testimonials::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #testimonials .testimonial-item {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      height: 100%;
+      border-top: 4px solid #f87500;
+    }
+    
+    #testimonials .rating i {
+      color: #f87500;
+    }
+    
+    /* Gallery Section */
+    #gallery {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #gallery::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #gallery .gallery-item {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    #gallery .gallery-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(248, 117, 0, 0.2);
+    }
+    
+    /* Logement Section - Card Style */
+    #logement {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #logement::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f87500' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+    
+    #logement .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #logement .content {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      border-left: 5px solid #f87500;
+      transition: transform 0.3s ease;
+    }
+    
+    #logement .content:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 70px rgba(248, 117, 0, 0.2);
+    }
+    
+    #logement h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #281a0c;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    #logement h2::before {
+      content: '🏠';
+      font-size: 3rem;
+      position: absolute;
+      left: -60px;
+      top: 0;
+      opacity: 0.1;
+    }
+    
+    #logement .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+      transform: rotate(-2deg);
+      transition: transform 0.3s ease;
+    }
+    
+    #logement .image-wrapper:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+    
+    /* Covoiturage Section - Gradient Background */
+    #covoiturage {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+    
+    #covoiturage::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    #covoiturage .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #covoiturage .content {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 3rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+    
+    #covoiturage h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    #covoiturage .lead {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.2rem;
+    }
+    
+    #covoiturage .btn-primary {
+      background: white;
+      color: #667eea;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    #covoiturage .btn-primary:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    #covoiturage .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 5px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Internships Section - Modern Card Grid */
+    #internships {
+      background: #ffffff;
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #internships::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #f87500, transparent);
+    }
+    
+    #internships .content {
+      position: relative;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 100%);
+      border-radius: 25px;
+      box-shadow: 0 15px 50px rgba(248, 117, 0, 0.1);
+      border: 2px solid rgba(248, 117, 0, 0.1);
+    }
+    
+    #internships h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-left: 3rem;
+    }
+    
+    #internships h2::before {
+      content: '💼';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 2.5rem;
+    }
+    
+    #internships .image-wrapper {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+    
+    #internships .image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    
+    /* Startups Section - Dark Theme */
+    #startups {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+    
+    #startups::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(248, 117, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
+      z-index: 0;
+    }
+    
+    #startups .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    #startups .content {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 3rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    #startups h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    #startups h2::after {
+      content: '🚀';
+      font-size: 2rem;
+      margin-left: 1rem;
+      display: inline-block;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    #startups .lead {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.2rem;
+    }
+    
+    #startups .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      box-shadow: 0 10px 30px rgba(248, 117, 0, 0.4);
+    }
+    
+    #startups .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(248, 117, 0, 0.6);
+    }
+    
+    #startups .image-wrapper {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(248, 117, 0, 0.3);
+      position: relative;
+    }
+    
+    #startups .image-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.2) 0%, transparent 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* About Section - Enhanced */
+    #about {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #about::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #about .container {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    }
+    
+    #about h2 {
+      color: #281a0c;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    #about p {
+      color: #40372e;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    
+    #about img {
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+    
+    #about img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Contact Section - Enhanced */
+    #contact {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 100px 0;
+      position: relative;
+    }
+    
+    #contact::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(248, 117, 0, 0.3), transparent);
+    }
+    
+    #contact .container {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    }
+    
+    #contact h2 {
+      color: #281a0c;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    #contact p {
+      color: #40372e;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    
+    #contact .contact-info {
+      background: linear-gradient(135deg, #fff5f0 0%, #ffffff 100%);
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 2rem 0;
+    }
+    
+    #contact .contact-info p {
+      margin-bottom: 1rem;
+      color: #40372e;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    #contact .contact-info i {
+      color: #f87500;
+      font-size: 1.3rem;
+      margin-right: 0.75rem;
+      width: 25px;
+    }
+    
+    #contact img {
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+    
+    #contact img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Sponsors Section */
+    #sponsors {
+      background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+      padding: 80px 0;
+    }
+    
+    #sponsors .section-title h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #281a0c;
+      margin-bottom: 1rem;
+    }
+    
+    #sponsors .client-logo {
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      filter: grayscale(100%);
+      opacity: 0.6;
+    }
+    
+    #sponsors .client-logo:hover {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    
+    /* Section Titles Global */
+    .section-title {
+      text-align: center;
+      margin-bottom: 4rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .section-title h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #281a0c;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(135deg, #281a0c 0%, #f87500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .section-title h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #f87500, #ff9500);
+      border-radius: 2px;
+      animation: expandWidth 0.8s ease-out 0.3s both;
+    }
+    
+    @keyframes expandWidth {
+      from {
+        width: 0;
+      }
+      to {
+        width: 80px;
+      }
+    }
+    
+    .section-title p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    /* Buttons Global Improvements */
+    .btn-primary {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-primary:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+    
+    .btn-outline,
+    .btn-outline-primary,
+    .btn-outline-secondary {
+      border: 2px solid #f87500;
+      color: #f87500;
+      background: transparent;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-outline::before,
+    .btn-outline-primary::before,
+    .btn-outline-secondary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: #f87500;
+      transition: left 0.4s ease;
+      z-index: -1;
+    }
+    
+    .btn-outline:hover,
+    .btn-outline-primary:hover,
+    .btn-outline-secondary:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.3);
+      border-color: #f87500;
+    }
+    
+    .btn-outline:hover::before,
+    .btn-outline-primary:hover::before,
+    .btn-outline-secondary:hover::before {
+      left: 0;
+    }
+    
+    /* Download CTA in Schedule */
+    .download-cta {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      padding: 3rem;
+      border-radius: 20px;
+      margin-top: 3rem;
+      border: 1px solid rgba(248, 117, 0, 0.1);
+    }
+    
+    .download-cta h4 {
+      color: #281a0c;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    /* Ticket Info Bar */
+    .ticket-info-bar {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      box-shadow: 0 10px 40px rgba(248, 117, 0, 0.3);
+    }
+    
+    .ticket-info-bar h4 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .ticket-info-bar .countdown h3 {
+      color: white;
+    }
+    
+    .ticket-info-bar .support-info {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .ticket-info-bar .contact-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    /* Nav Pills in Schedule */
+    .schedule-tabs .nav-pills .nav-link {
+      background: white;
+      color: #40372e;
+      border: 2px solid rgba(248, 117, 0, 0.2);
+      border-radius: 25px;
+      padding: 10px 25px;
+      margin: 0 5px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .schedule-tabs .nav-pills .nav-link:hover {
+      border-color: #f87500;
+      color: #f87500;
+    }
+    
+    .schedule-tabs .nav-pills .nav-link.active {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-color: #f87500;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.3);
+    }
+    
+    /* Track Headers */
+    .track-header {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.1) 0%, rgba(248, 117, 0, 0.05) 100%);
+      border-left: 4px solid #f87500;
+      padding: 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #281a0c;
+    }
+    
+    /* Speaker Quote Section */
+    .speaker-quote {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.05) 0%, rgba(248, 117, 0, 0.02) 100%);
+      padding: 3rem;
+      border-radius: 20px;
+      border-left: 4px solid #f87500;
+      margin-top: 3rem;
+    }
+    
+    .speaker-quote blockquote p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      color: #40372e;
+      font-style: italic;
+    }
+    
+    /* Footer Improvements */
+    #footer {
+      background: linear-gradient(180deg, #281a0c 0%, #1a1308 100%);
+    }
+    
+    #footer .footer-about .sitename {
+      color: #f87500;
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    
+    #footer .social-links a {
+      background: rgba(248, 117, 0, 0.1);
+      color: #f87500;
+      border: 1px solid rgba(248, 117, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    #footer .social-links a:hover {
+      background: #f87500;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(248, 117, 0, 0.4);
+    }
+    
+    #footer .footer-links a:hover {
+      color: #f87500;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      #intro .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      #intro .highlight-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      #intro .content h2 {
+        font-size: 2rem;
+      }
+      
+      .ticket-info-bar {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .section-title h2 {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      #intro .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      section {
+        padding: 60px 0 !important;
+      }
+      
+    }
+
+  </style>
+
+  <!-- =======================================================
+  * Template Name: EduLife
+  * Template URL: https://bootstrapmade.com/evently-bootstrap-events-template/
+  * Updated: Jul 19 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="{% static 'User/evently/img/logo.webp' %}" alt=""> -->
+        <h1 class="sitename">EduLife</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'logement_add' %}"><i class="bi bi-plus-circle me-1"></i> Ajouter un logement</a></li>
+                <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
+                <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' or request.resolver_match.url_name == 'home' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
+              <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      {% if request.user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+            {% if unread_notifications_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+            <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+            {% if unread_messages_count > 0 %}
+              <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
+          {% with user_id=request.user.id|default:0 %}
+          <div class="user-menu" id="idxUserMenu">
+            <a href="#" onclick="return false;"
+               class="user-avatar-mini {% if request.user.avatar %}has-avatar{% else %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+               title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}">
+              {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+              {% else %}
+                <span class="user-avatar-initials">
+                  {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                </span>
+              {% endif %}
+            </a>
+          <div class="user-dropdown" id="idxUserDropdown">
+            <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+            <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+            {% if request.user.is_superuser %}
+              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+            {% endif %}
+            <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+            <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+          </div>
+        </div>
+        {% endwith %}
+        </div>
+      {% else %}
+        <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
+      {% endif %}
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section dark-background">
+      <div class="background-overlay"></div>
+      <div class="hero-content">
+        <div class="container">
+          <div class="row align-items-center">
+            <!-- Text Content - Left Side -->
+            <div class="col-lg-6">
+              <div class="hero-text-wrapper">
+                <div class="hero-text">
+                  <h1 class="hero-title">Transform Your Future with&nbsp;<br>EduLife Education</h1>
+                  <p class="hero-subtitle">Discover innovative learning solutions, connect with expert educators, and unlock your potential through our comprehensive educational platform designed for lifelong learners.</p>
+                  <div class="event-details">
+                    <div class="detail-item"><i class="bi bi-book"></i><span>1000+ Courses Available</span></div>
+                    <div class="detail-item"><i class="bi bi-people"></i><span>50,000+ Active Students</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Spline 3D Viewer - Right Side -->
+<div class="col-lg-6">
+  <div style="
+    width:110%;
+    height:400px;
+    overflow:hidden;
+    border-radius:20px;
+    position:relative;
+    margin-left:150px;     /* décalage à gauche valable */
+    margin-top: -50px;
+  ">
+    
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.0/build/spline-viewer.js"></script>
+
+    <spline-viewer 
+      url="https://prod.spline.design/HG6NNGgo9o8-Hzxw/scene.splinecode"
+      style="
+        width:120%;              /* un peu plus large pour couper le vide */
+        height:100%;
+        display:block;
+        transform: translateX(-100px);  /* coupe la partie vide à gauche */
+        margin-right: 40px;
+      ">
+    </spline-viewer>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+    </section><!-- /Hero Section -->
+
+
+    <!-- Intro Section - Fil d'actualité -->
+    <section id="intro" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Fil d'Actualité</h2>
+              <p class="lead">Restez informé des dernières nouvelles et événements de la communauté EduLife. Partagez vos expériences et découvrez ce qui se passe autour de vous.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'evently_schedule' %}" class="btn btn-primary btn-lg"><i class="bi bi-newspaper me-2"></i>Voir le Fil d'Actualité</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="{% static 'User/evently/img/events/gallery-3.webp' %}" alt="Fil d'actualité EduLife" class="img-fluid">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Intro Section -->
+
+    <!-- Featured Speakers Section -->
+    <section id="featured-speakers" class="featured-speakers section">
+      <div class="container section-title">
+        <h2>Événements à Venir en Tunisie</h2>
+        <p>Découvrez nos hackathons, conférences, workshops et autres événements passionnants pour développer vos compétences et rencontrer la communauté éducative tunisienne</p>
+      </div>
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-6">
+            <div class="speaker-card featured">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="speaker-image">
+                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop" alt="Hackathon Tunisie" class="img-fluid">
+                    <div class="speaker-social">
+                      <span class="event-date"><i class="bi bi-calendar-event"></i> 20-22 Avril</span>
+                      <span class="event-location"><i class="bi bi-geo-alt"></i> Tunis, Cité des Sciences</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="speaker-content">
+                    <span class="speaker-category">Hackathon</span>
+                    <h3 class="speaker-name">Hackathon National IA Tunisie</h3>
+                    <p class="speaker-title">48 heures de développement intensif</p>
+                    <p class="speaker-company">Organisé par EduLife & Cité des Sciences</p>
+                    <div class="speaker-session"><h4>Thème: "IA pour le Développement Durable en Tunisie"</h4></div>
+                    <a href="/Event/" class="btn-speaker">S'inscrire</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="speaker-card featured">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="speaker-image">
+                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop" alt="Conférence Tunisie" class="img-fluid">
+                    <div class="speaker-social">
+                      <span class="event-date"><i class="bi bi-calendar-event"></i> 5 Mai</span>
+                      <span class="event-location"><i class="bi bi-geo-alt"></i> Sfax, Technopole</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="speaker-content">
+                    <span class="speaker-category">Conférence</span>
+                    <h3 class="speaker-name">Conférence Innovation & Startups Tunisie</h3>
+                    <p class="speaker-title">Journée complète d'inspiration</p>
+                    <p class="speaker-company">Avec des entrepreneurs tunisiens à succès</p>
+                    <div class="speaker-session"><h4>Thème: "L'Écosystème Startup en Tunisie"</h4></div>
+                    <a href="/Event/" class="btn-speaker">Réserver</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gy-4 mt-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop" alt="Workshop Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-clock"></i> 3h</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Workshop Design Thinking</h4>
+                <p class="speaker-title">Session pratique interactive</p>
+                <p class="speaker-company">Sousse, Centre d'Innovation</p>
+                <span class="speaker-topic">"Créativité & Innovation"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" alt="Hackathon Blockchain Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-trophy"></i> Prix 10K DT</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Hackathon Blockchain Tunisie</h4>
+                <p class="speaker-title">Blockchain & FinTech</p>
+                <p class="speaker-company">Tunis, Technopole El Ghazala</p>
+                <span class="speaker-topic">"L'Avenir de la Finance"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop" alt="Meetup Tech Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-people"></i> Networking</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Tech Meetup Mensuel Tunis</h4>
+                <p class="speaker-title">Rencontre de la communauté tech</p>
+                <p class="speaker-company">Tunis, Coworking Space</p>
+                <span class="speaker-topic">"Partage & Networking"</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="speaker-card compact">
+              <div class="speaker-image">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" alt="Bootcamp Data Tunisie" class="img-fluid">
+                <div class="speaker-overlay">
+                  <div class="speaker-social">
+                    <span class="event-badge"><i class="bi bi-graph-up"></i> Intensif</span>
+              </div>
+              </div>
+            </div>
+              <div class="speaker-content">
+                <h4 class="speaker-name">Bootcamp Data Science Tunisie</h4>
+                <p class="speaker-title">Formation intensive 5 jours</p>
+                <p class="speaker-company">Tunis, Institut Supérieur</p>
+                <span class="speaker-topic">"Maîtrisez les Données"</span>
+          </div>
+        </div>
+              </div>
+            </div>
+          </div>
+    </section><!-- /Featured Events Section -->
+
+    <!-- Logement Section -->
+    <section id="logement" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Logement en Tunisie</h2>
+              <p class="lead">Trouvez le logement idéal pour vos études en Tunisie. Explorez nos offres de logements étudiants, colocations et appartements disponibles dans les principales villes universitaires tunisiennes.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'logement' %}" class="btn btn-primary btn-lg"><i class="bi bi-house-door me-2"></i>Voir les Logements</a>
+        </div>
+            </div>
+                    </div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop" alt="Logement en Tunisie" class="img-fluid">
+                  </div>
+                </div>
+              </div>
+                    </div>
+                  </div>
+    </section><!-- /Logement Section -->
+
+    <!-- Covoiturage Section -->
+    <section id="covoiturage" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=600&fit=crop" alt="Covoiturage en Tunisie" class="img-fluid">
+              </div>
+              </div>
+              </div>
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Covoiturage en Tunisie</h2>
+              <p class="lead">Partagez vos trajets et économisez sur vos déplacements en Tunisie. Trouvez ou proposez un covoiturage pour vos voyages entre villes universitaires et découvrez une façon écologique et économique de voyager.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="/covoiturage/" class="btn btn-primary btn-lg"><i class="bi bi-car-front me-2"></i>Voir les Offres</a>
+            </div>
+          </div>
+              </div>
+              </div>
+              </div>
+    </section><!-- /Covoiturage Section -->
+
+    <!-- Internships Section -->
+    <section id="internships" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Stages & Internships</h2>
+              <p class="lead">Découvrez des opportunités de stages et d'internships en Tunisie et à l'international. Développez vos compétences professionnelles et construisez votre carrière avec nos offres de stages dans les meilleures entreprises.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'internships' %}" class="btn btn-primary btn-lg"><i class="bi bi-briefcase me-2"></i>Voir les Stages</a>
+          </div>
+        </div>
+              </div>
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop" alt="Stages et Internships" class="img-fluid">
+            </div>
+          </div>
+        </div>
+              </div>
+              </div>
+    </section><!-- /Internships Section -->
+
+    <!-- Startups Section -->
+    <section id="startups" class="intro section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="visual-section">
+              <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop" alt="Startups en Tunisie" class="img-fluid">
+          </div>
+        </div>
+      </div>
+          <div class="col-lg-6">
+            <div class="content">
+              <h2>Startups & Innovation</h2>
+              <p class="lead">Rejoignez l'écosystème startup tunisien. Investissez dans des projets innovants, créez votre propre startup ou découvrez les opportunités d'investissement dans les entreprises émergentes de Tunisie.</p>
+              
+              <div class="cta-section mt-4">
+                <a href="{% url 'startup_list' %}" class="btn btn-primary btn-lg"><i class="bi bi-rocket-takeoff me-2"></i>Découvrir les Startups</a>
+              </div>
+            </div>
+          </div>
+              </div>
+            </div>
+    </section><!-- /Startups Section -->
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <h2>About EduLife</h2>
+            <p>EduLife is dedicated to providing accessible, high-quality education to learners worldwide. We believe that education is a fundamental right and should be available to everyone.</p>
+            <p>Our platform brings together world-class educators, innovative teaching methods, and cutting-edge technology to create an unparalleled learning experience.</p>
+            <a href="{% url 'evently_about' %}" class="btn btn-primary">Learn More</a>
+          </div>
+          <div class="col-lg-6">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop" alt="About EduLife - Team" class="img-fluid rounded">
+              </div>
+            </div>
+          </div>
+    </section><!-- /About Section -->
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <img src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=800&h=600&fit=crop" alt="Contact EduLife - Office" class="img-fluid rounded">
+              </div>
+          <div class="col-lg-6">
+            <h2>Contact Us</h2>
+            <p>Get in touch with us. We'd love to hear from you!</p>
+            <div class="contact-info">
+              <p><i class="bi bi-geo-alt me-2"></i> A108 Adam Street, New York, NY 535022</p>
+              <p><i class="bi bi-telephone me-2"></i> +1 5589 55488 55</p>
+              <p><i class="bi bi-envelope me-2"></i> info@edulife.com</p>
+            </div>
+            <a href="{% url 'evently_contact' %}" class="btn btn-primary">Contact Us</a>
+          </div>
+              </div>
+            </div>
+    </section><!-- /Contact Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+            <span class="sitename">EduLife</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>A108 Adam Street</p>
+            <p>New York, NY 535022</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+            <p><strong>Email:</strong> <span>info@edulife.com</span></p>
+          </div>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'evently_about' %}">About us</a></li>
+            <li><a href="{% url 'evently_schedule' %}">Courses</a></li>
+            <li><a href="{% url 'evently_terms' %}">Terms of service</a></li>
+            <li><a href="{% url 'evently_privacy' %}">Privacy policy</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Our Programs</h4>
+          <ul>
+            <li><a href="#">Online Courses</a></li>
+            <li><a href="#">Certification Programs</a></li>
+            <li><a href="#">Professional Development</a></li>
+            <li><a href="#">Corporate Training</a></li>
+            <li><a href="#">Student Resources</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Learning Paths</h4>
+          <ul>
+            <li><a href="#">Technology & IT</a></li>
+            <li><a href="#">Business & Management</a></li>
+            <li><a href="#">Design & Creative</a></li>
+            <li><a href="#">Data Science</a></li>
+            <li><a href="#">Languages</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Student Portal</a></li>
+            <li><a href="#">Instructor Resources</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">EduLife</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'User/evently/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'User/evently/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'User/evently/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'User/evently/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'User/evently/js/main.js' %}"></script>
+  <script>
+    // Dropdown for avatar (index page)
+    (function(){
+      const menu = document.getElementById('idxUserMenu');
+      if (!menu) return;
+      const toggle = menu.querySelector('.user-avatar-mini');
+      function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+      toggle.addEventListener('click', function(){
+        menu.classList.toggle('open');
+        if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+      });
+    })();
+    
+    // Header always transparent - no scroll effect
+    (function() {
+      const header = document.getElementById('header');
+      if (!header) return;
+      
+      // Keep header transparent always (remove scrolled class if present)
+      header.classList.remove('scrolled');
+    })();
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && href.length > 1) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            const headerOffset = 80;
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      });
+    });
+    
+     // Scroll animations for sections
+    (function() {
+       const observerOptions = {
+         threshold: 0.1,
+         rootMargin: '0px 0px -100px 0px'
+       };
+       
+       const observer = new IntersectionObserver(function(entries) {
+         entries.forEach(entry => {
+           if (entry.isIntersecting) {
+             entry.target.classList.add('visible');
+              }
+            });
+       }, observerOptions);
+              
+       // Observe all sections except hero (already visible)
+       document.querySelectorAll('section:not(#hero)').forEach(section => {
+         observer.observe(section);
+        });
+        
+       // Make hero visible immediately
+       const hero = document.getElementById('hero');
+       if (hero) {
+         hero.classList.add('visible');
+       }
+    })();
+    
+    // Hide "Built with Spline" badge
+    (function() {
+      function hideSplineBadge() {
+        const splineViewer = document.querySelector('spline-viewer');
+        if (!splineViewer) return;
+        
+        // Try multiple methods to hide the badge
+        const shadowRoot = splineViewer.shadowRoot;
+        if (shadowRoot) {
+          // Hide badge in shadow DOM
+          const badge = shadowRoot.querySelector('a[href*="spline"], a[href*="Built"], button, [class*="badge"], [class*="logo"], [id*="badge"], [id*="logo"]');
+          if (badge) {
+            badge.style.display = 'none';
+            badge.style.visibility = 'hidden';
+            badge.style.opacity = '0';
+            badge.style.height = '0';
+            badge.style.width = '0';
+            badge.style.overflow = 'hidden';
+            badge.style.pointerEvents = 'none';
+          }
+          
+          // Hide all links and buttons except canvas
+          shadowRoot.querySelectorAll('a, button').forEach(el => {
+            if (el.tagName !== 'CANVAS') {
+              el.style.display = 'none';
+              el.style.visibility = 'hidden';
+              el.style.opacity = '0';
+              el.style.pointerEvents = 'none';
+            }
+          });
+        }
+        
+        // Also hide any badge outside shadow DOM
+        const badges = document.querySelectorAll('a[href*="spline"], a[href*="Built"][href*="spline"], [class*="spline"][class*="badge"]');
+        badges.forEach(badge => {
+          if (splineViewer.contains(badge) || splineViewer.shadowRoot?.contains(badge)) {
+            badge.style.display = 'none';
+            badge.style.visibility = 'hidden';
+            badge.style.opacity = '0';
+            badge.style.pointerEvents = 'none';
+          }
+        });
+      }
+      
+      // Try immediately and after delays (badge might load asynchronously)
+      hideSplineBadge();
+      setTimeout(hideSplineBadge, 500);
+      setTimeout(hideSplineBadge, 1000);
+      setTimeout(hideSplineBadge, 2000);
+      
+      // Also observe for changes
+      const observer = new MutationObserver(hideSplineBadge);
+      const splineViewer = document.querySelector('spline-viewer');
+      if (splineViewer) {
+        observer.observe(splineViewer, { childList: true, subtree: true });
+        if (splineViewer.shadowRoot) {
+          observer.observe(splineViewer.shadowRoot, { childList: true, subtree: true });
+        }
+      }
+    })();
+  </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
+
+  <!-- EduBot Floating Widget on Home -->
+  <div id="edubot-home-widget" class="edubot-home-widget minimized" style="margin-right: 55px;margin-bottom: -30px;">
+    <div class="edubot-home-header" onclick="toggleEduBotWidget()">
+      <div class="edubot-home-title">
+        <span class="edubot-home-avatar">EB</span>
+        <div>
+          <div class="edubot-home-name">EduBot</div>
+          <div class="edubot-home-sub">Assistant IA</div>
+        </div>
+      </div>
+      <button class="edubot-home-toggle" type="button">
+        <i class="bi bi-chevron-up"></i>
+      </button>
+    </div>
+    <div class="edubot-home-body">
+      <div id="edubot-home-messages" class="edubot-home-messages">
+        <div class="edubot-home-message edubot-home-message-bot">
+          <div class="edubot-home-message-author">EduBot</div>
+          <div class="edubot-home-message-text">
+            Bonjour 👋 Je suis EduBot, ton assistant. Pose-moi une question sur EduLife.
+          </div>
+        </div>
+      </div>
+      <form id="edubot-home-form" class="edubot-home-input-row" onsubmit="sendEduBotHomeMessage(event)">
+        <button type="button" id="edubot-home-mic-btn" class="edubot-home-icon-btn" title="Parler au micro">
+          <i class="bi bi-mic"></i>
+        </button>
+        <textarea id="edubot-home-input" class="edubot-home-input" rows="1" placeholder="Écris ta question ou parle au micro..."></textarea>
+        <button type="submit" class="edubot-home-send-btn">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <button id="edubot-home-fab" class="edubot-home-fab" type="button" onclick="toggleEduBotWidget()" aria-label="Ouvrir EduBot">
+    <i class="bi bi-robot"></i>
+  </button>
+
+  <!-- Floating EduVoice Button -->
+  <button id="eduvoice-fab" class="eduvoice-fab" type="button" onclick="toggleEduVoicePanel()" aria-label="Assistant vocal EduVoice">
+    <i class="bi bi-soundwave"></i>
+  </button>
+
+  <!-- EduVoice Voice Assistant Panel -->
+  <div id="eduvoice-panel" class="eduvoice-panel">
+    <div class="eduvoice-panel-inner">
+      <div class="eduvoice-panel-header">
+        <div>
+          <div class="eduvoice-title-mini">EduVoice</div>
+          <div class="eduvoice-sub-mini">Assistant vocal</div>
+        </div>
+        <button type="button" class="eduvoice-close-btn" onclick="toggleEduVoicePanel()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="eduvoice-blob-zone">
+        <div class="eduvoice-blob-orbit">
+          <div class="eduvoice-blob-orbit-dot"></div>
+        </div>
+        <div class="eduvoice-blob-core">
+          <div class="eduvoice-blob-face">
+            <span></span><span></span>
+          </div>
+        </div>
+      </div>
+      <div class="eduvoice-voice-status" id="eduvoice-status">
+        Appuie sur le micro et parle à EduVoice.
+      </div>
+      <div class="eduvoice-mic-row">
+        <button id="eduvoice-mic-btn" class="eduvoice-mic-btn" type="button">
+          <span class="eduvoice-mic-icon">🎙️</span>
+          <span class="eduvoice-mic-label" id="eduvoice-mic-label">Appuyer pour parler</span>
+        </button>
+        <button id="eduvoice-stop-tts-btn" class="eduvoice-stop-btn" type="button" title="Arrêter la voix">
+          <i class="bi bi-stop-fill"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .edubot-home-fab {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: #f97316;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 35px rgba(249,115,22,.6);
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 1.5rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .edubot-home-fab:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 22px 40px rgba(249,115,22,.8);
+    }
+
+    .eduvoice-fab {
+      position: fixed;
+      bottom: 160px;
+      right: 24px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg,#6366f1,#ec4899);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 35px rgba(79,70,229,.7);
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 1.4rem;
+      transition: transform .2s, box-shadow .2s, filter .2s;
+    }
+    .eduvoice-fab:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 20px 42px rgba(79,70,229,.9);
+      filter: saturate(1.1);
+    }
+
+    .eduvoice-panel {
+      position: fixed;
+      bottom: 230px;
+      right: 24px;
+      width: 260px;
+      border-radius: 20px;
+      background: radial-gradient(circle at 0 0,#4f46e5,#0f172a 60%);
+      box-shadow: 0 24px 60px rgba(15,23,42,.95);
+      color: #e5e7eb;
+      overflow: hidden;
+      z-index: 1001;
+      transform: translateY(140%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .25s ease, opacity .25s ease;
+      border: 1px solid rgba(129,140,248,.7);
+    }
+    .eduvoice-panel.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .eduvoice-panel-inner {
+      padding: 14px 14px 16px 14px;
+    }
+    .eduvoice-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .eduvoice-title-mini {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .eduvoice-sub-mini {
+      font-size: 0.72rem;
+      opacity: 0.8;
+    }
+    .eduvoice-close-btn {
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .eduvoice-close-btn:hover {
+      background: rgba(15,23,42,.3);
+    }
+
+    .eduvoice-blob-zone {
+      margin: 6px auto 6px auto;
+      width: 140px;
+      height: 140px;
+      position: relative;
+    }
+    .eduvoice-blob-core {
+      position: absolute;
+      inset: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0,#c4b5fd,#a855f7 30%,#1e3a8a 80%);
+      box-shadow:
+        0 0 35px rgba(129,140,248,.9),
+        0 10px 25px rgba(15,23,42,.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: blobFloat 4s ease-in-out infinite;
+    }
+    .eduvoice-blob-face span {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      border-radius: 999px;
+      background: #f9fafb;
+      margin: 0 6px;
+      box-shadow: 0 0 8px rgba(249,250,251,.7);
+    }
+    .eduvoice-blob-orbit {
+      position: absolute;
+      inset: 6px;
+      border-radius: 999px;
+      border: 1px dashed rgba(191,219,254,.7);
+      animation: orbitSpin 16s linear infinite;
+    }
+    .eduvoice-blob-orbit-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #fbbf24;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 14px rgba(251,191,36,1);
+    }
+    @keyframes blobFloat {
+      0%,100% { transform: translateY(4px) scale(1); }
+      50%     { transform: translateY(-6px) scale(1.04); }
+    }
+    @keyframes orbitSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .eduvoice-voice-status {
+      text-align: center;
+      font-size: 0.75rem;
+      margin: 4px 0 8px 0;
+      opacity: 0.9;
+    }
+    .eduvoice-mic-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eduvoice-mic-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: #f97316;
+      color: #111827;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(249,115,22,.7);
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .eduvoice-mic-btn.active {
+      background: #22c55e;
+      box-shadow: 0 14px 32px rgba(34,197,94,.8);
+    }
+    .eduvoice-mic-btn:hover {
+      transform: translateY(-1px);
+    }
+    .eduvoice-mic-icon {
+      font-size: 1.1rem;
+    }
+    .eduvoice-stop-btn {
+      border: none;
+      background: rgba(15,23,42,.5);
+      color: #e5e7eb;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .eduvoice-stop-btn:hover {
+      background: rgba(15,23,42,.8);
+    }
+
+    .edubot-home-widget {
+      position: fixed;
+      bottom: 160px;
+      right: 24px;
+      width: 360px;
+      max-height: 520px;
+      border-radius: 16px;
+      background: #020617;
+      color: #e5e7eb;
+      box-shadow: 0 16px 40px rgba(15,23,42,.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      z-index: 1001;
+      transform: translateY(120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .25s ease, opacity .25s ease;
+      border: 1px solid rgba(148,163,184,.45);
+    }
+    .edubot-home-widget.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .edubot-home-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: radial-gradient(circle at 0 0, rgba(248,113,113,.9), transparent 60%),
+                  radial-gradient(circle at 120% 180%, rgba(59,130,246,.9), transparent 55%),
+                  #020617;
+      cursor: pointer;
+    }
+    .edubot-home-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .edubot-home-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg,#f97316,#facc15);
+      color: #111827;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .edubot-home-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .edubot-home-sub {
+      font-size: 0.75rem;
+      opacity: .85;
+    }
+    .edubot-home-toggle {
+      border: none;
+      background: rgba(15,23,42,.3);
+      border-radius: 999px;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+    .edubot-home-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 8px;
+      gap: 6px;
+      background: radial-gradient(circle at 0 0, #0f172a, #020617 60%);
+    }
+    .edubot-home-messages {
+      flex: 1;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 4px 2px;
+      font-size: 0.8rem;
+      scrollbar-width: thin;
+    }
+    .edubot-home-message {
+      margin-bottom: 8px;
+      max-width: 85%;
+    }
+    .edubot-home-message-author {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-bottom: 2px;
+    }
+    .edubot-home-message-text {
+      padding: 6px 9px;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+    .edubot-home-message-bot .edubot-home-message-text {
+      background: rgba(15,23,42,.9);
+      border: 1px solid rgba(148,163,184,.6);
+    }
+    .edubot-home-message-user {
+      margin-left: auto;
+      text-align: right;
+    }
+    .edubot-home-message-user .edubot-home-message-text {
+      background: #f97316;
+      color: #111827;
+    }
+
+    .edubot-home-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 10px;
+      background: rgba(15,23,42,.9);
+      border: 1px solid rgba(55,65,81,.8);
+    }
+    .edubot-home-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      background: transparent;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+    }
+    .edubot-home-input::placeholder {
+      color: #6b7280;
+    }
+    .edubot-home-send-btn {
+      border: none;
+      background: #f97316;
+      color: #111827;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .edubot-home-icon-btn {
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .edubot-home-icon-btn:hover {
+      background: rgba(148,163,184,.25);
+      color: #e5e7eb;
+    }
+    .edubot-home-tts-inline {
+      margin-top: 4px;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 0;
+    }
+    .edubot-home-tts-inline i {
+      font-size: 0.9rem;
+    }
+    .edubot-home-tts-inline:hover {
+      color: #e5e7eb;
+    }
+  </style>
+
+  <script>
+    (function() {
+      const widget = document.getElementById('edubot-home-widget');
+      const fab = document.getElementById('edubot-home-fab');
+      const messagesEl = document.getElementById('edubot-home-messages');
+      const form = document.getElementById('edubot-home-form');
+      const input = document.getElementById('edubot-home-input');
+      const micBtn = document.getElementById('edubot-home-mic-btn');
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const synth = window.speechSynthesis;
+      let recognition = null;
+      let listening = false;
+      let lastBotReply = "";
+      let currentTtsText = "";
+      let recognitionSource = null; // 'widget' ou 'voice'
+
+      const voicePanel = document.getElementById('eduvoice-panel');
+      const voiceFab = document.getElementById('eduvoice-fab');
+      const voiceStatus = document.getElementById('eduvoice-status');
+      const voiceMicBtn = document.getElementById('eduvoice-mic-btn');
+      const voiceMicLabel = document.getElementById('eduvoice-mic-label');
+      const voiceStopBtn = document.getElementById('eduvoice-stop-tts-btn');
+
+      window.toggleEduBotWidget = function() {
+        if (!widget || !fab) return;
+        const isOpen = widget.classList.contains('open');
+        if (isOpen) {
+          widget.classList.remove('open');
+        } else {
+          // Fermer EduVoice si ouvert
+          if (voicePanel && voicePanel.classList.contains('open')) {
+            voicePanel.classList.remove('open');
+            if (recognition && listening) recognition.stop();
+          }
+          widget.classList.add('open');
+        }
+      };
+
+      window.toggleEduVoicePanel = function() {
+        if (!voicePanel || !voiceFab) return;
+        const isOpen = voicePanel.classList.contains('open');
+        if (isOpen) {
+          voicePanel.classList.remove('open');
+          if (recognition && listening) recognition.stop();
+        } else {
+          // Fermer EduBot si ouvert
+          if (widget && widget.classList.contains('open')) {
+            widget.classList.remove('open');
+          }
+          voicePanel.classList.add('open');
+        }
+      };
+
+      window.sendEduBotHomeMessage = async function(e) {
+        e.preventDefault();
+        const text = (input.value || "").trim();
+        if (!text) return;
+
+        const userDiv = document.createElement('div');
+        userDiv.className = 'edubot-home-message edubot-home-message-user';
+        userDiv.innerHTML = '<div class="edubot-home-message-author">Vous</div>' +
+                            '<div class="edubot-home-message-text"></div>';
+        userDiv.querySelector('.edubot-home-message-text').textContent = text;
+        messagesEl.appendChild(userDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        input.value = "";
+
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'edubot-home-message edubot-home-message-bot';
+        loadingDiv.innerHTML = '<div class="edubot-home-message-author">EduBot</div>' +
+                               '<div class="edubot-home-message-text">...</div>';
+        messagesEl.appendChild(loadingDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        try {
+          const resp = await fetch("{% url 'edubot_public_chat' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text })
+          });
+          let data = null;
+          try {
+            data = await resp.json();
+          } catch (parseErr) {
+            throw new Error("Réponse invalide du serveur.");
+          }
+          const replyText = data.reply || data.error || "Erreur lors de la réponse d’EduBot.";
+          lastBotReply = data.reply || "";
+          loadingDiv.querySelector('.edubot-home-message-text').textContent = replyText;
+          attachTTSButton(loadingDiv, replyText);
+        } catch (err) {
+          loadingDiv.querySelector('.edubot-home-message-text').textContent = "Erreur de connexion à EduBot.";
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      };
+
+      // Appel dédié pour EduVoice (assistant vocal), sans afficher le texte du bot dans le chat
+      async function sendEduVoiceQuery(spokenText) {
+        if (!spokenText) return;
+        if (voiceStatus) voiceStatus.textContent = "EduVoice réfléchit...";
+        try {
+          const resp = await fetch("{% url 'edubot_public_chat' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: spokenText })
+          });
+          let data = null;
+          try {
+            data = await resp.json();
+          } catch (parseErr) {
+            throw new Error("Réponse invalide du serveur.");
+          }
+          const replyText = data.reply || data.error || "Je n'arrive pas à répondre pour le moment.";
+          if (voiceStatus) voiceStatus.textContent = "EduVoice : réponse lue à voix haute.";
+          speak(replyText);
+        } catch (err) {
+          if (voiceStatus) voiceStatus.textContent = "Erreur de connexion à EduBot pour EduVoice.";
+        }
+      }
+
+      function speak(text) {
+        if (!synth || !text) return;
+        // Si on clique à nouveau sur le même texte pendant la lecture, on stoppe
+        if (synth.speaking && currentTtsText === text) {
+          synth.cancel();
+          currentTtsText = "";
+          return;
+        }
+        synth.cancel();
+        currentTtsText = text;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'fr-FR';
+        synth.speak(utter);
+      }
+      if (voiceStopBtn) {
+        voiceStopBtn.addEventListener('click', function() {
+          if (synth) {
+            synth.cancel();
+            currentTtsText = "";
+            if (voiceStatus) voiceStatus.textContent = "Lecture arrêtée.";
+          }
+        });
+      }
+
+
+      function attachTTSButton(container, explicitText) {
+        if (!container) return;
+        const existing = container.querySelector('.edubot-home-tts-inline');
+        if (existing) return;
+        const textDiv = container.querySelector('.edubot-home-message-text');
+        if (!textDiv) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'edubot-home-tts-inline';
+        btn.innerHTML = '<i class="bi bi-soundwave"></i><span>Écouter</span>';
+        btn.addEventListener('click', function() {
+          const t = explicitText || textDiv.textContent;
+          speak(t);
+        });
+        container.appendChild(btn);
+      }
+
+      function initRecognition() {
+        if (!SpeechRecognition) {
+          if (micBtn) micBtn.style.display = 'none';
+          if (voiceMicBtn) voiceMicBtn.style.display = 'none';
+          return;
+        }
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          listening = true;
+          if (micBtn) micBtn.classList.add('active');
+          if (voiceMicBtn) voiceMicBtn.classList.add('active');
+          if (voiceMicLabel) voiceMicLabel.textContent = "Parler... (cliquer pour arrêter)";
+          if (voiceStatus) voiceStatus.textContent = "Écoute en cours...";
+        };
+        recognition.onend = () => {
+          listening = false;
+          recognitionSource = null;
+          if (micBtn) micBtn.classList.remove('active');
+          if (voiceMicBtn) voiceMicBtn.classList.remove('active');
+          if (voiceMicLabel) voiceMicLabel.textContent = "Appuyer pour parler";
+          if (voiceStatus) voiceStatus.textContent = "Micro inactif.";
+        };
+        recognition.onerror = () => {
+          listening = false;
+          recognitionSource = null;
+          if (micBtn) micBtn.classList.remove('active');
+          if (voiceMicBtn) voiceMicBtn.classList.remove('active');
+          if (voiceStatus) voiceStatus.textContent = "Erreur de micro ou permissions.";
+        };
+        recognition.onresult = (event) => {
+          const text = event.results[0][0].transcript;
+          if (recognitionSource === 'widget') {
+            // Remplir le champ du chatbot flottant
+            input.value = (input.value ? input.value + " " : "") + text;
+            input.focus();
+          } else if (recognitionSource === 'voice') {
+            // EduVoice : pas d'écriture dans le chat, simple statut + appel API + TTS
+            if (voiceStatus) {
+              voiceStatus.textContent = "Tu as dit : " + text + " (analyse en cours...)";
+            }
+            // Envoyer au backend pour obtenir une réponse vocale
+            sendEduVoiceQuery(text);
+          }
+        };
+
+        if (micBtn) {
+          micBtn.addEventListener('click', function() {
+            if (!recognition) return;
+            if (!listening) {
+              recognitionSource = 'widget';
+              recognition.start();
+            } else {
+              recognition.stop();
+            }
+          });
+        }
+        if (voiceMicBtn) {
+          voiceMicBtn.addEventListener('click', function() {
+            if (!recognition) return;
+            if (!listening) {
+              recognitionSource = 'voice';
+              recognition.start();
+            } else {
+              recognition.stop();
+            }
+          });
+        }
+      }
+
+      // Ajouter un bouton TTS sur le premier message d'EduBot
+      if (messagesEl) {
+        const initialBot = messagesEl.querySelector('.edubot-home-message-bot');
+        if (initialBot) {
+          attachTTSButton(initialBot, initialBot.querySelector('.edubot-home-message-text')?.textContent || '');
+        }
+      }
+
+      initRecognition();
+    })();
+  </script>
+
+  <!-- Toast Notifications System -->
+  {% include 'includes/toast_notifications.html' %}
+
+</body>
+</html>

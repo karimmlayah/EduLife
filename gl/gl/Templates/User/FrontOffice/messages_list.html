@@ -1,0 +1,429 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Messages personnels{% endblock %}
+
+{% block body_class %}messages-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .messages-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Make header transparent over hero */
+    body.messages-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.messages-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      background: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+
+    .messages-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .messages-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .messages-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .messages-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .messages-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .messages-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .messages-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .messages-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .messages-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .messages-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .messages-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .messages-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .messages-main-content {
+      background: var(--background-color);
+      padding: 60px 0;
+    }
+
+    .messages-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .messages-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .messages-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .messages-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    .messages-list-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .messages-header {
+      margin-bottom: 2rem;
+    }
+
+    .messages-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .messages-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .tab-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .tab-btn.active:hover {
+      color: white;
+    }
+
+    .conversations-list {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .conversation-item {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .conversation-item:last-child {
+      border-bottom: none;
+    }
+
+    .conversation-item:hover {
+      background: #f5f5f5;
+    }
+
+    .conversation-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .conversation-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .conversation-name {
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .conversation-time {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .conversation-preview {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-unread {
+      background: #0a66c2;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+      display: block;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="messages-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Messages</h1>
+              <p class="hero-subtitle">Discutez et échangez avec les membres de la communauté EduLife.</p>
+            </div>
+            <div class="messages-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Messages</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="messages-main-content">
+    <div class="messages-content-header">
+      <h2 class="messages-content-title">Messages</h2>
+      <p class="messages-content-description">
+        Communiquez avec les membres de la communauté et restez connecté.
+      </p>
+    </div>
+
+    <div class="messages-list-container">
+      <div class="messages-tabs">
+        <a href="{% url 'messages' %}" class="tab-btn active">
+          <i class="bi bi-chat-dots"></i> Messages personnels
+        </a>
+        <a href="{% url 'marketplace_messages' %}" class="tab-btn">
+          <i class="bi bi-house"></i> Messages Marketplace
+        </a>
+      </div>
+
+    {% if conversations %}
+      <div class="conversations-list">
+        {% for conv in conversations %}
+        <a href="{% url 'messages_conversation' conv.user.id %}" class="conversation-item">
+          <div class="conversation-avatar">
+            {% if conv.user.avatar %}
+              <img src="{{ conv.user.avatar.url }}" alt="{{ conv.user.get_full_name|default:conv.user.username }}" />
+            {% else %}
+              <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ conv.user.get_full_name|default:conv.user.username }}" />
+            {% endif %}
+          </div>
+          <div class="conversation-info">
+            <div class="conversation-header">
+              <h3 class="conversation-name">{{ conv.user.get_full_name|default:conv.user.username }}</h3>
+              {% if conv.last_message %}
+                <span class="conversation-time">{{ conv.last_message.sent_at|timesince }} ago</span>
+              {% endif %}
+            </div>
+            {% if conv.last_message %}
+              {% if conv.last_message.text %}
+                <p class="conversation-preview">{{ conv.last_message.text|truncatewords:20 }}</p>
+              {% elif conv.last_message.get_file_name %}
+                <p class="conversation-preview"><i class="bi bi-file-earmark"></i> {{ conv.last_message.get_file_name }}</p>
+              {% else %}
+                <p class="conversation-preview" style="color: #999; font-style: italic;">Fichier</p>
+              {% endif %}
+            {% else %}
+              <p class="conversation-preview" style="color: #999; font-style: italic;">Aucun message</p>
+            {% endif %}
+          </div>
+          {% if conv.unread_count > 0 %}
+            <div class="conversation-unread">{{ conv.unread_count }}</div>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>Aucune conversation pour le moment.</p>
+        <p style="margin-top: 1rem;">
+          <a href="{% url 'evently_schedule' %}" style="color: #0a66c2; text-decoration: none; font-weight: 600;">
+            <i class="bi bi-arrow-left"></i> Retour au fil d'actualité
+          </a>
+        </p>
+      </div>
+    {% endif %}
+  </div>
+  </section>
+{% endblock %}
+

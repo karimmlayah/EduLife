@@ -1,0 +1,1498 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Profile - {{ user_obj.get_full_name|default:user_obj.username }}{% endblock %}
+
+{% block body_class %}profile-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .profile-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Header normal - no transparency */
+    body.profile-hero-page #header.header {
+      background-color: rgba(34, 18, 2, 0.95) !important;
+      background: rgba(34, 18, 2, 0.95) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .profile-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .profile-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .profile-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .profile-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .profile-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .profile-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .profile-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .profile-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .profile-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .profile-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .profile-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .profile-main-content {
+      background: var(--background-color);
+      padding: 0;
+      margin-top: 0;
+    }
+
+    .profile-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .profile-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .profile-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .profile-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    /* LinkedIn Style Profile */
+    .profile-container {
+      max-width: 1128px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    
+    /* Profile Header */
+    .profile-header {
+      background: #fff;
+      border-radius: 0;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      margin-top: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .profile-cover {
+      height: 200px;
+      background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+      position: relative;
+      overflow: hidden;
+      margin-top: 100px;
+    }
+    .profile-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-cover-edit {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,.6);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+      z-index: 10;
+    }
+    .profile-cover-edit:hover {
+      background: rgba(0,0,0,.8);
+    }
+    .profile-cover-edit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .profile-avatar-section {
+      padding: 0 24px 16px;
+      margin-top: -80px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .profile-avatar-wrapper {
+      position: relative;
+    }
+    .profile-avatar {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-edit {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: #0a66c2;
+      color: #fff;
+      border: 2px solid #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .profile-avatar-edit:hover {
+      background: #004182;
+    }
+    .profile-info {
+      padding: 0 24px 24px;
+    }
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 4px 0;
+    }
+    .profile-headline {
+      font-size: 1.25rem;
+      color: #666;
+      margin: 0 0 8px 0;
+      font-weight: 400;
+    }
+    .profile-location {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0 0 16px 0;
+    }
+    .profile-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0a66c2;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .edit-btn {
+      background: transparent;
+      border: 1px solid #666;
+      color: #666;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edit-btn:hover {
+      background: #f3f2ef;
+      border-color: #000;
+      color: #000;
+    }
+    
+    /* Profile Cards */
+    .profile-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .profile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .profile-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0;
+    }
+    .profile-card-content {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* Skills */
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .skill-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .skill-remove {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .skill-remove:hover {
+      color: #d32f2f;
+    }
+    
+    /* Experience & Education */
+    .experience-item, .education-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+    }
+    .experience-item:last-child, .education-item:last-child {
+      border-bottom: none;
+    }
+    .exp-title, .edu-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 4px 0;
+    }
+    .exp-company, .edu-school {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0 0 4px 0;
+    }
+    .exp-duration, .edu-duration {
+      font-size: 0.75rem;
+      color: #999;
+      margin: 0;
+    }
+    .item-actions {
+      position: absolute;
+      top: 16px;
+      right: 0;
+      display: flex;
+      gap: 8px;
+    }
+    .item-action-btn {
+      background: transparent;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    .item-action-btn:hover {
+      background: #f3f2ef;
+    }
+    
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,.5);
+      overflow: auto;
+    }
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 24px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+    .close-modal:hover {
+      color: #000;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #000;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #0a66c2;
+      box-shadow: 0 0 0 2px rgba(10,102,194,.1);
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn-primary {
+      background: #0a66c2;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      background: #004182;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #666;
+      border: 1px solid #ccc;
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-secondary:hover {
+      background: #f3f2ef;
+    }
+    .add-item-btn {
+      background: transparent;
+      border: 1px dashed #ccc;
+      color: #666;
+      padding: 12px;
+      border-radius: 4px;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 12px;
+      text-align: center;
+    }
+    .add-item-btn:hover {
+      border-color: #0a66c2;
+      color: #0a66c2;
+    }
+    .item-form {
+      background: #f9f9f9;
+      padding: 16px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    
+    /* Post Creation */
+    .post-create-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+    .post-create-form {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .post-create-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .post-create-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .post-create-input {
+      flex: 1;
+    }
+    .post-create-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .post-create-textarea:focus {
+      outline: none;
+      border-color: #0a66c2;
+      box-shadow: 0 0 0 2px rgba(10,102,194,.1);
+    }
+    .post-create-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .post-create-media {
+      display: flex;
+      gap: 8px;
+    }
+    .post-create-btn {
+      background: #0a66c2;
+      color: #fff;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .post-create-btn:hover {
+      background: #004182;
+    }
+    
+    /* Posts List */
+    .post-item {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+    .post-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .post-author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .post-author-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .post-author-info {
+      flex: 1;
+    }
+    .post-author-name {
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 2px 0;
+      font-size: 0.9375rem;
+    }
+    .post-time {
+      font-size: 0.75rem;
+      color: #666;
+      margin: 0;
+    }
+    .post-content {
+      color: #000;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .post-media {
+      margin-bottom: 12px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .post-media img, .post-media video {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+    /* Post menu button and dropdown */
+    .post-actions-menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    
+    .post-menu-btn {
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    
+    .post-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #333;
+    }
+    
+    .post-menu-dropdown {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 150px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .post-menu-item {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      background: white;
+      border: none;
+      text-align: left;
+      color: #333;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .post-menu-item:hover {
+      background: #f5f5f5;
+    }
+    
+    .post-menu-item i {
+      margin-right: 8px;
+    }
+    
+    .post-actions {
+      display: flex;
+      gap: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .post-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 0.875rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .post-action-btn:hover {
+      background: #f3f2ef;
+    }
+    
+    /* Comments */
+    .comments-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .comment-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .comment-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .comment-content {
+      flex: 1;
+      background: #f3f2ef;
+      padding: 8px 12px;
+      border-radius: 16px;
+    }
+    .comment-author {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #000;
+      margin: 0 0 2px 0;
+    }
+    .comment-text {
+      font-size: 0.875rem;
+      color: #000;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #666;
+    }
+    .empty-state-icon {
+      font-size: 3rem;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 12px;
+      }
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+      }
+      .profile-avatar-section {
+        margin-top: -60px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .profile-name {
+        font-size: 1.5rem;
+      }
+      .profile-headline {
+        font-size: 1rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Main Content Section -->
+  <section class="profile-main-content" style="margin-top: 0; padding-top: 0;">
+    <div class="profile-content-header" style="display: none;">
+      <h2 class="profile-content-title">Profil</h2>
+      <p class="profile-content-description">
+        Gérez votre profil et partagez vos expériences avec la communauté.
+      </p>
+    </div>
+
+    <div class="profile-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-cover">
+      {% if user_obj.cover_photo %}
+        <img src="{{ user_obj.cover_photo.url }}" alt="Cover" />
+      {% else %}
+        <img src="{% static 'User/evently/img/default-cover.svg' %}" alt="Cover" />
+      {% endif %}
+      <button type="button" class="profile-cover-edit" onclick="triggerCoverPhotoUpload()" title="Modifier la photo de couverture">
+        <i class="bi bi-camera"></i> Modifier la photo de couverture
+      </button>
+      <form id="cover-photo-form" method="post" action="{% url 'profile_update_public' %}" enctype="multipart/form-data" style="display: none;">
+        {% csrf_token %}
+        <input type="file" id="cover-photo-input" name="cover_photo" accept="image/*" onchange="handleCoverPhotoChange(event)">
+      </form>
+    </div>
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-wrapper">
+        <div class="profile-avatar">
+          {% if user_obj.avatar %}
+            <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.get_full_name|default:user_obj.username }}" />
+          {% else %}
+            <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ user_obj.get_full_name|default:user_obj.username }}" />
+          {% endif %}
+        </div>
+        <button class="profile-avatar-edit" onclick="document.getElementById('avatar-input').click()">
+          <i class="bi bi-camera"></i>
+        </button>
+        <form method="post" action="{% url 'profile_update_public' %}" enctype="multipart/form-data" style="display: none;">
+          {% csrf_token %}
+          <input type="file" id="avatar-input" name="avatar" accept="image/*" onchange="this.form.submit()">
+        </form>
+      </div>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ user_obj.get_full_name|default:user_obj.username }}</h1>
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        {% if user_obj.headline %}
+          <p class="profile-headline" id="headline-display">{{ user_obj.headline }}</p>
+        {% else %}
+          <p class="profile-headline" id="headline-display" style="color: #999; font-style: italic;">Ajoutez un titre professionnel</p>
+        {% endif %}
+        <button class="edit-btn" onclick="openModal('headline-modal')">
+          <i class="bi bi-pencil"></i> Modifier
+        </button>
+      </div>
+      {% if user_obj.location %}
+        <p class="profile-location"><i class="bi bi-geo-alt"></i> <span id="location-display">{{ user_obj.location }}</span>
+        <button class="edit-btn" onclick="openModal('location-modal')" style="margin-left: 8px; padding: 4px 12px;">
+          <i class="bi bi-pencil"></i>
+        </button></p>
+      {% else %}
+        <p class="profile-location"><i class="bi bi-geo-alt"></i> <span id="location-display" style="color: #999; font-style: italic;">Ajoutez votre localisation</span>
+        <button class="edit-btn" onclick="openModal('location-modal')" style="margin-left: 8px; padding: 4px 12px;">
+          <i class="bi bi-plus"></i>
+        </button></p>
+      {% endif %}
+      {% if user_obj.is_verified %}
+        <span class="profile-verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+      {% endif %}
+      
+      <!-- Statistics -->
+      <div class="profile-stats" style="display: flex; gap: 2rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ connections_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Amis</span>
+        </div>
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ posts_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Publications</span>
+        </div>
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ comments_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Commentaires</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+      <!-- About Section -->
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">À propos</h2>
+          <button class="edit-btn" onclick="openModal('bio-modal')">
+            <i class="bi bi-pencil"></i> Modifier
+          </button>
+        </div>
+        <div class="profile-card-content">
+          {% if user_obj.bio %}
+            <p id="bio-display">{{ user_obj.bio|linebreaks }}</p>
+          {% else %}
+            <p id="bio-display" style="color: #999; font-style: italic;">Ajoutez une biographie pour vous présenter</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Create Post -->
+      <div class="post-create-card">
+        <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data" class="post-create-form">
+          {% csrf_token %}
+          <div class="post-create-avatar">
+            {% if user_obj.avatar %}
+              <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.get_full_name|default:user_obj.username }}" />
+            {% else %}
+              <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ user_obj.get_full_name|default:user_obj.username }}" />
+            {% endif %}
+          </div>
+          <div class="post-create-input">
+            <textarea name="content" class="post-create-textarea" placeholder="Partagez quelque chose..." required></textarea>
+            <div class="post-create-actions">
+              <div class="post-create-media">
+                <label for="post-media" class="post-action-btn" style="cursor: pointer;">
+                  <i class="bi bi-image"></i> Photo
+                </label>
+                <input type="file" id="post-media" name="media" accept="image/*,video/*" style="display: none;">
+              </div>
+              <button type="submit" class="post-create-btn">Publier</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Posts List -->
+      {% if posts %}
+        {% for post in posts %}
+        <div class="post-item">
+          <div class="post-header">
+            <div class="post-author-avatar">
+              {% if post.author.avatar %}
+                <img src="{{ post.author.avatar.url }}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+              {% else %}
+                <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+              {% endif %}
+            </div>
+            <div class="post-author-info">
+              <h3 class="post-author-name">{{ post.author.get_full_name|default:post.author.username }}</h3>
+              <p class="post-time">{{ post.created_at|timesince }} ago</p>
+            </div>
+            {% if post.author == user_obj %}
+            <div class="post-actions-menu">
+              <button class="post-menu-btn" onclick="togglePostMenu({{ post.id }})">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <div class="post-menu-dropdown" id="post-menu-{{ post.id }}" style="display: none;">
+                <button class="post-menu-item" data-post-id="{{ post.id }}" data-post-content="{{ post.content|escapejs }}" data-post-media="{% if post.get_media_url %}{{ post.get_media_url|escapejs }}{% else %}{% endif %}" onclick="openEditPostModalFromButton(this)">
+                  <i class="bi bi-pencil"></i> Modifier
+                </button>
+                <form method="post" action="{% url 'delete_post' post.id %}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?');">
+                  {% csrf_token %}
+                  <button type="submit" class="post-menu-item" style="color: #dc3545;">
+                    <i class="bi bi-trash"></i> Supprimer
+                  </button>
+                </form>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          <div class="post-content" id="post-content-{{ post.id }}">{{ post.content }}</div>
+          {% if post.get_media_url %}
+          <div class="post-media">
+            {% with media_url=post.get_media_url %}
+              {% if media_url|slice:"-4:" == ".jpg" or media_url|slice:"-4:" == ".png" or media_url|slice:"-5:" == ".jpeg" or media_url|slice:"-4:" == ".gif" or media_url|slice:"-4:" == ".webp" %}
+                <img src="{{ media_url }}" alt="Post media" />
+              {% else %}
+                <video controls>
+                  <source src="{{ media_url }}" type="video/mp4">
+                </video>
+              {% endif %}
+            {% endwith %}
+          </div>
+          {% endif %}
+          <div class="post-actions">
+            <button class="post-action-btn">
+              <i class="bi bi-hand-thumbs-up"></i> J'aime
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-chat"></i> Commenter
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-share"></i> Partager
+            </button>
+          </div>
+          {% if post.comments.all %}
+          <div class="comments-section">
+            {% for comment in post.comments.all|slice:":5" %}
+            <div class="comment-item">
+              <div class="comment-avatar">
+                {% if comment.author.avatar %}
+                  <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% else %}
+                  <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% endif %}
+              </div>
+              <div class="comment-content">
+                <p class="comment-author">{{ comment.author.get_full_name|default:comment.author.username }}</p>
+                <p class="comment-text">{{ comment.text }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="profile-card">
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+            <p>Aucun post pour le moment. Commencez à partager !</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+      <!-- Experience -->
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Expérience</h2>
+          <button class="edit-btn" onclick="openModal('experience-modal')">
+            <i class="bi bi-plus"></i> Ajouter
+          </button>
+        </div>
+        <div class="profile-card-content" id="experience-display">
+          {% if user_obj.experience %}
+            {% for exp in user_obj.experience %}
+            <div class="experience-item">
+              <h3 class="exp-title">{{ exp.position|default:exp.title|default:"Position" }}</h3>
+              <p class="exp-company">{{ exp.company|default:exp.organization|default:"Entreprise" }}</p>
+              {% if exp.start_date or exp.end_date %}
+              <p class="exp-duration">
+                {% if exp.start_date %}{{ exp.start_date }}{% endif %}
+                {% if exp.start_date and exp.end_date %} - {% endif %}
+                {% if exp.end_date %}{{ exp.end_date }}{% elif exp.current %}Present{% endif %}
+              </p>
+              {% endif %}
+              {% if exp.description %}
+              <p style="font-size: 0.875rem; color: #666; margin-top: 8px;">{{ exp.description }}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color: #999; font-style: italic;">Aucune expérience ajoutée</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Formation</h2>
+          <button class="edit-btn" onclick="openModal('education-modal')">
+            <i class="bi bi-plus"></i> Ajouter
+          </button>
+        </div>
+        <div class="profile-card-content" id="education-display">
+          {% if user_obj.education %}
+            {% for edu in user_obj.education %}
+            <div class="education-item">
+              <h3 class="edu-title">{{ edu.degree|default:edu.diploma|default:"Diplôme" }}</h3>
+              <p class="edu-school">{{ edu.school|default:edu.university|default:"École" }}</p>
+              {% if edu.year or edu.start_year or edu.end_year %}
+              <p class="edu-duration">
+                {% if edu.start_year %}{{ edu.start_year }}{% endif %}
+                {% if edu.start_year and edu.end_year %} - {% endif %}
+                {% if edu.end_year %}{{ edu.end_year }}{% elif edu.year %}{{ edu.year }}{% endif %}
+              </p>
+              {% endif %}
+              {% if edu.field %}
+              <p style="font-size: 0.875rem; color: #666; margin-top: 4px;">{{ edu.field }}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color: #999; font-style: italic;">Aucune formation ajoutée</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Compétences</h2>
+          <button class="edit-btn" onclick="openModal('skills-modal')">
+            <i class="bi bi-pencil"></i> Modifier
+          </button>
+        </div>
+        <div class="profile-card-content">
+          <div class="skills-list" id="skills-display">
+            {% if user_obj.skills %}
+              {% for skill in user_obj.skills %}
+                {% if skill.name %}
+                  <span class="skill-badge">{{ skill.name }}</span>
+                {% else %}
+                  <span class="skill-badge">{{ skill }}</span>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <p style="color: #999; font-style: italic;">Aucune compétence ajoutée</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<!-- Headline Modal -->
+<div id="headline-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Modifier le titre professionnel</h2>
+      <button class="close-modal" onclick="closeModal('headline-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Titre professionnel</label>
+        <input type="text" name="headline" class="form-input" value="{{ user_obj.headline|default:'' }}" placeholder="Ex: Développeur Full Stack">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('headline-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Bio Modal -->
+<div id="bio-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Modifier la biographie</h2>
+      <button class="close-modal" onclick="closeModal('bio-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Biographie</label>
+        <textarea name="bio" class="form-textarea" placeholder="Parlez de vous...">{{ user_obj.bio|default:'' }}</textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('bio-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Location Modal -->
+<div id="location-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Modifier la localisation</h2>
+      <button class="close-modal" onclick="closeModal('location-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Localisation</label>
+        <input type="text" name="location" class="form-input" value="{{ user_obj.location|default:'' }}" placeholder="Ex: Paris, France">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('location-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Skills Modal -->
+<div id="skills-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Modifier les compétences</h2>
+      <button class="close-modal" onclick="closeModal('skills-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}" id="skills-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Compétences (une par ligne)</label>
+        <textarea name="skills" class="form-textarea" id="skills-textarea" placeholder="Python&#10;Django&#10;React">{% for skill in user_obj.skills %}{% if skill.name %}{{ skill.name }}{% else %}{{ skill }}{% endif %}&#10;{% endfor %}</textarea>
+        <small style="color: #666;">Entrez une compétence par ligne</small>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('skills-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Experience Modal -->
+<div id="experience-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Ajouter une expérience</h2>
+      <button class="close-modal" onclick="closeModal('experience-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}" id="experience-form">
+      {% csrf_token %}
+      <div class="item-form">
+        <div class="form-group">
+          <label class="form-label">Poste</label>
+          <input type="text" name="exp_position" class="form-input" placeholder="Ex: Développeur Full Stack">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entreprise</label>
+          <input type="text" name="exp_company" class="form-input" placeholder="Ex: Tech Corp">
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-label">Date de début</label>
+              <input type="text" name="exp_start" class="form-input" placeholder="Ex: 2021-01">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-label">Date de fin</label>
+              <input type="text" name="exp_end" class="form-input" placeholder="Ex: 2023-12 ou laisser vide si actuel">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="exp_description" class="form-textarea" placeholder="Description du poste..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('experience-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Education Modal -->
+<div id="education-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Ajouter une formation</h2>
+      <button class="close-modal" onclick="closeModal('education-modal')">&times;</button>
+    </div>
+    <form method="post" action="{% url 'profile_update_public' %}" id="education-form">
+      {% csrf_token %}
+      <div class="item-form">
+        <div class="form-group">
+          <label class="form-label">Diplôme</label>
+          <input type="text" name="edu_degree" class="form-input" placeholder="Ex: Master Informatique">
+        </div>
+        <div class="form-group">
+          <label class="form-label">École/Université</label>
+          <input type="text" name="edu_school" class="form-input" placeholder="Ex: Université XYZ">
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-label">Année de début</label>
+              <input type="text" name="edu_start" class="form-input" placeholder="Ex: 2018">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-label">Année de fin</label>
+              <input type="text" name="edu_end" class="form-input" placeholder="Ex: 2020">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Domaine</label>
+          <input type="text" name="edu_field" class="form-input" placeholder="Ex: Informatique">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('education-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal pour modifier un post -->
+<div id="edit-post-modal" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h2>Modifier le post</h2>
+      <button type="button" class="close-btn" onclick="closeModal('edit-post-modal')">&times;</button>
+    </div>
+    <form method="post" action="" id="edit-post-form" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="edit-post-content">Contenu</label>
+        <textarea name="content" id="edit-post-content" class="form-control" rows="5" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="edit-post-media">Média (optionnel)</label>
+        <input type="file" name="media" id="edit-post-media" class="form-control" accept="image/*,video/*">
+        <small>Laissez vide pour conserver le média actuel, ou sélectionnez un nouveau fichier pour le remplacer.</small>
+        <div id="edit-post-media-preview" style="margin-top: 10px;"></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('edit-post-modal')">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Fonction pour déclencher l'upload de la photo de couverture
+function triggerCoverPhotoUpload() {
+  const input = document.getElementById('cover-photo-input');
+  if (input) {
+    input.click();
+  } else {
+    console.error('Input file pour la photo de couverture introuvable');
+    alert('Erreur: Impossible de trouver le champ de sélection de fichier.');
+  }
+}
+
+// Fonction pour gérer le changement de photo de couverture
+function handleCoverPhotoChange(event) {
+  const file = event.target.files[0];
+  if (file) {
+    // Vérifier que c'est une image
+    if (!file.type.startsWith('image/')) {
+      alert('Veuillez sélectionner un fichier image.');
+      event.target.value = '';
+      return;
+    }
+    // Vérifier la taille du fichier (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Le fichier est trop volumineux. Taille maximale : 10MB.');
+      event.target.value = '';
+      return;
+    }
+    // Afficher un message de chargement
+    const button = document.querySelector('.profile-cover-edit');
+    if (button) {
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="bi bi-hourglass-split"></i> Upload en cours...';
+      button.disabled = true;
+    }
+    
+    // Soumettre le formulaire
+    const form = document.getElementById('cover-photo-form');
+    if (form) {
+      form.submit();
+    } else {
+      console.error('Formulaire de photo de couverture introuvable');
+      alert('Erreur: Impossible de trouver le formulaire.');
+      if (button) {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }
+    }
+  }
+}
+
+function openModal(modalId) {
+  document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+// Fonction pour ouvrir le modal de modification de post depuis un bouton
+function openEditPostModalFromButton(button) {
+  const postId = button.getAttribute('data-post-id');
+  const content = button.getAttribute('data-post-content');
+  const mediaUrl = button.getAttribute('data-post-media');
+  openEditPostModal(postId, content, mediaUrl);
+}
+
+// Fonction pour ouvrir le modal de modification de post
+function openEditPostModal(postId, content, mediaUrl) {
+  const form = document.getElementById('edit-post-form');
+  // Construire l'URL correctement
+  form.action = '/profile/post/' + postId + '/update/';
+  
+  document.getElementById('edit-post-content').value = content || '';
+  
+  const preview = document.getElementById('edit-post-media-preview');
+  preview.innerHTML = '';
+  if (mediaUrl && mediaUrl !== '') {
+    if (mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      preview.innerHTML = `<img src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" alt="Média actuel">`;
+    } else {
+      preview.innerHTML = `<video src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" controls></video>`;
+    }
+  }
+  
+  // Fermer tous les menus de posts
+  document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+    menu.style.display = 'none';
+  });
+  
+  openModal('edit-post-modal');
+}
+
+// Fonction pour basculer le menu d'actions du post
+function togglePostMenu(postId) {
+  const menu = document.getElementById('post-menu-' + postId);
+  const isVisible = menu.style.display === 'block';
+  
+  // Fermer tous les autres menus
+  document.querySelectorAll('.post-menu-dropdown').forEach(m => {
+    m.style.display = 'none';
+  });
+  
+  // Ouvrir/fermer le menu actuel
+  menu.style.display = isVisible ? 'none' : 'block';
+}
+
+// Fermer les menus quand on clique ailleurs
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.post-actions-menu')) {
+    document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+      menu.style.display = 'none';
+    });
+  }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = 'none';
+  }
+}
+
+// Handle skills form submission
+document.getElementById('skills-form')?.addEventListener('submit', function(e) {
+  const textarea = document.getElementById('skills-textarea');
+  const skills = textarea.value.split('\n').filter(s => s.trim()).map(s => s.trim());
+  const skillsJson = JSON.stringify(skills);
+  
+  // Create hidden input with JSON
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'skills';
+  hiddenInput.value = skillsJson;
+  this.appendChild(hiddenInput);
+  
+  // Clear textarea name so it's not sent
+  textarea.removeAttribute('name');
+});
+
+// Handle experience form submission - laisser le formulaire se soumettre normalement
+// La vue gérera l'ajout à la liste existante
+
+// Handle education form submission - laisser le formulaire se soumettre normalement
+// La vue gérera l'ajout à la liste existante
+</script>
+    </div>
+  </section>
+{% endblock %}
+
+
+

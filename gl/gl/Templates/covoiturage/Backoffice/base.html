@@ -1,0 +1,815 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="{% static 'backoffice/assets/img/apple-icon.png' %}"
+    />
+    <link rel="icon" type="image/png" href="{% static 'backoffice/assets/img/favicon.png' %}" />
+    <title>Argon Dashboard 3 by Creative Tim</title>
+    <!--     Fonts and icons     -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+      rel="stylesheet"
+    />
+    <!-- Nucleo Icons -->
+    <link
+      href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- CSS Files -->
+    <link
+      id="pagestyle"
+      href="{% static 'backoffice/assets/css/argon-dashboard.css' %}?v=2.1.0"
+      rel="stylesheet"
+    />
+    <style>
+      /* Navigation Links Styles */
+      .nav-link-top {
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .nav-link-top:hover:not(.nav-link-disabled) {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .nav-link-top.active {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+      }
+      .nav-link-top i {
+        font-size: 16px;
+      }
+      .nav-link-disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .nav-link-disabled:hover {
+        color: rgba(255, 255, 255, 0.8) !important;
+        background-color: transparent !important;
+      }
+      .login-link {
+        padding: 8px 12px;
+        font-size: 18px;
+      }
+      .login-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+      
+      /* User Menu Dropdown */
+      .user-menu-dashboard.active .user-dropdown-dashboard {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      .user-dropdown-dashboard {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        background: #1e293b;
+        border-radius: 8px;
+        min-width: 200px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        padding: 8px 0;
+      }
+      .user-dropdown-dashboard a {
+        display: block;
+        padding: 10px 16px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+      }
+      .user-dropdown-dashboard a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .user-dropdown-dashboard a i {
+        width: 20px;
+        text-align: center;
+      }
+
+      /* User avatar (gradient + neon ring) */
+      .user-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        box-shadow:
+          0 0 0 3px rgba(45, 255, 241, .85),
+          0 0 10px 2px rgba(45, 255, 241, .35);
+        color: #fff;
+        font-weight: 700;
+      }
+      .user-avatar-initial { font-size: .9rem; line-height: 1; }
+
+      /* Avatar color variants (Argon palette) */
+      .user-avatar.avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17,205,239,.85), 0 0 10px 2px rgba(17,205,239,.35); }
+      .user-avatar.avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45,206,137,.85), 0 0 10px 2px rgba(45,206,137,.35); }
+      .user-avatar.avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+      .user-avatar.avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.85), 0 0 10px 2px rgba(251,99,64,.35); }
+      .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.85), 0 0 10px 2px rgba(94,114,228,.35); }
+      .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.65), 0 0 10px 2px rgba(106,17,203,.35); }
+
+      /* User menu dropdown for dashboard */
+      .user-menu-dashboard {
+          position: relative;
+          display: inline-block;
+      }
+      .user-menu-dashboard.active .user-dropdown-dashboard {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+      }
+
+      /* Button to go to site */
+      .btn-site-dashboard {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          transition: all 0.2s;
+          opacity: 0.9;
+      }
+      .btn-site-dashboard:hover {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Notifications and Messages Icons */
+      .notifications-icon-dashboard,
+      .messages-icon-dashboard {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          transition: all 0.2s;
+          opacity: 0.9;
+      }
+      .notifications-icon-dashboard:hover,
+      .messages-icon-dashboard:hover {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.1);
+      }
+      .notifications-badge-dashboard,
+      .messages-badge-dashboard {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          background: #f5365c;
+          color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          font-weight: 700;
+          border: 2px solid #1e293b;
+      }
+
+      /* Sidebar footer: pin logout lower with icon + animation */
+      .btn-logout { 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: .5rem; 
+      }
+      .btn-logout i { 
+        font-size: .875rem; 
+      }
+      .btn-logout { 
+        transition: transform .15s ease, box-shadow .3s ease; 
+      }
+      .btn-logout:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 22px rgba(17,205,239,.25); 
+      }
+      .btn-logout:focus-visible { 
+        animation: subtle-pulse 1.2s ease-out; 
+      }
+    </style>
+  </head>
+
+  <body class="g-sidenav-show bg-gray-100">
+    <!-- Navbar personnalisée -->
+ 
+
+        <div
+          class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4"
+          id="navbar"
+        >
+          <div class="d-flex align-items-center">
+            <!-- MENUS À GAUCHE -->
+            <ul class="navbar-nav d-flex flex-row align-items-center me-3">
+              <li class="nav-item mx-2">
+                <a href="#" class="nav-link text-white fw-bold">
+                  <i class="ni ni-calendar-grid-58 text-white me-1"></i>
+                  Covoiturage
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="#" class="nav-link text-white fw-bold">
+                  <i class="ni ni-single-02 text-white me-1"></i> Utilisateurs
+                </a>
+              </li>
+              <li class="nav-item mx-2">
+                <a href="#" class="nav-link text-white fw-bold">
+                  <i class="ni ni-briefcase-24 text-white me-1"></i> Offres
+                </a>
+              </li>
+              <li class="nav-item">
+
+            </ul>
+
+            <!-- BARRE DE RECHERCHE -->
+            <div class="input-group">
+              <span class="input-group-text text-body"
+                ><i class="fas fa-search" aria-hidden="true"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Rechercher..."
+              />
+            </div>
+          </div>
+
+          <!-- SECTION DROITE (profil, notifications, etc.) -->
+          <ul class="navbar-nav ms-auto justify-content-end">
+            <li class="nav-item d-flex align-items-center">
+              <a
+                href="javascript:;"
+                class="nav-link text-white font-weight-bold px-0"
+              >
+                <i class="fas fa-user me-sm-1"></i>
+                <span class="d-sm-inline d-none">Sign In</span>
+              </a>
+            </li>
+            <li class="nav-item px-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white p-0">
+                <i class="fas fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+              </a>
+            </li>
+            <li class="nav-item dropdown pe-2 d-flex align-items-center">
+              <a
+                href="javascript:;"
+                class="nav-link text-white p-0"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-bell cursor-pointer"></i>
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4"
+                aria-labelledby="dropdownMenuButton"
+              >
+                <li>
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+                    <div class="d-flex py-1">
+                      <div class="my-auto">
+                        <img
+                          src="{% static 'backoffice/assets/img/team-2.jpg' %}"
+                          class="avatar avatar-sm me-3"
+                        />
+                      </div>
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                          <span class="font-weight-bold">New message</span> from
+                          Laur
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                            <i class="fas fa-clock me-1"></i> 13 minutes ago
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="min-height-300 bg-dark position-absolute w-100"></div>
+    <aside
+      class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4"
+      id="sidenav-main"
+    >
+      <div class="sidenav-header">
+        <i
+          class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+          aria-hidden="true"
+          id="iconSidenav"
+        ></i>
+        <a class="navbar-brand m-0" href="#">
+          <img
+            src="{% static 'backoffice/assets/img/logo-ct-dark.png' %}"
+            width="26px"
+            height="26px"
+            class="navbar-brand-img h-100"
+            alt="main_logo"
+          />
+          <span class="ms-1 font-weight-bold">Admin Dashboard</span>
+        </a>
+      </div>
+
+      <hr class="horizontal dark mt-0 mb-3" />
+<div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+    <ul class="navbar-nav">
+
+        <!-- DASHBOARD -->
+        <li class="nav-item mb-2">
+            <a class="nav-link {% if request.path == '/dashboard/covoiturage/' %}active{% endif %}"
+               href="{% url 'dashboard_covoiturage' %}">
+                <i class="ni ni-tv-2 text-dark"></i>
+                <span class="nav-link-text">Tableau de Bord</span>
+            </a>
+        </li>
+
+        <!-- OFFRES DE COVOITURAGE -->
+        <li class="nav-item mb-2">
+            <a class="nav-link {% if 'offres/covoiturage' in request.path %}active{% endif %}"
+               href="{% url 'offres_list' %}">
+                <i class="ni ni-calendar-grid-58 text-dark"></i>
+                <span class="nav-link-text">Offres de Covoiturage</span>
+            </a>
+        </li>
+
+    </ul>
+</div>
+
+      <!-- Footer avec bouton de déconnexion -->
+      <div class="sidenav-footer mx-3 mt-4" >
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout" style="margin-top: 160px;">
+          <i class="ni ni-button-power"></i>
+          <span>Déconnexion</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary btn-sm w-100 mb-0 btn-logout">
+          <i class="ni ni-single-02"></i>
+          <span>Connexion</span>
+        </a>
+        {% endif %}
+      </div>
+
+</aside>
+
+    <main class="main-content position-relative border-radius-lg">
+      <!-- Navbar -->
+      <nav
+        class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl"
+        id="navbarBlur"
+        data-scroll="false"
+      >
+        <div class="container-fluid py-1 px-3">
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <!-- Left side: Breadcrumb -->
+            <div class="flex-grow-1">
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
+                  <li class="breadcrumb-item text-sm text-white active" aria-current="page">Dashboard</li>
+                </ol>
+                <h6 class="font-weight-bolder text-white mb-0">Dashboard</h6>
+              </nav>
+            </div>
+            
+            <!-- Center: Navigation Links -->
+            <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
+              <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' or request.path == '/admin/' %}active{% endif %}">
+                <i class="ni ni-single-02 me-1"></i>
+                <span>User</span>
+              </a>
+              <a href="{% url 'offres_stage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+                <i class="ni ni-briefcase-24 me-1"></i>
+                <span>Internship</span>
+              </a>
+              <a href="{% url 'dashboard_startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_startup' or request.resolver_match.url_name == 'startupList' or request.resolver_match.url_name == 'investmentList' or 'startup' in request.path %}active{% endif %}">
+                <i class="ni ni-building me-1"></i>
+                <span>Startup</span>
+              </a>
+              <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
+                <i class="fas fa-home me-1"></i>
+                <span>Housing</span>
+              </a>
+              <a href="{% url 'dashboard_covoiturage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_covoiturage' or request.resolver_match.url_name == 'offres_list' %}active{% endif %}">
+                <i class="ni ni-delivery-fast me-1"></i>
+                <span>Ride sharing</span>
+              </a>
+              <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+                <i class="ni ni-calendar-grid-58 me-1"></i>
+                <span>Events</span>
+              </a>
+            </div>
+            
+            <!-- Right side: Notifications, Messages, and User Menu -->
+            <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2">
+              {% if request.user.is_authenticated %}
+                <!-- Button to go to site -->
+                <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
+                  <i class="ni ni-world" style="font-size: 1.2rem;"></i>
+                </a>
+                <!-- Notifications Icon -->
+                <a href="{% url 'notifications' %}" class="notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                  <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                  {% if unread_notifications_count > 0 %}
+                    <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
+                  {% endif %}
+                </a>
+                <!-- Messages Icon -->
+                <a href="{% url 'messages' %}" class="messages-icon-dashboard" title="Messages" style="position: relative;">
+                  <i class="ni ni-chat-round" style="font-size: 1.2rem; color: white;"></i>
+                  {% if unread_messages_count > 0 %}
+                    <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
+                  {% endif %}
+                </a>
+                <!-- User Avatar Menu -->
+                {% with user_id=request.user.id|default:0 %}
+                <div class="user-menu-dashboard" id="dashboardUserMenu">
+                  <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center" style="cursor: pointer;">
+                    <span class="user-avatar me-2 
+                      {% if not request.user.avatar %}
+                        {% if user_id|divisibleby:'6' %}
+                          avatar-c0
+                        {% elif user_id|add:'-1'|divisibleby:'6' %}
+                          avatar-c1
+                        {% elif user_id|add:'-2'|divisibleby:'6' %}
+                          avatar-c2
+                        {% elif user_id|add:'-3'|divisibleby:'6' %}
+                          avatar-c3
+                        {% elif user_id|add:'-4'|divisibleby:'6' %}
+                          avatar-c4
+                        {% else %}
+                          avatar-c5
+                        {% endif %}
+                      {% endif %}"
+                      {% if request.user.avatar %}
+                        style="background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;"
+                      {% endif %}
+                    >
+                      {% if request.user.avatar %}
+                        <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                      {% else %}
+                        {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                      {% endif %}
+                    </span>
+                  </a>
+                  <div class="user-dropdown-dashboard" id="dashboardUserDropdown">
+                    <a href="{% url 'profile' %}"><i class="ni ni-single-02 me-2"></i> Profile</a>
+                    <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
+                    <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
+                    <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
+                  </div>
+                </div>
+                {% endwith %}
+              {% else %}
+                <a href="{% url 'login' %}" class="nav-link-top login-link">
+                  <i class="ni ni-single-02"></i>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- End Navbar -->
+          {% block content %}
+      {% endblock %}
+      
+      <!-- Toast Notifications -->
+      {% include 'includes/toast_notifications.html' %}
+
+    </main>
+    <div class="fixed-plugin">
+      <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
+        <i class="fas fa-cog py-2"> </i>
+      </a>
+      <div class="card shadow-lg">
+        <div class="card-header pb-0 pt-3">
+          <div class="float-start">
+            <h5 class="mt-3 mb-0">Argon Configurator</h5>
+            <p>See our dashboard options.</p>
+          </div>
+          <div class="float-end mt-4">
+            <button
+              class="btn btn-link text-dark p-0 fixed-plugin-close-button"
+            >
+              <i class="fas fa-close"></i>
+            </button>
+          </div>
+          <!-- End Toggle Button -->
+        </div>
+        <hr class="horizontal dark my-1" />
+        <div class="card-body pt-sm-3 pt-0 overflow-auto">
+          <!-- Sidebar Backgrounds -->
+          <div>
+            <h6 class="mb-0">Sidebar Colors</h6>
+          </div>
+          <a href="javascript:void(0)" class="switch-trigger background-color">
+            <div class="badge-colors my-2 text-start">
+              <span
+                class="badge filter bg-gradient-primary active"
+                data-color="primary"
+                onclick="sidebarColor(this)"
+              ></span>
+              <span
+                class="badge filter bg-gradient-dark"
+                data-color="dark"
+                onclick="sidebarColor(this)"
+              ></span>
+              <span
+                class="badge filter bg-gradient-info"
+                data-color="info"
+                onclick="sidebarColor(this)"
+              ></span>
+              <span
+                class="badge filter bg-gradient-success"
+                data-color="success"
+                onclick="sidebarColor(this)"
+              ></span>
+              <span
+                class="badge filter bg-gradient-warning"
+                data-color="warning"
+                onclick="sidebarColor(this)"
+              ></span>
+              <span
+                class="badge filter bg-gradient-danger"
+                data-color="danger"
+                onclick="sidebarColor(this)"
+              ></span>
+            </div>
+          </a>
+          <!-- Sidenav Type -->
+          <div class="mt-3">
+            <h6 class="mb-0">Sidenav Type</h6>
+            <p class="text-sm">Choose between 2 different sidenav types.</p>
+          </div>
+          <div class="d-flex">
+            <button
+              class="btn bg-gradient-primary w-100 px-3 mb-2 active me-2"
+              data-class="bg-white"
+              onclick="sidebarType(this)"
+            >
+              White
+            </button>
+            <button
+              class="btn bg-gradient-primary w-100 px-3 mb-2"
+              data-class="bg-default"
+              onclick="sidebarType(this)"
+            >
+              Dark
+            </button>
+          </div>
+          <p class="text-sm d-xl-none d-block mt-2">
+            You can change the sidenav type just on desktop view.
+          </p>
+          <!-- Navbar Fixed -->
+          <div class="d-flex my-3">
+            <h6 class="mb-0">Navbar Fixed</h6>
+            <div class="form-check form-switch ps-0 ms-auto my-auto">
+              <input
+                class="form-check-input mt-1 ms-auto"
+                type="checkbox"
+                id="navbarFixed"
+                onclick="navbarFixed(this)"
+              />
+            </div>
+          </div>
+          <hr class="horizontal dark my-sm-4" />
+          <div class="mt-2 mb-5 d-flex">
+            <h6 class="mb-0">Light / Dark</h6>
+            <div class="form-check form-switch ps-0 ms-auto my-auto">
+              <input
+                class="form-check-input mt-1 ms-auto"
+                type="checkbox"
+                id="dark-version"
+                onclick="darkMode(this)"
+              />
+            </div>
+          </div>
+          <a
+            class="btn bg-gradient-dark w-100"
+            href="https://www.creative-tim.com/product/argon-dashboard"
+            >Free Download</a
+          >
+          <a
+            class="btn btn-outline-dark w-100"
+            href="https://www.creative-tim.com/learning-lab/bootstrap/license/argon-dashboard"
+            >View documentation</a
+          >
+          <div class="w-100 text-center">
+            <a
+              class="github-button"
+              href="https://github.com/creativetimofficial/argon-dashboard"
+              data-icon="octicon-star"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Star creativetimofficial/argon-dashboard on GitHub"
+              >Star</a
+            >
+            <h6 class="mt-3">Thank you for sharing!</h6>
+            <a
+              href="https://twitter.com/intent/tweet?text=Check%20Argon%20Dashboard%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23bootstrap5&amp;url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fargon-dashboard"
+              class="btn btn-dark mb-0 me-2"
+              target="_blank"
+            >
+              <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
+            </a>
+            <a
+              href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/argon-dashboard"
+              class="btn btn-dark mb-0 me-2"
+              target="_blank"
+            >
+              <i class="fab fa-facebook-square me-1" aria-hidden="true"></i>
+              Share
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--   Core JS Files   -->
+    <script src="{% static 'backoffice/assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'backoffice/assets/js/core/bootstrap.min.js' %}"></script>
+    <script src="{% static 'backoffice/assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'backoffice/assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+    <script src="{% static 'backoffice/assets/js/plugins/chartjs.min.js' %}"></script>
+    <script>
+      var ctx1 = document.getElementById("chart-line").getContext("2d");
+
+      var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
+
+      gradientStroke1.addColorStop(1, "rgba(94, 114, 228, 0.2)");
+      gradientStroke1.addColorStop(0.2, "rgba(94, 114, 228, 0.0)");
+      gradientStroke1.addColorStop(0, "rgba(94, 114, 228, 0)");
+      new Chart(ctx1, {
+        type: "line",
+        data: {
+          labels: [
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ],
+          datasets: [
+            {
+              label: "Mobile apps",
+              tension: 0.4,
+              borderWidth: 0,
+              pointRadius: 0,
+              borderColor: "#5e72e4",
+              backgroundColor: gradientStroke1,
+              borderWidth: 3,
+              fill: true,
+              data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+              maxBarThickness: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+          interaction: {
+            intersect: false,
+            mode: "index",
+          },
+          scales: {
+            y: {
+              grid: {
+                drawBorder: false,
+                display: true,
+                drawOnChartArea: true,
+                drawTicks: false,
+                borderDash: [5, 5],
+              },
+              ticks: {
+                display: true,
+                padding: 10,
+                color: "#fbfbfb",
+                font: {
+                  size: 11,
+                  family: "Open Sans",
+                  style: "normal",
+                  lineHeight: 2,
+                },
+              },
+            },
+            x: {
+              grid: {
+                drawBorder: false,
+                display: false,
+                drawOnChartArea: false,
+                drawTicks: false,
+                borderDash: [5, 5],
+              },
+              ticks: {
+                display: true,
+                color: "#ccc",
+                padding: 20,
+                font: {
+                  size: 11,
+                  family: "Open Sans",
+                  style: "normal",
+                  lineHeight: 2,
+                },
+              },
+            },
+          },
+        },
+      });
+    </script>
+    <script>
+      var win = navigator.platform.indexOf("Win") > -1;
+      if (win && document.querySelector("#sidenav-scrollbar")) {
+        var options = {
+          damping: "0.5",
+        };
+        Scrollbar.init(document.querySelector("#sidenav-scrollbar"), options);
+      }
+
+      // User dropdown menu toggle
+      document.addEventListener('DOMContentLoaded', function() {
+        const userMenu = document.getElementById('dashboardUserMenu');
+        if (userMenu) {
+          const dropdown = document.getElementById('dashboardUserDropdown');
+          const toggle = userMenu.querySelector('a[href="javascript:;"]');
+          
+          if (toggle && dropdown) {
+            toggle.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              userMenu.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+              if (!userMenu.contains(e.target)) {
+                userMenu.classList.remove('active');
+              }
+            });
+          }
+        }
+      });
+    </script>
+    <!-- Github buttons -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+    <script src="{% static 'backoffice/assets/js/argon-dashboard.min.js' %}?v=2.1.0"></script>
+  </body>
+</html>

@@ -1,0 +1,552 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Messages - {{ logement.title }}{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section with Background Image */
+    .logement-hero {
+      position: relative;
+      min-height: 50vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 60px;
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .logement-messages-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f8f9fa;
+      min-height: 70vh;
+    }
+
+    .logement-messages-header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .btn-back-messages {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+    }
+
+    .btn-back-messages:hover {
+      background: linear-gradient(135deg, #ff9500 0%, #ffaa00 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      color: white;
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .btn-back-messages {
+        top: 1rem;
+        right: 1rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+      }
+      
+      .btn-back-messages span {
+        display: none;
+      }
+    }
+
+    .logement-messages-header img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .logement-messages-header-info h3 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 1.25rem;
+    }
+
+    .logement-messages-header-info p {
+      margin: 0.25rem 0 0 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .logement-messages-header-info a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .messages-chat-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+
+    .messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message-item {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 70%;
+    }
+
+    .message-item.sent {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-item.received {
+      align-self: flex-start;
+    }
+
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .message-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .message-content {
+      background: #f3f4f6;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      word-wrap: break-word;
+    }
+
+    .message-item.sent .message-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .message-item.received .message-content {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+
+    .message-item.sent .message-time {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .message-form-container {
+      padding: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .message-form {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .message-input-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .message-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      resize: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+      min-height: 50px;
+      max-height: 120px;
+    }
+
+    .message-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .message-send-btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message-send-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .message-send-btn:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .message-send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .empty-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #9ca3af;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .empty-chat i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Suggested Messages */
+    .suggested-messages {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .suggested-messages-title {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .suggested-messages-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .suggested-message-btn {
+      padding: 0.5rem 1rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .suggested-message-btn:hover {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-color: #f87500;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.3);
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Messages</h1>
+              <p class="hero-subtitle">{{ logement.title }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="logement-messages-container">
+        <!-- Header avec info du logement -->
+        <div class="logement-messages-header" style="position: relative;">
+          <!-- Bouton de retour -->
+          <a href="{% url 'messages' %}" class="btn-back-messages">
+            <i class="bi bi-arrow-left"></i>
+            <span>Retour aux messages</span>
+          </a>
+          {% if logement.image %}
+            <img src="{{ logement.image.url }}" alt="{{ logement.title }}">
+          {% else %}
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+              <i class="bi bi-house"></i>
+            </div>
+          {% endif %}
+          <div class="logement-messages-header-info">
+            <h3>{{ logement.title }}</h3>
+            <p>{{ logement.address }}, {{ logement.city }} • {{ logement.price|floatformat:0 }} DZD</p>
+             {% if other_user %}
+               <p style="margin: 0.25rem 0 0 0; color: #6b7280; font-size: 0.9rem;">
+                 Conversation avec: <strong>{{ other_user.get_full_name|default:other_user.username }}</strong>
+               </p>
+             {% endif %}
+            <a href="{% url 'logement_detail' logement.id %}">Voir les détails du logement</a>
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="messages-chat-container">
+          <!-- Messages List -->
+          <div class="messages-list" id="messages-list">
+            {% if messages_list %}
+              {% for message in messages_list %}
+                {% if message.text or message.file %}
+                <div class="message-item {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                  <div class="message-avatar">
+                    {% if message.sender.avatar %}
+                      <img src="{{ message.sender.avatar.url }}" alt="{{ message.sender.get_full_name|default:message.sender.username }}">
+                    {% else %}
+                      {{ message.sender.first_name|default:message.sender.username|make_list|first|upper }}{% if message.sender.last_name %}{{ message.sender.last_name|make_list|first|upper }}{% endif %}
+                    {% endif %}
+                  </div>
+                  <div class="message-content">
+                    {% if message.text %}
+                    <div>{{ message.text|linebreaks }}</div>
+                    {% endif %}
+                    {% if message.file %}
+                      <div style="margin-top: 0.5rem;">
+                        <a href="{{ message.file.url }}" target="_blank" style="color: inherit; text-decoration: underline;">
+                          <i class="bi bi-paperclip"></i> {{ message.get_file_name }}
+                        </a>
+                      </div>
+                    {% endif %}
+                    <div class="message-time">{{ message.sent_at|date:"d/m/Y H:i" }}</div>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+              {% if not messages_list %}
+                <div class="empty-chat">
+                  <i class="bi bi-chat-left"></i>
+                  <p>Aucun message pour le moment. Commencez la conversation !</p>
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="empty-chat">
+                <i class="bi bi-chat-left"></i>
+                <p>Aucun message pour le moment. Commencez la conversation !</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Suggested Messages -->
+          {% if not messages_list %}
+          <div class="suggested-messages">
+            <div class="suggested-messages-title">Messages recommandés :</div>
+            <div class="suggested-messages-list">
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, je suis intéressé(e) par ce logement. Est-il toujours disponible ?')">
+                Est-il toujours disponible ?
+              </button>
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, pouvez-vous me donner plus d\'informations sur ce logement ?')">
+                Plus d'informations
+              </button>
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, est-il possible de visiter le logement ?')">
+                Visite possible ?
+              </button>
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, quel est le prix exact et les charges incluses ?')">
+                Prix et charges
+              </button>
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, le logement est-il meublé ou non meublé ?')">
+                Meublé ou non ?
+              </button>
+              <button type="button" class="suggested-message-btn" onclick="setSuggestedMessage('Bonjour, y a-t-il un parking disponible ?')">
+                Parking disponible ?
+              </button>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Message Form -->
+          <div class="message-form-container">
+            <form method="post" action="{% url 'send_logement_message' logement.id %}" class="message-form" enctype="multipart/form-data" id="message-form">
+              {% csrf_token %}
+               {% if other_user %}
+                 <input type="hidden" name="user_id" value="{{ other_user.id }}">
+               {% endif %}
+              <div class="message-input-wrapper">
+                <textarea name="text" class="message-input" placeholder="Tapez votre message..." rows="1" id="message-input" required></textarea>
+              </div>
+              <button type="submit" class="message-send-btn">
+                <i class="bi bi-send"></i> Envoyer
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Auto-resize textarea
+    const messageInput = document.getElementById('message-input');
+    if (messageInput) {
+      messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+    }
+
+    // Scroll to bottom of messages
+    const messagesList = document.getElementById('messages-list');
+    if (messagesList) {
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    // Auto-scroll on new messages
+    const observer = new MutationObserver(function() {
+      messagesList.scrollTop = messagesList.scrollHeight;
+    });
+    if (messagesList) {
+      observer.observe(messagesList, { childList: true, subtree: true });
+    }
+
+    // Set suggested message
+    function setSuggestedMessage(message) {
+      const input = document.getElementById('message-input');
+      if (input) {
+        input.value = message;
+        input.focus();
+        // Auto-resize
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+      }
+    }
+  </script>
+{% endblock %}
+

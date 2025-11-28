@@ -1,0 +1,816 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Profil - {{ profile_user.get_full_name|default:profile_user.username }}{% endblock %}
+
+{% block body_class %}profile-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .profile-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Header normal - no transparency */
+    body.profile-hero-page #header.header {
+      background-color: rgba(34, 18, 2, 0.95) !important;
+      background: rgba(34, 18, 2, 0.95) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .profile-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .profile-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .profile-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .profile-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .profile-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .profile-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .profile-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .profile-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .profile-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .profile-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .profile-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section */
+    .profile-main-content {
+      background: var(--background-color);
+      padding: 0;
+      margin-top: 0;
+    }
+
+    .profile-content-header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 1rem;
+    }
+
+    .profile-content-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--heading-color);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .profile-content-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .profile-content-description {
+      color: var(--default-color);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+
+    /* LinkedIn Style Profile */
+    .profile-container {
+      max-width: 1128px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    
+    /* Profile Header */
+    .profile-header {
+      background: #fff;
+      border-radius: 0;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      margin-top: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .profile-cover {
+      height: 200px;
+      background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+      position: relative;
+      overflow: hidden;
+      margin-top: 100px;
+    }
+    .profile-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-section {
+      padding: 0 24px 16px;
+      margin-top: -80px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .profile-avatar-wrapper {
+      position: relative;
+    }
+    .profile-avatar {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .btn-connect {
+      background: #0a66c2;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-connect:hover {
+      background: #004182;
+    }
+    .btn-message {
+      background: #fff;
+      color: #0a66c2;
+      border: 1px solid #0a66c2;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-message:hover {
+      background: #e6f2ff;
+    }
+    .connection-status {
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .connection-status.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .connection-status.accepted {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .profile-info {
+      padding: 0 24px 24px;
+    }
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 4px 0;
+    }
+    .profile-headline {
+      font-size: 1.25rem;
+      color: #666;
+      margin: 0 0 8px 0;
+      font-weight: 400;
+    }
+    .profile-location {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0 0 16px 0;
+    }
+    .profile-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0a66c2;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    /* Profile Cards */
+    .profile-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .profile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .profile-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0;
+    }
+    .profile-card-content {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* Skills */
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .skill-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* Experience & Education */
+    .experience-item, .education-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+    }
+    .experience-item:last-child, .education-item:last-child {
+      border-bottom: none;
+    }
+    .exp-title, .edu-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 4px 0;
+    }
+    .exp-company, .edu-school {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0 0 4px 0;
+    }
+    .exp-duration, .edu-duration {
+      font-size: 0.75rem;
+      color: #999;
+      margin: 0;
+    }
+    
+    /* Posts List */
+    .post-item {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+    .post-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .post-author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .post-author-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .post-author-info {
+      flex: 1;
+    }
+    .post-author-name {
+      font-weight: 600;
+      color: #000;
+      margin: 0 0 2px 0;
+      font-size: 0.9375rem;
+    }
+    .post-time {
+      font-size: 0.75rem;
+      color: #666;
+      margin: 0;
+    }
+    .post-content {
+      color: #000;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .post-media {
+      margin-bottom: 12px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .post-media img, .post-media video {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+    .post-actions {
+      display: flex;
+      gap: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .post-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 0.875rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .post-action-btn:hover {
+      background: #f3f2ef;
+    }
+    
+    /* Comments */
+    .comments-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .comment-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .comment-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .comment-content {
+      flex: 1;
+      background: #f3f2ef;
+      padding: 8px 12px;
+      border-radius: 16px;
+    }
+    .comment-author {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #000;
+      margin: 0 0 2px 0;
+    }
+    .comment-text {
+      font-size: 0.875rem;
+      color: #000;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #666;
+    }
+    .empty-state-icon {
+      font-size: 3rem;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 12px;
+      }
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+      }
+      .profile-avatar-section {
+        margin-top: -60px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .profile-name {
+        font-size: 1.5rem;
+      }
+      .profile-headline {
+        font-size: 1rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Main Content Section -->
+  <section class="profile-main-content" style="margin-top: 0; padding-top: 0;">
+    <div class="profile-content-header" style="display: none;">
+      <h2 class="profile-content-title">Profil</h2>
+      <p class="profile-content-description">
+        Découvrez le profil de {{ profile_user.get_full_name|default:profile_user.username }}.
+      </p>
+    </div>
+
+    <div class="profile-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-cover">
+      {% if profile_user.cover_photo %}
+        <img src="{{ profile_user.cover_photo.url }}" alt="Cover" />
+      {% else %}
+        <img src="{% static 'User/evently/img/default-cover.svg' %}" alt="Cover" />
+      {% endif %}
+    </div>
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-wrapper">
+        <div class="profile-avatar">
+          {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" />
+          {% else %}
+            <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" />
+          {% endif %}
+        </div>
+      </div>
+      <div class="profile-actions">
+        {% if connection_status == 'accepted' %}
+          <span class="connection-status accepted">
+            <i class="bi bi-check-circle"></i> Connecté
+          </span>
+        {% elif connection_status == 'pending' %}
+          {% if is_request_sender %}
+            <span class="connection-status pending">
+              <i class="bi bi-clock"></i> Demande en attente
+            </span>
+          {% else %}
+            <span class="connection-status pending">
+              <i class="bi bi-clock"></i> Demande reçue - Vérifiez vos notifications
+            </span>
+          {% endif %}
+        {% elif connection_status == 'rejected' %}
+          {% if is_request_sender %}
+            <form method="post" action="{% url 'send_connection' profile_user.id %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-connect">
+                <i class="bi bi-arrow-clockwise"></i> Réessayer
+              </button>
+            </form>
+          {% else %}
+            <span class="connection-status" style="background: #fee; color: #c33; padding: 0.75rem 1.5rem; border-radius: 24px; font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+              <i class="bi bi-x-circle"></i> Demande refusée
+            </span>
+          {% endif %}
+        {% else %}
+          <form method="post" action="{% url 'send_connection' profile_user.id %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-connect">
+              <i class="bi bi-person-plus"></i> Se connecter
+            </button>
+          </form>
+        {% endif %}
+        {% if profile_user != request.user %}
+          <a href="{% url 'messages_conversation' profile_user.id %}" class="btn-message">
+            <i class="bi bi-envelope"></i> Message
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+      {% if profile_user.headline %}
+        <p class="profile-headline">{{ profile_user.headline }}</p>
+      {% endif %}
+      {% if profile_user.location %}
+        <p class="profile-location"><i class="bi bi-geo-alt"></i> {{ profile_user.location }}</p>
+      {% endif %}
+      {% if profile_user.is_verified %}
+        <span class="profile-verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+      {% endif %}
+      
+      <!-- Statistics -->
+      <div class="profile-stats" style="display: flex; gap: 2rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ connections_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Amis</span>
+        </div>
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ posts_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Publications</span>
+        </div>
+        <div class="profile-stat-item" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span class="profile-stat-number" style="font-size: 1.5rem; font-weight: 600; color: #0a66c2;">{{ comments_count|default:0 }}</span>
+          <span class="profile-stat-label" style="font-size: 0.875rem; color: #666;">Commentaires</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+      <!-- About Section -->
+      {% if profile_user.bio %}
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">À propos</h2>
+        </div>
+        <div class="profile-card-content">
+          <p>{{ profile_user.bio|linebreaks }}</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Posts List -->
+      {% if posts %}
+        {% for post in posts %}
+        <div class="post-item">
+          <div class="post-header">
+            <div class="post-author-avatar">
+              {% if post.author.avatar %}
+                <img src="{{ post.author.avatar.url }}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+              {% else %}
+                <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ post.author.get_full_name|default:post.author.username }}" />
+              {% endif %}
+            </div>
+            <div class="post-author-info">
+              <h3 class="post-author-name">{{ post.author.get_full_name|default:post.author.username }}</h3>
+              <p class="post-time">{{ post.created_at|timesince }} ago</p>
+            </div>
+          </div>
+          <div class="post-content" id="post-content-{{ post.id }}">{{ post.content }}</div>
+          {% if post.get_media_url %}
+          <div class="post-media">
+            {% with media_url=post.get_media_url %}
+              {% if media_url|slice:"-4:" == ".jpg" or media_url|slice:"-4:" == ".png" or media_url|slice:"-5:" == ".jpeg" or media_url|slice:"-4:" == ".gif" or media_url|slice:"-4:" == ".webp" %}
+                <img src="{{ media_url }}" alt="Post media" />
+              {% else %}
+                <video controls>
+                  <source src="{{ media_url }}" type="video/mp4">
+                </video>
+              {% endif %}
+            {% endwith %}
+          </div>
+          {% endif %}
+          <div class="post-actions">
+            <button class="post-action-btn">
+              <i class="bi bi-hand-thumbs-up"></i> J'aime
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-chat"></i> Commenter
+            </button>
+            <button class="post-action-btn">
+              <i class="bi bi-share"></i> Partager
+            </button>
+          </div>
+          {% if post.comments.all %}
+          <div class="comments-section">
+            {% for comment in post.comments.all|slice:":5" %}
+            <div class="comment-item">
+              <div class="comment-avatar">
+                {% if comment.author.avatar %}
+                  <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% else %}
+                  <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ comment.author.get_full_name|default:comment.author.username }}" />
+                {% endif %}
+              </div>
+              <div class="comment-content">
+                <p class="comment-author">{{ comment.author.get_full_name|default:comment.author.username }}</p>
+                <p class="comment-text">{{ comment.text }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="profile-card">
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+            <p>Aucun post pour le moment.</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+      <!-- Experience -->
+      {% if profile_user.experience %}
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Expérience</h2>
+        </div>
+        <div class="profile-card-content" id="experience-display">
+          {% for exp in profile_user.experience %}
+          <div class="experience-item">
+            <h3 class="exp-title">{{ exp.position|default:exp.title|default:"Position" }}</h3>
+            <p class="exp-company">{{ exp.company|default:exp.organization|default:"Entreprise" }}</p>
+            {% if exp.start_date or exp.end_date %}
+            <p class="exp-duration">
+              {% if exp.start_date %}{{ exp.start_date }}{% endif %}
+              {% if exp.start_date and exp.end_date %} - {% endif %}
+              {% if exp.end_date %}{{ exp.end_date }}{% elif exp.current %}Present{% endif %}
+            </p>
+            {% endif %}
+            {% if exp.description %}
+            <p style="font-size: 0.875rem; color: #666; margin-top: 8px;">{{ exp.description }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Education -->
+      {% if profile_user.education %}
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Formation</h2>
+        </div>
+        <div class="profile-card-content" id="education-display">
+          {% for edu in profile_user.education %}
+          <div class="education-item">
+            <h3 class="edu-title">{{ edu.degree|default:edu.diploma|default:"Diplôme" }}</h3>
+            <p class="edu-school">{{ edu.school|default:edu.university|default:"École" }}</p>
+            {% if edu.year or edu.start_year or edu.end_year %}
+            <p class="edu-duration">
+              {% if edu.start_year %}{{ edu.start_year }}{% endif %}
+              {% if edu.start_year and edu.end_year %} - {% endif %}
+              {% if edu.end_year %}{{ edu.end_year }}{% elif edu.year %}{{ edu.year }}{% endif %}
+            </p>
+            {% endif %}
+            {% if edu.field %}
+            <p style="font-size: 0.875rem; color: #666; margin-top: 4px;">{{ edu.field }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Skills -->
+      {% if profile_user.skills %}
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">Compétences</h2>
+        </div>
+        <div class="profile-card-content">
+          <div class="skills-list" id="skills-display">
+            {% for skill in profile_user.skills %}
+              {% if skill.name %}
+                <span class="skill-badge">{{ skill.name }}</span>
+              {% else %}
+                <span class="skill-badge">{{ skill }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+  </section>
+{% endblock %}

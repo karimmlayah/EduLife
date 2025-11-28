@@ -1,0 +1,62 @@
+{% extends 'evently/base.html' %}
+{% load static %}
+
+{% block title %}Spline Test • EduLife{% endblock %}
+
+{% block content %}
+<style>
+  .spline-container {
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(16, 9, 1, 0.95) 0%, rgba(37, 37, 37, 0.9) 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(248, 117, 0, 0.2) inset;
+    margin: 20px 0;
+  }
+
+  .spline-container spline-viewer {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .test-header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    color: #fff;
+  }
+
+  .test-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #fff 0%, rgba(248, 117, 0, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .test-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+  }
+</style>
+
+<section class="section">
+  <div class="container">
+    <div class="test-header">
+      <h1>Spline 3D Viewer Test</h1>
+      <p>Test de l'intégration du composant Spline 3D</p>
+    </div>
+    
+    <div class="spline-container">
+      <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
+      <spline-viewer url="https://prod.spline.design/zpQ8cAh3-ZTcG2JV/scene.splinecode"></spline-viewer>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

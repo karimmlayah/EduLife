@@ -1,0 +1,2222 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Logements • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&h=1080&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Main Content */
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .logement-content-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* Add Logement Button */
+    .add-logement-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-logement-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .add-logement-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .add-logement-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .add-logement-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Logements Grid */
+    .logements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .logement-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .logement-card-wifi-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(34, 197, 94, 0.95);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .logement-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .logement-card-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .logement-card-image-carousel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .logement-card-image-carousel::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .logement-card-image-slide {
+      min-width: 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      flex-shrink: 0;
+    }
+    
+    .logement-card-image-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .logement-card-image-indicators {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 2;
+    }
+    
+    .logement-card-image-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .logement-card-image-indicator.active {
+      background: rgba(255, 255, 255, 1);
+      width: 24px;
+      border-radius: 4px;
+    }
+    
+    .logement-card-image-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 1.2rem;
+    }
+    
+    .logement-card-image-wrapper:hover .logement-card-image-nav {
+      opacity: 1;
+    }
+    
+    .logement-card-image-nav:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .logement-card-image-nav.prev {
+      left: 10px;
+    }
+    
+    .logement-card-image-nav.next {
+      right: 10px;
+    }
+    
+    .logement-card-image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* 3D Model Button */
+    .btn-3d-view {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #1f2937;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-3d-view:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      color: #667eea;
+    }
+    
+    .btn-3d-view:active {
+      transform: translateY(0);
+    }
+    
+    .btn-3d-view i {
+      font-size: 1rem;
+    }
+    
+    /* Modal 3D Viewer - Style similaire à motionwave.pl */
+    .modal-3d-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 1);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+    }
+    
+    .modal-3d-viewer.active {
+      display: flex;
+    }
+    
+    .modal-3d-viewer-header {
+      position: relative;
+      width: 100%;
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10001;
+      backdrop-filter: blur(10px);
+    }
+    
+    .modal-3d-viewer-title {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .modal-3d-viewer-nav {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .modal-3d-viewer-close {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .modal-3d-viewer-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .modal-3d-viewer-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      background: #000;
+      overflow: hidden;
+    }
+    
+    .modal-3d-viewer-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    
+    .modal-3d-viewer-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 1.1rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .modal-3d-viewer-loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .modal-3d-viewer-instructions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(40, 40, 40, 0.95);
+      color: white;
+      padding: 0;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      z-index: 10001;
+      backdrop-filter: blur(10px);
+      display: none;
+      max-width: 700px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-3d-viewer-instructions.show {
+      display: block;
+    }
+    
+    .modal-3d-viewer-instructions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-3d-viewer-instructions-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .modal-3d-viewer-instructions-tab {
+      padding: 8px 20px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .modal-3d-viewer-instructions-tab.active {
+      background: #5e72e4;
+      color: white;
+    }
+    
+    .modal-3d-viewer-instructions-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+    
+    .modal-3d-viewer-instructions-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-3d-viewer-instructions-content {
+      padding: 25px;
+    }
+    
+    .modal-3d-viewer-instructions-section {
+      display: none;
+    }
+    
+    .modal-3d-viewer-instructions-section.active {
+      display: block;
+    }
+    
+    .modal-3d-viewer-instructions-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .modal-3d-viewer-instructions-control-item {
+      text-align: center;
+    }
+    
+    .modal-3d-viewer-instructions-control-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: white;
+    }
+    
+    .modal-3d-viewer-instructions-control-icons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-icon {
+      width: 60px;
+      height: 90px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-button {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      position: relative;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-button.active {
+      background: #5e72e4;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-button.active::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-button.left.active::after {
+      content: '↔';
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    
+    .modal-3d-viewer-instructions-mouse-button.right.active::after {
+      content: '↕';
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    
+    .modal-3d-viewer-instructions-keyboard-icon {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+      width: 120px;
+      height: 120px;
+    }
+    
+    .modal-3d-viewer-instructions-key {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .modal-3d-viewer-instructions-key.active {
+      background: #5e72e4;
+      border-color: #5e72e4;
+    }
+    
+    .modal-3d-viewer-instructions-key.arrow-up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    
+    .modal-3d-viewer-instructions-key.arrow-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    
+    .modal-3d-viewer-instructions-key.arrow-down {
+      grid-column: 2;
+      grid-row: 3;
+    }
+    
+    .modal-3d-viewer-instructions-key.arrow-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+    
+    .modal-3d-viewer-instructions-vr-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .modal-3d-viewer-instructions-vr-circle {
+      position: absolute;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .modal-3d-viewer-instructions-vr-circle.outer {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .modal-3d-viewer-instructions-vr-circle.middle {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .modal-3d-viewer-instructions-vr-circle.inner {
+      width: 20px;
+      height: 20px;
+      background: #5e72e4;
+      border-color: #5e72e4;
+    }
+    
+    .modal-3d-viewer-instructions-control-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .logement-card-content {
+      padding: 1.5rem;
+    }
+
+    .logement-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .logement-card-location {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logement-card-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .logement-card-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .logement-card-details {
+      display: flex;
+      gap: 1rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .logement-card-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .logement-card-type {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Message Button */
+    .btn-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-message::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-message:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-message:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .btn-message i {
+      font-size: 1rem;
+    }
+
+    /* Button Voir dans le map */
+    .btn-map-view {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .btn-map-view::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-map-view:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-map-view:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      color: white;
+    }
+
+    .btn-map-view i {
+      font-size: 1rem;
+    }
+
+    /* Button Itinéraire */
+    .btn-directions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .btn-directions::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-directions:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-directions:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+      background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+      color: white;
+    }
+
+    .btn-directions i {
+      font-size: 1rem;
+    }
+
+    /* Filtres avancés */
+    .filters-panel {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filters-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filters-toggle-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filters-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .filters-toggle-btn i {
+      transition: transform 0.3s;
+    }
+
+    .filters-panel.collapsed .filters-toggle-btn i {
+      transform: rotate(-90deg);
+    }
+
+    .filters-content {
+      padding: 30px;
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s;
+    }
+
+    .filters-panel.collapsed .filters-content {
+      max-height: 0;
+      padding: 0 30px;
+    }
+
+    .filters-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-group label i {
+      color: #f87500;
+    }
+
+    .filter-input,
+    .filter-select {
+      padding: 12px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: #f87500;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+    }
+
+    .filter-range {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-range input {
+      flex: 1;
+    }
+
+    .filter-range span {
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .filters-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      padding-top: 20px;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .btn-filter-apply,
+    .btn-filter-reset {
+      flex: 1;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-filter-apply {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+    }
+
+    .btn-filter-apply:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-filter-reset {
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 2px solid #e5e7eb;
+    }
+
+    .btn-filter-reset:hover {
+      background: #e5e7eb;
+      color: #1f2937;
+      transform: translateY(-2px);
+    }
+
+    /* Compteur de résultats avec filtres actifs */
+    .filters-active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(248, 117, 0, 0.1);
+      color: #f87500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 15px;
+    }
+
+    .filters-active-badge i {
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters-actions {
+        flex-direction: column;
+      }
+
+      .filter-range {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-range span {
+        display: none;
+      }
+    }
+
+    /* Modal Map */
+    .modal-map-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-map-viewer.active {
+      display: flex;
+    }
+
+    .modal-map-viewer-header {
+      position: relative;
+      width: 100%;
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10001;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-map-viewer-title {
+      color: #1f2937;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .modal-map-viewer-location {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .modal-map-viewer-close {
+      background: rgba(248, 117, 0, 0.1);
+      color: #f87500;
+      border: 1px solid rgba(248, 117, 0, 0.3);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-map-viewer-close:hover {
+      background: rgba(248, 117, 0, 0.2);
+      border-color: rgba(248, 117, 0, 0.5);
+    }
+
+    .modal-map-viewer-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+
+    #modal-map-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .modal-map-viewer-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #6b7280;
+      font-size: 1.1rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .modal-map-viewer-loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #f87500;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Logements</h1>
+              <p class="hero-subtitle">Trouvez ou proposez un logement dans notre communauté</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <span class="current">Logements</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="logement-main-content">
+    <div class="container">
+      <h2 class="logement-content-title">Liste des logements disponibles</h2>
+      
+      <!-- Filtres avancés -->
+      <div class="filters-panel" id="filtersPanel">
+        <div class="filters-header">
+          <h3><i class="bi bi-funnel"></i> Filtres avancés</h3>
+          <button class="filters-toggle-btn" onclick="toggleFilters()">
+            <i class="bi bi-chevron-down" id="filtersToggleIcon"></i>
+          </button>
+        </div>
+        <div class="filters-content" id="filtersContent">
+          <form method="GET" action="{% url 'logement' %}" id="filtersForm" class="filters-form">
+            <!-- Recherche textuelle -->
+            <div class="filter-group">
+              <label><i class="bi bi-search"></i> Recherche</label>
+              <input type="text" name="search" class="filter-input" placeholder="Titre, description, adresse..." value="{{ filters.search }}">
+            </div>
+            
+            <div class="filters-grid">
+              <!-- Ville -->
+              <div class="filter-group">
+                <label><i class="bi bi-geo-alt"></i> Ville</label>
+                <select name="city" class="filter-select">
+                  <option value="">Toutes les villes</option>
+                  {% for city in all_cities %}
+                    <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <!-- Type de logement -->
+              <div class="filter-group">
+                <label><i class="bi bi-house"></i> Type</label>
+                <select name="type" class="filter-select">
+                  <option value="">Tous les types</option>
+                  <option value="APPARTEMENT" {% if filters.type == 'APPARTEMENT' %}selected{% endif %}>Appartement</option>
+                  <option value="MAISON" {% if filters.type == 'MAISON' %}selected{% endif %}>Maison</option>
+                  <option value="STUDIO" {% if filters.type == 'STUDIO' %}selected{% endif %}>Studio</option>
+                  <option value="VILLA" {% if filters.type == 'VILLA' %}selected{% endif %}>Villa</option>
+                  <option value="AUTRE" {% if filters.type == 'AUTRE' %}selected{% endif %}>Autre</option>
+                </select>
+              </div>
+              
+              <!-- Prix -->
+              <div class="filter-group">
+                <label><i class="bi bi-currency-dollar"></i> Prix (DZD)</label>
+                <div class="filter-range">
+                  <input type="number" name="price_min" class="filter-input" placeholder="Min" value="{{ filters.price_min }}" min="0" step="1000">
+                  <span>-</span>
+                  <input type="number" name="price_max" class="filter-input" placeholder="Max" value="{{ filters.price_max }}" min="0" step="1000">
+                </div>
+              </div>
+              
+              <!-- Surface -->
+              <div class="filter-group">
+                <label><i class="bi bi-rulers"></i> Surface (m²)</label>
+                <div class="filter-range">
+                  <input type="number" name="surface_min" class="filter-input" placeholder="Min" value="{{ filters.surface_min }}" min="0" step="1">
+                  <span>-</span>
+                  <input type="number" name="surface_max" class="filter-input" placeholder="Max" value="{{ filters.surface_max }}" min="0" step="1">
+                </div>
+              </div>
+              
+              <!-- Nombre de pièces -->
+              <div class="filter-group">
+                <label><i class="bi bi-door-open"></i> Pièces</label>
+                <div class="filter-range">
+                  <input type="number" name="rooms_min" class="filter-input" placeholder="Min" value="{{ filters.rooms_min }}" min="1" step="1">
+                  <span>-</span>
+                  <input type="number" name="rooms_max" class="filter-input" placeholder="Max" value="{{ filters.rooms_max }}" min="1" step="1">
+                </div>
+              </div>
+              
+              <!-- Salles de bain -->
+              <div class="filter-group">
+                <label><i class="bi bi-droplet"></i> Salles de bain</label>
+                <input type="number" name="bathrooms_min" class="filter-input" placeholder="Minimum" value="{{ filters.bathrooms_min }}" min="1" step="1">
+              </div>
+              
+              <!-- WiFi -->
+              <div class="filter-group">
+                <label><i class="bi bi-wifi"></i> WiFi</label>
+                <select name="wifi" class="filter-select">
+                  <option value="">Tous</option>
+                  <option value="true" {% if filters.wifi == 'true' %}selected{% endif %}>Avec WiFi</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="filters-actions">
+              <button type="submit" class="btn-filter-apply">
+                <i class="bi bi-check-circle"></i> Appliquer les filtres
+              </button>
+              <a href="{% url 'logement' %}" class="btn-filter-reset">
+                <i class="bi bi-x-circle"></i> Réinitialiser
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      {% if request.user.is_authenticated %}
+      <div style="text-align: center;">
+        <a href="{% url 'logement_add' %}" class="add-logement-btn">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un logement
+        </a>
+      </div>
+      {% else %}
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <p style="color: #6b7280; margin-bottom: 1rem;">Connectez-vous pour ajouter un logement</p>
+        <a href="{% url 'login' %}" class="add-logement-btn">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Se connecter
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Compteur de résultats -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+        <div>
+          <h3 style="margin: 0; color: #1f2937; font-size: 1.1rem;">
+            {{ logements_with_connection|length }} logement{{ logements_with_connection|length|pluralize }} trouvé{{ logements_with_connection|length|pluralize }}
+            {% if filters.search or filters.city or filters.type or filters.price_min or filters.price_max %}
+              <span class="filters-active-badge">
+                <i class="bi bi-funnel-fill"></i> Filtres actifs
+              </span>
+            {% endif %}
+          </h3>
+        </div>
+      </div>
+
+      {% if logements_with_connection %}
+      <div class="logements-grid">
+        {% for item in logements_with_connection %}
+        {% with logement=item.logement is_connected=item.is_connected %}
+        <div class="logement-card">
+          {% if logement.wifi %}
+          <div class="logement-card-wifi-badge">
+            <i class="bi bi-wifi"></i> WiFi
+          </div>
+          {% endif %}
+          <div class="logement-card-image-wrapper" onclick="window.location.href='{% url 'logement_detail' logement.id %}'" style="cursor: pointer;">
+            {% if logement.model_3d %}
+              <button class="btn-3d-view" onclick="event.stopPropagation(); open3DViewer('{{ logement.model_3d|escapejs }}', '{{ logement.title|escapejs }}')" title="Voir en 3D">
+                <i class="bi bi-box-seam"></i>
+                <span>Enter 3D</span>
+              </button>
+            {% endif %}
+            {% if logement.image or logement.images.all %}
+              <div class="logement-card-image-carousel" id="carousel-{{ logement.id }}">
+                {% if logement.image %}
+                  <div class="logement-card-image-slide">
+                    <img src="{{ logement.image.url }}" alt="{{ logement.title }}">
+                  </div>
+                {% endif %}
+                {% for img in logement.images.all %}
+                  <div class="logement-card-image-slide">
+                    <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
+                  </div>
+                {% endfor %}
+              </div>
+              
+              {% if logement.image or logement.images.all %}
+                {% with total_images=logement.images.all|length %}
+                  {% if logement.image %}
+                    {% with total_images=total_images|add:1 %}
+                      {% if total_images > 1 %}
+                        <div class="logement-card-image-indicators" id="indicators-{{ logement.id }}">
+                          {% for i in "x"|ljust:total_images %}
+                            <div class="logement-card-image-indicator {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></div>
+                          {% endfor %}
+                        </div>
+                        <button class="logement-card-image-nav prev" onclick="event.stopPropagation(); slideCarousel('{{ logement.id }}', -1)">
+                          <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button class="logement-card-image-nav next" onclick="event.stopPropagation(); slideCarousel('{{ logement.id }}', 1)">
+                          <i class="bi bi-chevron-right"></i>
+                        </button>
+                      {% endif %}
+                    {% endwith %}
+                  {% else %}
+                    {% if total_images > 1 %}
+                      <div class="logement-card-image-indicators" id="indicators-{{ logement.id }}">
+                        {% for i in "x"|ljust:total_images %}
+                          <div class="logement-card-image-indicator {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></div>
+                        {% endfor %}
+                      </div>
+                      <button class="logement-card-image-nav prev" onclick="event.stopPropagation(); slideCarousel('{{ logement.id }}', -1)">
+                        <i class="bi bi-chevron-left"></i>
+                      </button>
+                      <button class="logement-card-image-nav next" onclick="event.stopPropagation(); slideCarousel('{{ logement.id }}', 1)">
+                        <i class="bi bi-chevron-right"></i>
+                      </button>
+                    {% endif %}
+                  {% endif %}
+                {% endwith %}
+              {% endif %}
+            {% else %}
+              <div class="logement-card-image-placeholder">
+                <i class="bi bi-house"></i>
+              </div>
+            {% endif %}
+          </div>
+          <div class="logement-card-content">
+            <div onclick="window.location.href='{% url 'logement_detail' logement.id %}'" style="cursor: pointer;">
+              <span class="logement-card-type">{{ logement.get_type_logement_display }}</span>
+              <h3 class="logement-card-title">{{ logement.title }}</h3>
+              <div class="logement-card-location">
+                <i class="bi bi-geo-alt"></i>
+                {{ logement.address }}, {{ logement.city }}
+              </div>
+              <div class="logement-card-info">
+                <div class="logement-card-price">{{ logement.price|floatformat:0 }} DZD</div>
+                <div class="logement-card-details">
+                  <span><i class="bi bi-rulers"></i> {{ logement.surface }} m²</span>
+                  <span><i class="bi bi-door-open"></i> {{ logement.rooms }} pièces</span>
+                  <span><i class="bi bi-droplet"></i> {{ logement.bathrooms }} sdb</span>
+                </div>
+              </div>
+            </div>
+            <div class="logement-card-actions" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn-map-view" 
+                      data-logement-id="{{ logement.id }}"
+                      data-latitude="{% if logement.latitude %}{{ logement.latitude }}{% endif %}"
+                      data-longitude="{% if logement.longitude %}{{ logement.longitude }}{% endif %}"
+                      data-title="{{ logement.title|escapejs }}"
+                      data-address="{{ logement.address|escapejs }}"
+                      data-city="{{ logement.city|escapejs }}"
+                      data-price="{{ logement.price|floatformat:0 }}"
+                      onclick="event.stopPropagation();">
+                <i class="bi bi-geo-alt"></i> Voir dans le map
+              </button>
+              {% if logement.latitude and logement.longitude %}
+                <button class="btn-directions" 
+                        data-latitude="{{ logement.latitude }}"
+                        data-longitude="{{ logement.longitude }}"
+                        data-address="{{ logement.address|escapejs }}, {{ logement.city|escapejs }}"
+                        onclick="event.stopPropagation();"
+                        title="Obtenir l'itinéraire">
+                  <i class="bi bi-signpost-2"></i> Itinéraire
+                </button>
+              {% endif %}
+              {% if request.user.is_authenticated %}
+                <a href="{% url 'logement_messages' logement.id %}" class="btn-message" onclick="event.stopPropagation();" style="flex: 1; min-width: 150px;">
+                  <i class="bi bi-chat-dots"></i> Envoyer un message
+                </a>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn-message" onclick="event.stopPropagation();" style="flex: 1; min-width: 150px;">
+                  <i class="bi bi-box-arrow-in-right"></i> Se connecter pour envoyer un message
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-house"></i>
+        </div>
+        <h3>Aucun logement disponible</h3>
+        <p>Il n'y a pas encore de logements disponibles. {% if request.user.is_authenticated %}<a href="{% url 'logement_add' %}">Soyez le premier à en ajouter un !</a>{% else %}<a href="{% url 'login' %}">Connectez-vous</a> pour ajouter un logement.{% endif %}</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  
+  <!-- Modal Map Viewer -->
+  <div class="modal-map-viewer" id="modalMapViewer">
+    <div class="modal-map-viewer-header">
+      <div>
+        <h3 class="modal-map-viewer-title" id="modalMapViewerTitle">Localisation</h3>
+        <div class="modal-map-viewer-location" id="modalMapViewerLocation"></div>
+      </div>
+      <button class="modal-map-viewer-close" onclick="closeMapViewer()" aria-label="Fermer">
+        <i class="bi bi-x-lg"></i>
+        <span>Fermer</span>
+      </button>
+    </div>
+    <div class="modal-map-viewer-content">
+      <div class="modal-map-viewer-loading" id="modalMapViewerLoading">
+        <div class="modal-map-viewer-loading-spinner"></div>
+        <div>Chargement de la carte...</div>
+      </div>
+      <div id="modal-map-container"></div>
+    </div>
+  </div>
+
+  <!-- Modal 3D Viewer - Style motionwave.pl -->
+  <div class="modal-3d-viewer" id="modal3DViewer">
+    <div class="modal-3d-viewer-header">
+      <h3 class="modal-3d-viewer-title" id="modal3DViewerTitle">Modèle 3D</h3>
+      <div class="modal-3d-viewer-nav">
+        <button class="modal-3d-viewer-close" onclick="close3DViewer()" aria-label="Fermer">
+          <i class="bi bi-x-lg"></i>
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-3d-viewer-content">
+      <div class="modal-3d-viewer-loading" id="modal3DViewerLoading">
+        <div class="modal-3d-viewer-loading-spinner"></div>
+        <div>Chargement du modèle 3D...</div>
+      </div>
+      <iframe id="3d-viewer-iframe" class="modal-3d-viewer-iframe" src="" allowfullscreen allow="gyroscope; accelerometer; xr-spatial-tracking; vr; camera; microphone" scrolling="no"></iframe>
+      <div class="modal-3d-viewer-instructions" id="modal3DViewerInstructions">
+        <div class="modal-3d-viewer-instructions-header">
+          <div class="modal-3d-viewer-instructions-tabs">
+            <button class="modal-3d-viewer-instructions-tab active" onclick="switchInstructionsTab('basic')">BASIC</button>
+            <button class="modal-3d-viewer-instructions-tab" onclick="switchInstructionsTab('advanced')">ADVANCED</button>
+          </div>
+          <button class="modal-3d-viewer-instructions-close" onclick="hideInstructions()">×</button>
+        </div>
+        <div class="modal-3d-viewer-instructions-content">
+          <div class="modal-3d-viewer-instructions-section active" id="instructions-basic">
+            <div class="modal-3d-viewer-instructions-controls">
+              <div class="modal-3d-viewer-instructions-control-item">
+                <div class="modal-3d-viewer-instructions-control-title">Mouse</div>
+                <div class="modal-3d-viewer-instructions-control-icons">
+                  <div class="modal-3d-viewer-instructions-mouse-icon">
+                    <div class="modal-3d-viewer-instructions-mouse-button left active"></div>
+                    <div class="modal-3d-viewer-instructions-mouse-button right"></div>
+                  </div>
+                  <div class="modal-3d-viewer-instructions-mouse-icon">
+                    <div class="modal-3d-viewer-instructions-mouse-button left"></div>
+                    <div class="modal-3d-viewer-instructions-mouse-button right active"></div>
+                  </div>
+                </div>
+                <div class="modal-3d-viewer-instructions-control-desc">
+                  Left click to rotate<br>Right click to zoom
+                </div>
+              </div>
+              
+              <div class="modal-3d-viewer-instructions-control-item">
+                <div class="modal-3d-viewer-instructions-control-title">Keyboard</div>
+                <div class="modal-3d-viewer-instructions-control-icons">
+                  <div class="modal-3d-viewer-instructions-keyboard-icon">
+                    <div class="modal-3d-viewer-instructions-key arrow-up active">↑</div>
+                    <div class="modal-3d-viewer-instructions-key arrow-left active">←</div>
+                    <div class="modal-3d-viewer-instructions-key arrow-down active">↓</div>
+                    <div class="modal-3d-viewer-instructions-key arrow-right active">→</div>
+                  </div>
+                </div>
+                <div class="modal-3d-viewer-instructions-control-desc">
+                  Arrow keys or WASD<br>to move around
+                </div>
+              </div>
+              
+              <div class="modal-3d-viewer-instructions-control-item">
+                <div class="modal-3d-viewer-instructions-control-title">VR teleport</div>
+                <div class="modal-3d-viewer-instructions-control-icons">
+                  <div class="modal-3d-viewer-instructions-vr-icon">
+                    <div class="modal-3d-viewer-instructions-vr-circle outer"></div>
+                    <div class="modal-3d-viewer-instructions-vr-circle middle"></div>
+                    <div class="modal-3d-viewer-instructions-vr-circle inner"></div>
+                  </div>
+                </div>
+                <div class="modal-3d-viewer-instructions-control-desc">
+                  Compatible with<br>VR headsets
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-3d-viewer-instructions-section" id="instructions-advanced">
+            <div class="modal-3d-viewer-instructions-controls">
+              <div class="modal-3d-viewer-instructions-control-item">
+                <div class="modal-3d-viewer-instructions-control-title">Additional Controls</div>
+                <div class="modal-3d-viewer-instructions-control-desc" style="text-align: left; margin-top: 15px;">
+                  <strong>Mouse Wheel:</strong> Zoom in/out<br>
+                  <strong>PgUp/PgDn:</strong> Move up/down<br>
+                  <strong>E/Q:</strong> Rotate view<br>
+                  <strong>1-9:</strong> Preset viewpoints<br>
+                  <strong>P:</strong> Pause/Resume<br>
+                  <strong>I:</strong> Toggle info<br>
+                  <strong>M:</strong> Toggle map<br>
+                  <strong>L:</strong> Toggle lighting
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Fonction pour faire défiler le carrousel
+  function slideCarousel(logementId, direction) {
+    const carousel = document.getElementById('carousel-' + logementId);
+    const indicators = document.getElementById('indicators-' + logementId);
+    if (!carousel) return;
+    
+    const slides = carousel.querySelectorAll('.logement-card-image-slide');
+    if (slides.length <= 1) return;
+    
+    const currentScroll = carousel.scrollLeft;
+    const slideWidth = carousel.offsetWidth;
+    const currentIndex = Math.round(currentScroll / slideWidth);
+    let newIndex = currentIndex + direction;
+    
+    // Boucle infinie
+    if (newIndex < 0) {
+      newIndex = slides.length - 1;
+    } else if (newIndex >= slides.length) {
+      newIndex = 0;
+    }
+    
+    // Faire défiler vers la nouvelle image
+    carousel.scrollTo({
+      left: newIndex * slideWidth,
+      behavior: 'smooth'
+    });
+    
+    // Mettre à jour les indicateurs
+    if (indicators) {
+      const indicatorButtons = indicators.querySelectorAll('.logement-card-image-indicator');
+      indicatorButtons.forEach((indicator, index) => {
+        if (index === newIndex) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+    }
+  }
+  
+  // Initialiser les carrousels au chargement
+  document.addEventListener('DOMContentLoaded', function() {
+    // Détecter le scroll pour mettre à jour les indicateurs
+    document.querySelectorAll('.logement-card-image-carousel').forEach(carousel => {
+      const logementId = carousel.id.replace('carousel-', '');
+      const indicators = document.getElementById('indicators-' + logementId);
+      
+      if (indicators) {
+        carousel.addEventListener('scroll', function() {
+          const slideWidth = carousel.offsetWidth;
+          const currentIndex = Math.round(carousel.scrollLeft / slideWidth);
+          const indicatorButtons = indicators.querySelectorAll('.logement-card-image-indicator');
+          
+          indicatorButtons.forEach((indicator, index) => {
+            if (index === currentIndex) {
+              indicator.classList.add('active');
+            } else {
+              indicator.classList.remove('active');
+            }
+          });
+        });
+        
+        // Permettre de cliquer sur les indicateurs
+        const indicatorButtons = indicators.querySelectorAll('.logement-card-image-indicator');
+        indicatorButtons.forEach((indicator, index) => {
+          indicator.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const slideWidth = carousel.offsetWidth;
+            carousel.scrollTo({
+              left: index * slideWidth,
+              behavior: 'smooth'
+            });
+          });
+        });
+      }
+    });
+    
+    // Support du swipe sur mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    document.querySelectorAll('.logement-card-image-carousel').forEach(carousel => {
+      const logementId = carousel.id.replace('carousel-', '');
+      
+      carousel.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      
+      carousel.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe(logementId);
+      }, { passive: true });
+    });
+    
+    function handleSwipe(logementId) {
+      const diff = touchStartX - touchEndX;
+      const threshold = 50; // Minimum distance for swipe
+      
+      if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+          // Swipe left - next image
+          slideCarousel(logementId, 1);
+        } else {
+          // Swipe right - previous image
+          slideCarousel(logementId, -1);
+        }
+      }
+    }
+  });
+  
+  // Fonction pour ouvrir le viewer 3D (style motionwave.pl)
+  function open3DViewer(url, title) {
+    const modal = document.getElementById('modal3DViewer');
+    const iframe = document.getElementById('3d-viewer-iframe');
+    const loading = document.getElementById('modal3DViewerLoading');
+    const titleElement = document.getElementById('modal3DViewerTitle');
+    const instructions = document.getElementById('modal3DViewerInstructions');
+    
+    if (!modal || !iframe) return;
+    
+    // Mettre à jour le titre
+    if (titleElement && title) {
+      titleElement.textContent = title;
+    }
+    
+    // Afficher le loading
+    if (loading) {
+      loading.style.display = 'flex';
+    }
+    
+    // Déterminer l'URL d'embed selon le service
+    let embedUrl = url;
+    
+    // Si c'est une URL Sketchfab, convertir en embed
+    if (url.includes('sketchfab.com')) {
+      const sketchfabMatch = url.match(/sketchfab\.com\/models\/([a-zA-Z0-9]+)/);
+      if (sketchfabMatch) {
+        embedUrl = 'https://sketchfab.com/models/' + sketchfabMatch[1] + '/embed?autostart=1&transparent=0&ui_theme=dark';
+      }
+    }
+    // Si c'est une URL Shapespark (comme motionwave.pl utilise)
+    else if (url.includes('shapespark.com')) {
+      // Les URLs Shapespark sont au format: https://username.shapespark.com/scene-name/
+      // Elles peuvent être utilisées directement dans un iframe
+      // S'assurer que l'URL se termine par / si nécessaire
+      embedUrl = url.trim();
+      if (!embedUrl.endsWith('/') && !embedUrl.includes('?')) {
+        embedUrl += '/';
+      }
+    }
+    // Si c'est une URL motionwave.pl (utilise probablement Shapespark)
+    else if (url.includes('motionwave.pl')) {
+      // Les URLs motionwave.pl peuvent pointer vers des viewers Shapespark
+      embedUrl = url;
+    }
+    // Pour d'autres services (Model Viewer, Three.js, etc.), utiliser l'URL telle quelle
+    else {
+      embedUrl = url;
+    }
+    
+    // Ouvrir le modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Charger l'iframe
+    iframe.src = embedUrl;
+    
+    // Masquer le loading quand l'iframe est chargé
+    iframe.addEventListener('load', function() {
+      if (loading) {
+        loading.style.display = 'none';
+      }
+      // Afficher les instructions après 2 secondes
+      if (instructions) {
+        setTimeout(function() {
+          instructions.classList.add('show');
+          // Masquer automatiquement après 10 secondes
+          setTimeout(function() {
+            instructions.classList.remove('show');
+          }, 10000);
+        }, 2000);
+      }
+    }, { once: true });
+    
+    // Gérer les erreurs de chargement
+    iframe.addEventListener('error', function() {
+      if (loading) {
+        loading.innerHTML = '<div style="color: #ff6b6b;">Erreur de chargement du modèle 3D</div>';
+      }
+    });
+  }
+  
+  // Fonction pour fermer le viewer 3D
+  function close3DViewer() {
+    const modal = document.getElementById('modal3DViewer');
+    const iframe = document.getElementById('3d-viewer-iframe');
+    const loading = document.getElementById('modal3DViewerLoading');
+    const instructions = document.getElementById('modal3DViewerInstructions');
+    
+    if (modal && iframe) {
+      modal.classList.remove('active');
+      iframe.src = ''; // Arrêter le chargement
+      document.body.style.overflow = ''; // Réactiver le scroll
+      
+      // Réinitialiser le loading
+      if (loading) {
+        loading.style.display = 'flex';
+        loading.innerHTML = '<div class="modal-3d-viewer-loading-spinner"></div><div>Chargement du modèle 3D...</div>';
+      }
+      
+      // Masquer les instructions
+      if (instructions) {
+        instructions.classList.remove('show');
+      }
+    }
+  }
+  
+  // Fonction pour masquer les instructions
+  function hideInstructions() {
+    const instructions = document.getElementById('modal3DViewerInstructions');
+    if (instructions) {
+      instructions.classList.remove('show');
+    }
+  }
+  
+  // Fonction pour changer d'onglet dans les instructions
+  function switchInstructionsTab(tab) {
+    const basicTab = document.querySelector('.modal-3d-viewer-instructions-tab[onclick*="basic"]');
+    const advancedTab = document.querySelector('.modal-3d-viewer-instructions-tab[onclick*="advanced"]');
+    const basicSection = document.getElementById('instructions-basic');
+    const advancedSection = document.getElementById('instructions-advanced');
+    
+    if (tab === 'basic') {
+      if (basicTab) basicTab.classList.add('active');
+      if (advancedTab) advancedTab.classList.remove('active');
+      if (basicSection) basicSection.classList.add('active');
+      if (advancedSection) advancedSection.classList.remove('active');
+    } else if (tab === 'advanced') {
+      if (basicTab) basicTab.classList.remove('active');
+      if (advancedTab) advancedTab.classList.add('active');
+      if (basicSection) basicSection.classList.remove('active');
+      if (advancedSection) advancedSection.classList.add('active');
+    }
+  }
+  
+  // Fermer avec la touche Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      close3DViewer();
+    }
+  });
+  
+  // Fermer en cliquant en dehors du contenu
+  const modal3D = document.getElementById('modal3DViewer');
+  if (modal3D) {
+    modal3D.addEventListener('click', function(e) {
+      if (e.target === this) {
+        close3DViewer();
+      }
+    });
+  }
+
+  // ========== MAP VIEWER FUNCTIONS ==========
+  let modalMap = null;
+  let modalMapMarker = null;
+
+  // Fonction pour géocoder une adresse (utiliser Nominatim OpenStreetMap)
+  async function geocodeAddress(address, city) {
+    try {
+      const query = encodeURIComponent(`${address}, ${city}`);
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur de géocodage:', error);
+      return null;
+    }
+  }
+
+  // Fonction pour ouvrir le viewer de carte avec géocodage si nécessaire
+  async function openMapViewWithGeocoding(buttonElement) {
+    const latitude = buttonElement.getAttribute('data-latitude');
+    const longitude = buttonElement.getAttribute('data-longitude');
+    const address = buttonElement.getAttribute('data-address');
+    const city = buttonElement.getAttribute('data-city');
+    
+    // Si pas de coordonnées, géocoder l'adresse
+    if (!latitude || !longitude || latitude === '' || longitude === '') {
+      const loadingToast = showToast ? showToast('Recherche de la localisation...', 'info', 3000) : null;
+      
+      const coords = await geocodeAddress(address, city);
+      
+      if (coords) {
+        buttonElement.setAttribute('data-latitude', coords.lat);
+        buttonElement.setAttribute('data-longitude', coords.lng);
+        openMapView(buttonElement);
+      } else {
+        if (typeof showToast !== 'undefined') {
+          showToast('Impossible de trouver la localisation. Veuillez ajouter les coordonnées GPS dans les paramètres du logement.', 'error', 5000);
+        } else {
+          alert('Impossible de trouver la localisation. Veuillez ajouter les coordonnées GPS dans les paramètres du logement.');
+        }
+      }
+    } else {
+      openMapView(buttonElement);
+    }
+  }
+
+  // Fonction pour ouvrir le viewer de carte
+  function openMapView(buttonElement) {
+    const logementId = buttonElement.getAttribute('data-logement-id');
+    const latitudeStr = buttonElement.getAttribute('data-latitude');
+    const longitudeStr = buttonElement.getAttribute('data-longitude');
+    const title = buttonElement.getAttribute('data-title');
+    const address = buttonElement.getAttribute('data-address');
+    const city = buttonElement.getAttribute('data-city');
+    const price = buttonElement.getAttribute('data-price');
+    
+    // Vérifier que les coordonnées sont valides
+    const latitude = parseFloat(latitudeStr);
+    const longitude = parseFloat(longitudeStr);
+    
+    if (isNaN(latitude) || isNaN(longitude)) {
+      if (typeof showToast !== 'undefined') {
+        showToast('Coordonnées GPS invalides. Veuillez les ajouter dans les paramètres du logement.', 'error', 5000);
+      } else {
+        alert('Coordonnées GPS invalides. Veuillez les ajouter dans les paramètres du logement.');
+      }
+      return;
+    }
+    const modal = document.getElementById('modalMapViewer');
+    const titleElement = document.getElementById('modalMapViewerTitle');
+    const locationElement = document.getElementById('modalMapViewerLocation');
+    const loading = document.getElementById('modalMapViewerLoading');
+    const mapContainer = document.getElementById('modal-map-container');
+    
+    if (!modal || !mapContainer) return;
+    
+    // Mettre à jour le titre et la localisation
+    if (titleElement) {
+      titleElement.textContent = title;
+    }
+    if (locationElement) {
+      locationElement.textContent = `${address}, ${city}`;
+    }
+    
+    // Afficher le modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Afficher le loading
+    if (loading) {
+      loading.style.display = 'flex';
+    }
+    
+    // Attendre un peu pour que le modal soit rendu
+    setTimeout(() => {
+      // Initialiser la carte si elle n'existe pas
+      if (!modalMap) {
+        modalMap = L.map('modal-map-container', {
+          zoomControl: true,
+          scrollWheelZoom: true
+        });
+        
+        // Ajouter les tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(modalMap);
+      }
+      
+      // Centrer la carte sur le logement
+      modalMap.setView([latitude, longitude], 15);
+      
+      // Supprimer l'ancien marker s'il existe
+      if (modalMapMarker) {
+        modalMap.removeLayer(modalMapMarker);
+      }
+      
+      // Créer un marker personnalisé
+      const customIcon = L.divIcon({
+        className: 'custom-map-marker',
+        html: `<div style="background: #f87500; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 4px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); font-size: 14px;">
+          <i class="bi bi-house-fill"></i>
+        </div>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+      
+      // Ajouter le marker
+      modalMapMarker = L.marker([latitude, longitude], { icon: customIcon }).addTo(modalMap);
+      
+      // Popup avec les infos
+      const priceFormatted = parseFloat(price).toLocaleString();
+      const popupContent = `
+        <div style="min-width: 200px;">
+          <div style="font-size: 1rem; font-weight: 600; color: #1f2937; margin-bottom: 8px;">${title}</div>
+          <div style="font-size: 1.25rem; font-weight: 700; color: #f87500; margin-bottom: 8px;">${priceFormatted} DZD</div>
+          <div style="color: #6b7280; font-size: 0.875rem; margin-bottom: 15px;">${address}, ${city}</div>
+          <div style="display: flex; gap: 8px; flex-direction: column;">
+            <a href="/Logement/${logementId}/" style="display: inline-block; padding: 8px 16px; background: #f87500; color: white; text-decoration: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; transition: all 0.3s; text-align: center;">Voir détails</a>
+            <button onclick="window.openDirections && window.openDirections(${latitude}, ${longitude}, '${address}, ${city}')" style="display: inline-block; padding: 8px 16px; background: #22c55e; color: white; text-decoration: none; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; transition: all 0.3s; cursor: pointer; width: 100%;">
+              <i class="bi bi-signpost-2"></i> Itinéraire
+            </button>
+          </div>
+        </div>
+      `;
+      
+      modalMapMarker.bindPopup(popupContent).openPopup();
+      
+      // Masquer le loading
+      if (loading) {
+        loading.style.display = 'none';
+      }
+      
+      // Ajuster la taille de la carte après le rendu
+      setTimeout(() => {
+        modalMap.invalidateSize();
+      }, 100);
+    }, 100);
+  }
+  
+  // Fonction pour fermer le viewer de carte
+  function closeMapViewer() {
+    const modal = document.getElementById('modalMapViewer');
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+  
+  // Fermer avec la touche Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeMapViewer();
+    }
+  });
+  
+  // Fermer en cliquant en dehors du contenu
+  const modalMapEl = document.getElementById('modalMapViewer');
+  if (modalMapEl) {
+    modalMapEl.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeMapViewer();
+      }
+    });
+  }
+
+  // ========== ITINÉRAIRE ==========
+  function openDirections(latitude, longitude, address) {
+    // Demander la position actuelle de l'utilisateur
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          
+          // Ouvrir Google Maps avec l'itinéraire
+          const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${latitude},${longitude}&travelmode=driving`;
+          window.open(googleMapsUrl, '_blank');
+        },
+        function(error) {
+          // Si l'utilisateur refuse la géolocalisation ou erreur, ouvrir juste la destination
+          const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+          window.open(googleMapsUrl, '_blank');
+        }
+      );
+    } else {
+      // Si la géolocalisation n'est pas supportée, ouvrir juste la destination
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+      window.open(googleMapsUrl, '_blank');
+    }
+  }
+
+  // Rendre la fonction accessible globalement
+  window.openDirections = openDirections;
+
+  // ========== FILTRES AVANCÉS ==========
+  function toggleFilters() {
+    const panel = document.getElementById('filtersPanel');
+    const icon = document.getElementById('filtersToggleIcon');
+    
+    if (panel) {
+      panel.classList.toggle('collapsed');
+      if (icon) {
+        if (panel.classList.contains('collapsed')) {
+          icon.classList.remove('bi-chevron-down');
+          icon.classList.add('bi-chevron-up');
+        } else {
+          icon.classList.remove('bi-chevron-up');
+          icon.classList.add('bi-chevron-down');
+        }
+      }
+    }
+  }
+
+  // Auto-submit des filtres avec debounce pour la recherche textuelle
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          // Optionnel: auto-submit après 1 seconde d'inactivité
+          // document.getElementById('filtersForm').submit();
+        }, 1000);
+      });
+    }
+  });
+
+  // Ajouter les event listeners pour les boutons "Voir dans le map"
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-map-view').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const latitude = this.getAttribute('data-latitude');
+        const longitude = this.getAttribute('data-longitude');
+        
+        // Si pas de coordonnées, utiliser le géocodage
+        if (!latitude || !longitude || latitude === '' || longitude === '') {
+          openMapViewWithGeocoding(this);
+        } else {
+          openMapView(this);
+        }
+      });
+    });
+
+    // Ajouter les event listeners pour les boutons "Itinéraire"
+    document.querySelectorAll('.btn-directions').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const latitude = parseFloat(this.getAttribute('data-latitude'));
+        const longitude = parseFloat(this.getAttribute('data-longitude'));
+        const address = this.getAttribute('data-address');
+        
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          openDirections(latitude, longitude, address);
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'Backoffice/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid py-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Statistiques Cards -->
+  <div class="row">
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Événements</p>
+                <h5 class="font-weight-bolder mb-0">{{ total_events }}</h5>
+                <p class="mb-0">
+                  <span class="text-success text-sm font-weight-bolder">Tous les événements</span>
+                </p>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                <i class="ni ni-calendar-grid-58 text-lg opacity-10" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="text-sm mb-0 text-uppercase font-weight-bold">À Venir</p>
+                <h5 class="font-weight-bolder mb-0">{{ upcoming_events }}</h5>
+                <p class="mb-0">
+                  <span class="text-info text-sm font-weight-bolder">Événements futurs</span>
+                </p>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+                <i class="ni ni-time-alarm text-lg opacity-10" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="text-sm mb-0 text-uppercase font-weight-bold">Passés</p>
+                <h5 class="font-weight-bolder mb-0">{{ past_events }}</h5>
+                <p class="mb-0">
+                  <span class="text-secondary text-sm font-weight-bolder">Événements terminés</span>
+                </p>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="icon icon-shape bg-gradient-secondary shadow-secondary text-center rounded-circle">
+                <i class="ni ni-check-bold text-lg opacity-10" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+      <div class="card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="text-sm mb-0 text-uppercase font-weight-bold">Ce Mois</p>
+                <h5 class="font-weight-bolder mb-0">{{ events_this_month }}</h5>
+                <p class="mb-0">
+                  <span class="text-success text-sm font-weight-bolder">Événements ce mois</span>
+                </p>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                <i class="ni ni-calendar-grid-58 text-lg opacity-10" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions rapides -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Actions rapides</h6>
+        </div>
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'dashboard' %}" class="btn btn-primary w-100">
+                <i class="ni ni-calendar-grid-58 me-2"></i>Voir tous les événements
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'dashboard' %}" class="btn btn-info w-100">
+                <i class="ni ni-time-alarm me-2"></i>Événements à venir ({{ upcoming_events }})
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'seats_list' %}" class="btn btn-warning w-100">
+                <i class="ni ni-badge me-2"></i>Gérer les places
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Événements récents et statistiques -->
+  <div class="row">
+    <div class="col-lg-7 mb-lg-0 mb-4">
+      <div class="card">
+        <div class="card-header pb-0 p-3">
+          <div class="d-flex justify-content-between">
+            <h6 class="mb-0">Événements récents</h6>
+            <a href="{% url 'dashboard' %}" class="btn btn-sm btn-primary mb-0">Voir tout</a>
+          </div>
+        </div>
+        <div class="card-body p-3">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Événement</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Catégorie</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Places</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for event in recent_events %}
+                <tr>
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div>
+                        {% if event.photo_url %}
+                          <img src="{{ event.photo_url }}" alt="{{ event.name }}" class="avatar avatar-sm me-3" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+                        {% else %}
+                          <span class="avatar avatar-sm me-3 d-inline-flex align-items-center justify-content-center text-white" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#5e72e4 0%,#11cdef 100%);">
+                            <i class="ni ni-calendar-grid-58"></i>
+                          </span>
+                        {% endif %}
+                      </div>
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ event.name|truncatewords:4 }}</h6>
+                        <p class="text-xs text-secondary mb-0">{{ event.location }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge badge-sm bg-gradient-primary">
+                      {{ event.get_category_display }}
+                    </span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">{{ event.date|date:"d/m/y" }}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">{{ event.reserved_seats }} / {{ event.total_seats }}</span>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-secondary text-xs py-4">Aucun événement</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header pb-0 p-3">
+          <h6 class="mb-0">Répartition par catégorie</h6>
+        </div>
+        <div class="card-body p-3">
+          <ul class="list-group">
+            {% for item in events_by_category %}
+            <li class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+              <div class="d-flex align-items-center">
+                <div class="icon icon-shape icon-sm me-3 bg-gradient-primary shadow text-center">
+                  <i class="ni ni-calendar-grid-58 text-white opacity-10"></i>
+                </div>
+                <div class="d-flex flex-column">
+                  <h6 class="mb-1 text-dark text-sm">
+                    {% if item.category == 'conference' %}Conférence
+                    {% elif item.category == 'workshop' %}Atelier
+                    {% elif item.category == 'concert' %}Concert
+                    {% elif item.category == 'festival' %}Festival
+                    {% else %}Autre{% endif %}
+                  </h6>
+                  <span class="text-xs">{{ item.count }} événement{{ item.count|pluralize }}</span>
+                </div>
+              </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item border-0 text-center text-secondary">Aucune donnée</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="card mt-4">
+        <div class="card-header pb-0 p-3">
+          <h6 class="mb-0">Statistiques</h6>
+        </div>
+        <div class="card-body p-3">
+          <div class="d-flex flex-column">
+            <div class="mb-3">
+              <p class="text-xs text-secondary mb-1">Places totales</p>
+              <h5 class="mb-0">{{ total_seats }}</h5>
+            </div>
+            <div class="mb-3">
+              <p class="text-xs text-secondary mb-1">Places réservées</p>
+              <h5 class="mb-0">{{ total_reserved_seats }}</h5>
+            </div>
+            <div class="mb-3">
+              <p class="text-xs text-secondary mb-1">Places disponibles</p>
+              <h5 class="mb-0">{{ total_available_seats }}</h5>
+            </div>
+            <div class="mb-3">
+              <p class="text-xs text-secondary mb-1">Taux d'occupation</p>
+              <h5 class="mb-0">{{ occupancy_rate }}%</h5>
+            </div>
+            <div class="mb-3">
+              <p class="text-xs text-secondary mb-1">Revenu total</p>
+              <h5 class="mb-0">{{ total_revenue|floatformat:0 }} DT</h5>
+            </div>
+            <div>
+              <p class="text-xs text-secondary mb-1">Prix moyen</p>
+              <h5 class="mb-0">{{ avg_price|floatformat:2 }} DT</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
