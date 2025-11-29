@@ -1,0 +1,948 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login/Signup Form</title>
+  <link href="{% static 'User/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'User/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+  <link rel="stylesheet" href="{% static 'User/assets/css/login.css' %}">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <style>
+    /* Ajoute ceci à ton CSS principal ou ici directement */
+    .background-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Pour être derrière le contenu */
+      border: none;
+      pointer-events: none; /* Empêche de cliquer sur l'iframe */
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1; /* Pour que ton formulaire soit au-dessus */
+    }
+
+    .background-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border: none;
+    pointer-events: none; /* pour rendre le fond non cliquable */
+}
+
+    /* Hide Spline badge (covered by glass chip) */
+    .spline-badge-hide {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      width: 140px;  /* approx Spline badge width */
+      height: 44px;  /* approx Spline badge height */
+      border-radius: 14px;
+      background: rgba(10, 15, 30, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+      z-index: 1; /* above iframe, below floating icon */
+      pointer-events: none; /* visual cover only */
+    }
+
+    /* Optional floating icon button - matching index.html colors */
+    .floating-icon {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.9), rgba(248, 117, 0, 0.7));
+      box-shadow: 0 8px 22px rgba(248, 117, 0, 0.4), 0 0 0 1px rgba(248, 117, 0, 0.3) inset;
+      border: 1px solid rgba(248, 117, 0, 0.5);
+      text-decoration: none;
+      z-index: 2;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .floating-icon:hover { 
+      transform: translateY(-2px); 
+      background: linear-gradient(135deg, rgba(248, 117, 0, 1), rgba(248, 117, 0, 0.9));
+      box-shadow: 0 12px 26px rgba(248, 117, 0, 0.5), 0 0 0 1px rgba(248, 117, 0, 0.6) inset;
+      border-color: rgba(248, 117, 0, 0.8);
+    }
+    .floating-icon i { font-size: 22px; }
+
+    /* Validation Messages Styles */
+    .validation-message {
+      position: absolute;
+      bottom: -22px;
+      left: 0;
+      width: 100%;
+      font-size: 11px;
+      padding: 2px 0;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(-5px);
+      pointer-events: none;
+    }
+    
+    .validation-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .validation-message.error {
+      color: #ff6b6b;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .validation-message.success {
+      color: #51cf66;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .input-box input.valid {
+      border-color: #51cf66;
+      box-shadow: 0 0 0 2px rgba(81, 207, 102, 0.2);
+    }
+    
+    .input-box input.invalid {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+    }
+    
+    /* Add padding to input-box for validation messages */
+    .input-box {
+      margin-bottom: 28px !important;
+      padding-bottom: 2px;
+    }
+    
+    /* Extra space for password input with help message */
+    #register-password {
+      margin-bottom: 0 !important;
+    }
+    
+    .input-box:has(#register-password) {
+      margin-bottom: 60px !important;
+    }
+    
+    /* Password help message */
+    .password-help-message {
+      position: absolute;
+      bottom: -50px;
+      left: 0;
+      width: 100%;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 5px 0;
+      line-height: 1.4;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      transition: opacity 0.3s ease;
+    }
+    
+    .password-help-message.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    /* Register button styling - more visible */
+    .btn-register {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 0.95), rgba(248, 117, 0, 0.85)) !important;
+      border: 2px solid rgba(248, 117, 0, 0.8) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      font-size: 16px !important;
+      padding: 14px 30px !important;
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.4), 
+                  0 0 0 2px rgba(248, 117, 0, 0.2) inset !important;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease !important;
+    }
+    
+    .btn-register:hover {
+      background: linear-gradient(135deg, rgba(248, 117, 0, 1), rgba(248, 117, 0, 0.95)) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5), 
+                  0 0 0 2px rgba(248, 117, 0, 0.3) inset !important;
+    }
+    
+    .btn-register:active {
+      transform: translateY(0);
+    }
+
+    /* Style pour l'icône d'œil (password toggle) */
+    .password-toggle {
+      position: absolute;
+      right: 50px !important;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: rgba(248, 117, 0, 0.9) !important;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    
+    .password-toggle:hover {
+      color: rgba(248, 117, 0, 1) !important;
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .password-toggle.active {
+      color: rgba(248, 117, 0, 1) !important;
+    }
+    
+    /* Style pour le bouton de génération de mot de passe */
+    .password-generate-btn {
+      position: absolute;
+      right: 80px !important;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: rgba(248, 117, 0, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      padding: 0;
+    }
+    
+    .password-generate-btn i {
+      font-size: 18px;
+      color: rgba(248, 117, 0, 0.9);
+      transition: all 0.3s ease;
+    }
+    
+    .password-generate-btn:hover {
+      background: rgba(248, 117, 0, 0.4);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .password-generate-btn:hover i {
+      color: rgba(248, 117, 0, 1);
+      transform: rotate(180deg);
+    }
+    
+    .password-generate-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+  </style>
+
+  
+</head>
+
+  <body>
+
+  <!-- 🌀 Iframe du fond -->
+  <iframe
+    src='https://my.spline.design/motiontrails-ajUiPLY8qZ2gzdS6SAHoTKdJ/'
+    class="background-iframe"
+    frameborder="0">
+    position: fixed;
+    top: -2000; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+  </iframe>
+
+  <!-- Cover Spline badge and add a small floating icon -->
+  <div class="spline-badge-hide"></div>
+  <a class="floating-icon" href="{% url 'index' %}" title="Accueil">
+    <i class='bx bx-rocket'></i>
+  </a>
+
+  <!-- Messages Django sont maintenant affichés via le système de toast -->
+
+  <!-- Ton contenu -->
+  <div class="container{% if show_login %} active{% endif %}">
+    <div class="form-box login">
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="login">
+        <h1>Login</h1>
+        
+        {% if login_form.non_field_errors %}
+          <div id="login-error-message" style="display: none;">
+            {% for error in login_form.non_field_errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        
+        <div class="input-box">
+          <input type="text" name="username" id="login-username" placeholder="Username or Email" required value="{% if login_form.username.value %}{{ login_form.username.value }}{% endif %}">
+          <i class='bx bxs-user'></i>
+          <div class="validation-message" id="login-username-error"></div>
+          {% if login_form.username.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ login_form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="input-box">
+          <input type="password" name="password" id="login-password" placeholder="Password" required>
+          <i class='bx bx-show password-toggle' id="login-password-toggle" style="cursor: pointer; color: rgba(248, 117, 0, 0.9);"></i>
+          <i class='bx bxs-lock-alt'></i>
+          <div class="validation-message" id="login-password-error"></div>
+          {% if login_form.password.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ login_form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="forgot-link">
+          <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+        </div>
+        
+        <!-- reCAPTCHA Widget pour le login -->
+        {% if RECAPTCHA_SITE_KEY %}
+        <div class="recaptcha-container" style="margin: 15px 0; display: flex; justify-content: center;">
+          <div class="g-recaptcha" id="login-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+        </div>
+        {% endif %}
+        
+        <button type="submit" class="btn">Login</button>
+        <p>or login with</p>
+        <div class="social-icons">
+          <button type="button" class="face-id-btn" id="faceIdLoginBtn" title="Face ID Login">
+            <i class='bx bx-face'></i>
+          </button>
+          <a href="{% url 'google_login' %}" class="google-btn" title="Login with Google">
+            <i class='bx bxl-google'></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-box register">
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="signup">
+        <h1>Registration</h1>
+        
+        {% if signup_form.non_field_errors %}
+          <div style="color: #ff6b6b; margin-bottom: 15px; font-size: 12px; background: rgba(220, 53, 69, 0.2); backdrop-filter: blur(5px); padding: 10px; border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.4); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+            {{ signup_form.non_field_errors }}
+          </div>
+        {% endif %}
+        
+        <div class="input-box">
+          <input type="text" name="username" id="register-username" placeholder="Username" required value="{% if signup_form.username.value %}{{ signup_form.username.value }}{% endif %}">
+          <i class='bx bxs-user'></i>
+          <div class="validation-message" id="register-username-error"></div>
+          {% if signup_form.username.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="first_name" id="register-firstname" placeholder="Prénom (optionnel)" value="{% if signup_form.first_name.value %}{{ signup_form.first_name.value }}{% endif %}">
+          <i class='bx bxs-user-circle'></i>
+          <div class="validation-message" id="register-firstname-error"></div>
+          {% if signup_form.first_name.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.first_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="last_name" id="register-lastname" placeholder="Nom (optionnel)" value="{% if signup_form.last_name.value %}{{ signup_form.last_name.value }}{% endif %}">
+          <i class='bx bxs-user-circle'></i>
+          <div class="validation-message" id="register-lastname-error"></div>
+          {% if signup_form.last_name.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.last_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="email" name="email" id="register-email" placeholder="Email" required value="{% if signup_form.email.value %}{{ signup_form.email.value }}{% endif %}">
+          <i class='bx bxs-envelope'></i>
+          <div class="validation-message" id="register-email-error"></div>
+          {% if signup_form.email.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="text" name="phone" id="register-phone" placeholder="Téléphone (optionnel)" value="{% if signup_form.phone.value %}{{ signup_form.phone.value }}{% endif %}">
+          <i class='bx bxs-phone'></i>
+          <div class="validation-message" id="register-phone-error"></div>
+          {% if signup_form.phone.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.phone.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="password" name="password" id="register-password" placeholder="Password (min 8 caractères)" required>
+          <button type="button" class="password-generate-btn" id="generate-password-btn" title="Générer un mot de passe sécurisé">
+            <i class='bx bx-refresh'></i>
+          </button>
+          <i class='bx bx-show password-toggle' id="register-password-toggle" style="cursor: pointer; color: rgba(248, 117, 0, 0.9);"></i>
+          <i class='bx bxs-lock-alt'></i>
+          <div class="validation-message" id="register-password-error"></div>
+          <div class="password-help-message" id="password-help">
+            <small>Le mot de passe doit contenir : minimum 8 caractères, lettres majuscules et minuscules, chiffres et caractères spéciaux</small>
+          </div>
+          {% if signup_form.password.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="input-box">
+          <input type="password" name="password_confirm" id="register-password-confirm" placeholder="Confirm Password" required>
+          <i class='bx bx-show password-toggle' id="register-password-confirm-toggle" style="cursor: pointer; color: rgba(248, 117, 0, 0.9);"></i>
+          <i class='bx bxs-lock-alt'></i>
+          <div class="validation-message" id="register-password-confirm-error"></div>
+          {% if signup_form.password_confirm.errors %}
+            <div style="color: #ff6b6b; font-size: 11px; margin-top: 5px; position: absolute; bottom: -20px; left: 0; width: 100%; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">{{ signup_form.password_confirm.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- reCAPTCHA Widget pour l'enregistrement -->
+        {% if RECAPTCHA_SITE_KEY %}
+        <div class="recaptcha-container" style="margin: 15px 0; display: flex; justify-content: center;">
+          <div class="g-recaptcha" id="register-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+        </div>
+        {% endif %}
+        
+        <button type="submit" class="btn btn-primary-solid btn-register">Register</button>
+        <p>or register with</p>
+        <div class="social-icons">
+          <button type="button" class="face-id-btn" id="faceIdRegisterBtn" title="Register with Face ID">
+            <i class='bx bx-face'></i>
+          </button>
+          <a href="{% url 'google_login' %}" class="google-btn" title="Register with Google">
+            <i class='bx bxl-google'></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="toggle-box">
+      <div class="toggle-panel toggle-left">
+        <h1>Hello, Welcome!</h1>
+        <p>Don't have an account?</p>
+        <button class="btn register-btn">Register</button>
+      </div>
+      <div class="toggle-panel toggle-right">
+        <h1>Welcome Back!</h1>
+        <p>Already have an account?</p>
+        <button class="btn login-btn">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google reCAPTCHA Script -->
+  {% if RECAPTCHA_SITE_KEY %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  {% endif %}
+
+  <script src="{% static 'User/assets/js/login.js' %}"></script>
+  
+  <!-- Validation JavaScript -->
+  <script>
+    (function() {
+      'use strict';
+      
+      // Fonction utilitaire pour afficher les messages de validation
+      function showValidationMessage(inputId, message, type) {
+        const errorDiv = document.getElementById(inputId + '-error');
+        const input = document.getElementById(inputId);
+        
+        if (!errorDiv || !input) return;
+        
+        if (message) {
+          errorDiv.textContent = message;
+          errorDiv.className = 'validation-message show ' + type;
+          input.classList.remove('valid', 'invalid');
+          input.classList.add(type === 'error' ? 'invalid' : 'valid');
+        } else {
+          errorDiv.textContent = '';
+          errorDiv.className = 'validation-message';
+          input.classList.remove('valid', 'invalid');
+        }
+      }
+      
+      // Validation du username (login)
+      const loginUsername = document.getElementById('login-username');
+      if (loginUsername) {
+        loginUsername.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length === 0) {
+            showValidationMessage('login-username', 'Le nom d\'utilisateur ou email est requis', 'error');
+          } else if (value.length < 3) {
+            showValidationMessage('login-username', 'Minimum 3 caractères requis', 'error');
+          } else {
+            showValidationMessage('login-username', '', '');
+          }
+        });
+        
+        loginUsername.addEventListener('blur', function() {
+          const value = this.value.trim();
+          if (value.length > 0 && value.length >= 3) {
+            showValidationMessage('login-username', '✓', 'success');
+          }
+        });
+      }
+      
+      // Validation du password (login)
+      const loginPassword = document.getElementById('login-password');
+      if (loginPassword) {
+        loginPassword.addEventListener('input', function() {
+          const value = this.value;
+          if (value.length === 0) {
+            showValidationMessage('login-password', 'Le mot de passe est requis', 'error');
+          } else if (value.length < 6) {
+            showValidationMessage('login-password', 'Minimum 6 caractères requis', 'error');
+          } else {
+            showValidationMessage('login-password', '', '');
+          }
+        });
+        
+        loginPassword.addEventListener('blur', function() {
+          const value = this.value;
+          if (value.length > 0 && value.length >= 6) {
+            showValidationMessage('login-password', '✓', 'success');
+          }
+        });
+      }
+      
+      // Validation du username (register)
+      const registerUsername = document.getElementById('register-username');
+      if (registerUsername) {
+        const usernameRegex = /^[a-zA-Z0-9@.+\-_]{3,150}$/;
+        
+        registerUsername.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length === 0) {
+            showValidationMessage('register-username', 'Le nom d\'utilisateur est requis', 'error');
+          } else if (value.length < 3) {
+            showValidationMessage('register-username', 'Minimum 3 caractères requis', 'error');
+          } else if (value.length > 150) {
+            showValidationMessage('register-username', 'Maximum 150 caractères', 'error');
+          } else if (!usernameRegex.test(value)) {
+            showValidationMessage('register-username', 'Caractères autorisés: lettres, chiffres, @/./+/-/_', 'error');
+          } else {
+            showValidationMessage('register-username', '✓ Nom d\'utilisateur valide', 'success');
+          }
+        });
+      }
+      
+      // Validation du first_name (register) - seulement des lettres
+      const registerFirstname = document.getElementById('register-firstname');
+      if (registerFirstname) {
+        const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+        
+        registerFirstname.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length > 0) {
+            if (value.length > 150) {
+              showValidationMessage('register-firstname', 'Maximum 150 caractères', 'error');
+            } else if (!nameRegex.test(value)) {
+              showValidationMessage('register-firstname', 'Seulement des lettres, espaces, tirets et apostrophes autorisés', 'error');
+            } else {
+              showValidationMessage('register-firstname', '✓ Prénom valide', 'success');
+            }
+          } else {
+            showValidationMessage('register-firstname', '', '');
+          }
+        });
+      }
+      
+      // Validation du last_name (register) - seulement des lettres
+      const registerLastname = document.getElementById('register-lastname');
+      if (registerLastname) {
+        const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+        
+        registerLastname.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length > 0) {
+            if (value.length > 150) {
+              showValidationMessage('register-lastname', 'Maximum 150 caractères', 'error');
+            } else if (!nameRegex.test(value)) {
+              showValidationMessage('register-lastname', 'Seulement des lettres, espaces, tirets et apostrophes autorisés', 'error');
+            } else {
+              showValidationMessage('register-lastname', '✓ Nom valide', 'success');
+            }
+          } else {
+            showValidationMessage('register-lastname', '', '');
+          }
+        });
+      }
+      
+      // Validation de l'email (register)
+      const registerEmail = document.getElementById('register-email');
+      if (registerEmail) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        registerEmail.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length === 0) {
+            showValidationMessage('register-email', 'L\'email est requis', 'error');
+          } else if (!emailRegex.test(value)) {
+            showValidationMessage('register-email', 'Format d\'email invalide (ex: user@example.com)', 'error');
+          } else {
+            showValidationMessage('register-email', '✓ Email valide', 'success');
+          }
+        });
+      }
+      
+      // Validation du téléphone (register)
+      const registerPhone = document.getElementById('register-phone');
+      if (registerPhone) {
+        const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
+        
+        registerPhone.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length > 0) {
+            if (value.length > 20) {
+              showValidationMessage('register-phone', 'Maximum 20 caractères', 'error');
+            } else if (!phoneRegex.test(value) && value.length > 0) {
+              showValidationMessage('register-phone', 'Format de téléphone invalide', 'error');
+            } else if (value.length > 0) {
+              showValidationMessage('register-phone', '✓', 'success');
+            }
+          } else {
+            showValidationMessage('register-phone', '', '');
+          }
+        });
+      }
+      
+      // Validation du password (register)
+      const registerPassword = document.getElementById('register-password');
+      const passwordHelp = document.getElementById('password-help');
+      
+      if (registerPassword) {
+        registerPassword.addEventListener('focus', function() {
+          if (passwordHelp) {
+            passwordHelp.classList.remove('hidden');
+          }
+        });
+        
+        registerPassword.addEventListener('blur', function() {
+          if (passwordHelp && this.value.length >= 8) {
+            setTimeout(() => {
+              if (passwordHelp) {
+                passwordHelp.classList.add('hidden');
+              }
+            }, 2000);
+          }
+        });
+        
+        registerPassword.addEventListener('input', function() {
+          const value = this.value;
+          const strength = checkPasswordStrength(value);
+          
+          if (value.length === 0) {
+            showValidationMessage('register-password', 'Le mot de passe est requis', 'error');
+            if (passwordHelp) passwordHelp.classList.remove('hidden');
+          } else if (value.length < 8) {
+            showValidationMessage('register-password', `Minimum 8 caractères (${value.length}/8)`, 'error');
+            if (passwordHelp) passwordHelp.classList.remove('hidden');
+          } else {
+            showValidationMessage('register-password', `✓ Mot de passe ${strength.text}`, strength.type);
+            if (passwordHelp && strength.type === 'success') {
+              setTimeout(() => {
+                if (passwordHelp) passwordHelp.classList.add('hidden');
+              }, 1500);
+            }
+          }
+          
+          // Vérifier aussi la confirmation si elle existe
+          const confirmPassword = document.getElementById('register-password-confirm');
+          if (confirmPassword && confirmPassword.value.length > 0) {
+            confirmPassword.dispatchEvent(new Event('input'));
+          }
+        });
+      }
+      
+      // Validation de la confirmation du password (register)
+      const registerPasswordConfirm = document.getElementById('register-password-confirm');
+      if (registerPasswordConfirm) {
+        registerPasswordConfirm.addEventListener('input', function() {
+          const value = this.value;
+          const password = document.getElementById('register-password')?.value || '';
+          
+          if (value.length === 0) {
+            showValidationMessage('register-password-confirm', 'Veuillez confirmer le mot de passe', 'error');
+          } else if (value !== password) {
+            showValidationMessage('register-password-confirm', 'Les mots de passe ne correspondent pas', 'error');
+          } else if (password.length >= 8) {
+            showValidationMessage('register-password-confirm', '✓ Les mots de passe correspondent', 'success');
+          }
+        });
+      }
+      
+      // Fonction pour vérifier la force du mot de passe
+      function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = [];
+        
+        if (password.length >= 8) strength++;
+        else feedback.push('8 caractères');
+        
+        if (/[a-z]/.test(password)) strength++;
+        else feedback.push('minuscule');
+        
+        if (/[A-Z]/.test(password)) strength++;
+        else feedback.push('majuscule');
+        
+        if (/[0-9]/.test(password)) strength++;
+        else feedback.push('chiffre');
+        
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        else feedback.push('caractère spécial');
+        
+        if (strength <= 2) {
+          return { text: 'faible', type: 'error' };
+        } else if (strength <= 3) {
+          return { text: 'moyen', type: 'error' };
+        } else if (strength <= 4) {
+          return { text: 'fort', type: 'success' };
+        } else {
+          return { text: 'très fort', type: 'success' };
+        }
+      }
+      
+      // Validation au submit des formulaires
+      const loginForm = document.querySelector('.form-box.login form');
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          const username = document.getElementById('login-username')?.value.trim();
+          const password = document.getElementById('login-password')?.value;
+          
+          let isValid = true;
+          
+          if (!username || username.length < 3) {
+            showValidationMessage('login-username', 'Le nom d\'utilisateur est requis (min 3 caractères)', 'error');
+            isValid = false;
+          }
+          
+          if (!password || password.length < 6) {
+            showValidationMessage('login-password', 'Le mot de passe est requis (min 6 caractères)', 'error');
+            isValid = false;
+          }
+          
+          // Vérifier le reCAPTCHA si configuré
+          {% if RECAPTCHA_SITE_KEY %}
+          const loginRecaptchaResponse = grecaptcha.getResponse('login-recaptcha');
+          if (!loginRecaptchaResponse) {
+            alert('Veuillez compléter la vérification reCAPTCHA.');
+            isValid = false;
+          }
+          {% endif %}
+          
+          if (!isValid) {
+            e.preventDefault();
+            return false;
+          }
+        });
+      }
+      
+      const registerForm = document.querySelector('.form-box.register form');
+      if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+          const username = document.getElementById('register-username')?.value.trim();
+          const email = document.getElementById('register-email')?.value.trim();
+          const password = document.getElementById('register-password')?.value;
+          const passwordConfirm = document.getElementById('register-password-confirm')?.value;
+          
+          let isValid = true;
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          
+          if (!username || username.length < 3) {
+            showValidationMessage('register-username', 'Le nom d\'utilisateur est requis (min 3 caractères)', 'error');
+            isValid = false;
+          }
+          
+          if (!email || !emailRegex.test(email)) {
+            showValidationMessage('register-email', 'Un email valide est requis', 'error');
+            isValid = false;
+          }
+          
+          if (!password || password.length < 8) {
+            showValidationMessage('register-password', 'Le mot de passe doit contenir au moins 8 caractères', 'error');
+            isValid = false;
+          }
+          
+          if (password !== passwordConfirm) {
+            showValidationMessage('register-password-confirm', 'Les mots de passe ne correspondent pas', 'error');
+            isValid = false;
+          }
+          
+          // Vérifier le reCAPTCHA si configuré
+          {% if RECAPTCHA_SITE_KEY %}
+          const registerRecaptchaResponse = grecaptcha.getResponse('register-recaptcha');
+          if (!registerRecaptchaResponse) {
+            alert('Veuillez compléter la vérification reCAPTCHA.');
+            isValid = false;
+          }
+          {% endif %}
+          
+          if (!isValid) {
+            e.preventDefault();
+            return false;
+          }
+        });
+      }
+      
+      // Fonctionnalité toggle password avec icône d'œil
+      function setupPasswordToggle(toggleId, inputId) {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        
+        if (toggle && input) {
+          toggle.addEventListener('click', function() {
+            if (input.type === 'password') {
+              input.type = 'text';
+              toggle.classList.remove('bx-show');
+              toggle.classList.add('bx-hide');
+            } else {
+              input.type = 'password';
+              toggle.classList.remove('bx-hide');
+              toggle.classList.add('bx-show');
+            }
+            toggle.classList.toggle('active');
+          });
+        }
+      }
+      
+      // Initialiser les toggles pour tous les champs de mot de passe
+      setupPasswordToggle('login-password-toggle', 'login-password');
+      setupPasswordToggle('register-password-toggle', 'register-password');
+      setupPasswordToggle('register-password-confirm-toggle', 'register-password-confirm');
+      
+      // Afficher un popup pour les erreurs de login (identifiants incorrects)
+      document.addEventListener('DOMContentLoaded', function() {
+        // Attendre que le système de toast soit chargé
+        setTimeout(function() {
+          // Vérifier les erreurs non-field du formulaire
+          {% if login_form.non_field_errors %}
+            {% for error in login_form.non_field_errors %}
+              if (typeof showToast !== 'undefined') {
+                showToast('{{ error|escapejs }}', 'error', 6000);
+              } else {
+                // Fallback si showToast n'est pas disponible
+                setTimeout(function() {
+                  alert('Erreur de connexion: {{ error|escapejs }}');
+                }, 100);
+              }
+            {% endfor %}
+          {% endif %}
+          
+          // Vérifier aussi les messages Django pour les erreurs de login
+          {% if messages %}
+            {% for message in messages %}
+              {% if message.tags == 'error' %}
+                if (typeof showToast !== 'undefined') {
+                  showToast('{{ message|escapejs }}', 'error', 6000);
+                } else {
+                  // Fallback
+                  setTimeout(function() {
+                    alert('Erreur: {{ message|escapejs }}');
+                  }, 100);
+                }
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        }, 300); // Attendre 300ms pour que le système de toast soit initialisé
+      });
+      
+      // Fonction pour générer un mot de passe sécurisé
+      function generateSecurePassword() {
+        const length = 16; // Longueur du mot de passe
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+        const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const allChars = lowercase + uppercase + numbers + special;
+        
+        // S'assurer qu'on a au moins un caractère de chaque type
+        let password = '';
+        password += lowercase[Math.floor(Math.random() * lowercase.length)];
+        password += uppercase[Math.floor(Math.random() * uppercase.length)];
+        password += numbers[Math.floor(Math.random() * numbers.length)];
+        password += special[Math.floor(Math.random() * special.length)];
+        
+        // Remplir le reste avec des caractères aléatoires
+        for (let i = password.length; i < length; i++) {
+          password += allChars[Math.floor(Math.random() * allChars.length)];
+        }
+        
+        // Mélanger le mot de passe
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+        
+        return password;
+      }
+      
+      // Ajouter l'événement au bouton de génération
+      const generatePasswordBtn = document.getElementById('generate-password-btn');
+      if (generatePasswordBtn) {
+        generatePasswordBtn.addEventListener('click', function() {
+          const generatedPassword = generateSecurePassword();
+          const passwordInput = document.getElementById('register-password');
+          const passwordConfirmInput = document.getElementById('register-password-confirm');
+          
+          if (passwordInput) {
+            passwordInput.type = 'text'; // Afficher temporairement pour voir le mot de passe généré
+            passwordInput.value = generatedPassword;
+            
+            // Déclencher l'événement input pour la validation
+            passwordInput.dispatchEvent(new Event('input'));
+            
+            // Mettre à jour l'icône toggle
+            const toggle = document.getElementById('register-password-toggle');
+            if (toggle) {
+              toggle.classList.remove('bx-show');
+              toggle.classList.add('bx-hide');
+            }
+          }
+          
+          if (passwordConfirmInput) {
+            passwordConfirmInput.type = 'text'; // Afficher temporairement
+            passwordConfirmInput.value = generatedPassword;
+            
+            // Déclencher l'événement input pour la validation
+            passwordConfirmInput.dispatchEvent(new Event('input'));
+            
+            // Mettre à jour l'icône toggle
+            const toggleConfirm = document.getElementById('register-password-confirm-toggle');
+            if (toggleConfirm) {
+              toggleConfirm.classList.remove('bx-show');
+              toggleConfirm.classList.add('bx-hide');
+            }
+          }
+          
+          // Afficher un message de succès
+          showValidationMessage('register-password', '✓ Mot de passe généré avec succès', 'success');
+          showValidationMessage('register-password-confirm', '✓ Les mots de passe correspondent', 'success');
+        });
+      }
+    })();
+  </script>
+  
+  <!-- Google OAuth 2.0 - Les boutons utilisent maintenant des liens directs vers /auth/google/ -->
+  <!-- Le flux OAuth standard avec redirect URI est utilisé -->
+  
+  <!-- Toast Notifications System -->
+  {% include 'includes/toast_notifications.html' %}
+</body>
+</html>
+
+

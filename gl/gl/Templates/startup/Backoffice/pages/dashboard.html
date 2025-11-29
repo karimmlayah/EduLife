@@ -1,0 +1,632 @@
+{% extends 'startup/Backoffice/base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Section pour les messages -->
+<div class="container-fluid">
+    {% if messages %}
+    <div class="mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.show {
+    display: block;
+}
+
+.add-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.add-panel.open {
+    right: 0;
+}
+
+.close-panel {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.close-panel:hover {
+    color: #495057;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
+                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.w-100 {
+    width: 100% !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
+.valid-message {
+    color: #28a745;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.valid-message.show {
+    display: block;
+}
+
+.form-control.error {
+    border-color: #dc3545;
+}
+
+.form-control.valid {
+    border-color: #28a745;
+}
+
+.image-preview {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+</style>
+
+<a id="addBtn" class="btn btn-primary mb-3">+ Ajouter un événement</a>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="container-fluid py-4">
+  <div class="card">
+    <div class="card-header pb-0">
+      <h6>Liste des événements</h6>
+    </div>
+    <div class="card-body px-0 pt-0 pb-2">
+      <div class="table-responsive p-0">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Catégorie</th>
+              <th>Date</th>
+              <th>Lieu</th>
+              <th>Prix</th>
+              <th>Total Seats</th>
+              <th>Réservées</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+            <tr>
+              <td>
+                {% if event.photo_url %}
+                    <img src="{{ event.photo_url }}" class="avatar avatar-sm me-3 border-radius-lg" alt="{{ event.name }}">
+                {% else %}
+                    <img src="{% static 'backoffice/assets/img/default.jpg' %}" class="avatar avatar-sm me-3 border-radius-lg" alt="Image par défaut">
+                {% endif %}
+              </td>
+              <td>{{ event.name }}</td>
+              <td>{{ event.get_category_display }}</td>
+              <td>{{ event.date }}</td>
+              <td>{{ event.location }}</td>
+              <td>{{ event.price }} DT</td>
+              <td>{{ event.total_seats }}</td>
+              <td>{{ event.reserved_seats }}</td>
+              <td class="text-center">
+                <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="event_id" value="{{ event.id }}">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer cet événement ?')">
+                        Supprimer
+                    </button>
+                </form>
+                <button class="btn btn-warning btn-sm edit-btn"
+                        data-id="{{ event.id }}"
+                        data-name="{{ event.name }}"
+                        data-category="{{ event.category }}"
+                        data-description="{{ event.description }}"
+                        data-price="{{ event.price }}"
+                        data-date="{{ event.date|date:'Y-m-d' }}"
+                        data-location="{{ event.location }}"
+                        data-total="{{ event.total_seats }}"
+                        data-photo="{{ event.photo_url }}">
+                    Modifier
+                </button>
+                <a href="{% url 'view_seats' event.id %}" class="btn btn-info btn-sm">
+                    Voir chaises
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="text-center text-muted">Aucun événement trouvé</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EVENT PANEL (SIDE PANEL) -->
+<div class="add-panel" id="addPanel">
+    <button class="close-panel" id="closePanel">×</button>
+    <h3>Ajouter un événement</h3>
+
+    <form method="POST" id="eventForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="form_action" value="create">
+        <input type="hidden" name="event_id" id="edit_event_id" value="">
+
+        <div class="form-group">
+            <label for="category">Catégorie :</label>
+            <select id="category" name="category" class="form-control required">
+                <option value="">Sélectionnez...</option>
+                <option value="conference">Conférence</option>
+                <option value="workshop">Atelier</option>
+                <option value="concert">Concert</option>
+                <option value="festival">Festival</option>
+                <option value="autre">Autre</option>
+            </select>
+            <span id="categoryError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="name" name="name" class="form-control" required minlength="3">
+            <span id="nameError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="description" name="description" class="form-control" required rows="3"></textarea>
+            <span id="descriptionError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Prix</label>
+            <input type="number" step="0.01" id="price" name="price" class="form-control" required min="0">
+            <span id="priceError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+            <span id="dateError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Lieu</label>
+            <input type="text" id="location" name="location" class="form-control" required>
+            <span id="locationError" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>URL de l'image ou image encodée</label>
+            <textarea id="photo_url" name="photo_url" class="form-control" 
+                      rows="3"
+                      placeholder="https://example.com/image.jpg ou data:image/jpeg;base64,..."></textarea>
+            <small class="form-text text-muted">
+                Vous pouvez utiliser une URL normale (http://...) ou coller une image encodée en base64 (data:image/...)
+            </small>
+            <span id="photoUrlError" class="error-message"></span>
+            <div class="image-preview" id="imagePreview">
+                <img id="previewImage" src="" alt="Aperçu de l'image" style="display: none;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Places totales</label>
+            <input type="number" id="total_seats" name="total_seats" class="form-control" min="1" required>
+            <span id="totalSeatsError" class="error-message"></span>
+        </div>
+
+        <button type="submit" id="submitEventBtn" class="btn btn-primary w-100 mt-3">
+            Enregistrer
+        </button>
+    </form>
+</div>
+
+<script>
+// Fonctions utilitaires pour afficher/masquer les messages
+function showError(element, message) {
+    element.textContent = message;
+    element.classList.add('show');
+    element.classList.remove('valid-message');
+    element.classList.add('error-message');
+    element.previousElementSibling.classList.add('error');
+    element.previousElementSibling.classList.remove('valid');
+}
+
+function showValid(element) {
+    element.textContent = '✓ Valide';
+    element.classList.add('show');
+    element.classList.remove('error-message');
+    element.classList.add('valid-message');
+    element.previousElementSibling.classList.remove('error');
+    element.previousElementSibling.classList.add('valid');
+}
+
+function hideMessage(element) {
+    element.classList.remove('show');
+    element.previousElementSibling.classList.remove('error', 'valid');
+}
+
+// Fonction pour prévisualiser l'image (support data URI)
+function previewImage() {
+    const url = document.getElementById('photo_url').value.trim();
+    const preview = document.getElementById('previewImage');
+    
+    if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+// Fonction de validation de l'URL - ACCEPTE LES DATA URI
+function validatePhotoUrl() {
+    const photoUrl = document.getElementById('photo_url').value.trim();
+    const errorElement = document.getElementById('photoUrlError');
+    
+    // L'URL est optionnelle
+    if (photoUrl === '') {
+        hideMessage(errorElement);
+        return true;
+    }
+    
+    // Accepter les URLs data URI
+    if (photoUrl.startsWith('data:image/')) {
+        // Vérification basique du format data URI
+        const dataUriRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/;
+        if (dataUriRegex.test(photoUrl)) {
+            showValid(errorElement);
+            return true;
+        } else {
+            showError(errorElement, "Format d'image base64 invalide");
+            return false;
+        }
+    }
+    
+    // Vérifier le format de l'URL HTTP/HTTPS
+    try {
+        const url = new URL(photoUrl);
+        if (!url.protocol.startsWith('http')) {
+            showError(errorElement, "L'URL doit commencer par http:// ou https://");
+            return false;
+        }
+        showValid(errorElement);
+        return true;
+    } catch (e) {
+        showError(errorElement, "Veuillez entrer une URL valide ou une image encodée en base64");
+        return false;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    console.log('Initializing dashboard...');
+    
+    // Définir la date minimale comme aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').min = today;
+
+    // Fonctions de validation
+    function validateCategory() {
+        const category = document.getElementById('category').value;
+        const errorElement = document.getElementById('categoryError');
+        
+        if (category === "") {
+            showError(errorElement, "Veuillez sélectionner une catégorie");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validateName() {
+        const name = document.getElementById('name').value.trim();
+        const errorElement = document.getElementById('nameError');
+        
+        if (name.length < 3) {
+            showError(errorElement, "Le nom doit contenir au moins 3 caractères");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validateDescription() {
+        const description = document.getElementById('description').value.trim();
+        const errorElement = document.getElementById('descriptionError');
+        
+        if (description.length < 10) {
+            showError(errorElement, "La description doit contenir au moins 10 caractères");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validatePrice() {
+        const price = parseFloat(document.getElementById('price').value);
+        const errorElement = document.getElementById('priceError');
+        
+        if (isNaN(price) || price < 0) {
+            showError(errorElement, "Le prix doit être un nombre positif");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validateDate() {
+        const dateInput = document.getElementById('date').value;
+        const selectedDate = new Date(dateInput);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const errorElement = document.getElementById('dateError');
+        
+        if (!dateInput) {
+            showError(errorElement, "Veuillez sélectionner une date");
+            return false;
+        } else if (selectedDate <= today) {
+            showError(errorElement, "La date doit être dans le futur");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validateLocation() {
+        const location = document.getElementById('location').value.trim();
+        const errorElement = document.getElementById('locationError');
+        
+        if (location.length < 3) {
+            showError(errorElement, "Le lieu doit contenir au moins 3 caractères");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function validateTotalSeats() {
+        const seats = parseInt(document.getElementById('total_seats').value);
+        const errorElement = document.getElementById('totalSeatsError');
+        
+        if (isNaN(seats) || seats < 1) {
+            showError(errorElement, "Le nombre de places doit être au moins 1");
+            return false;
+        } else {
+            showValid(errorElement);
+            return true;
+        }
+    }
+
+    function updateSubmitButton() {
+        const submitButton = document.getElementById('submitEventBtn');
+        const isValid = validateCategory() && validateName() && validateDescription() && 
+                       validatePrice() && validateDate() && validateLocation() && 
+                       validatePhotoUrl() && validateTotalSeats();
+        
+        submitButton.disabled = !isValid;
+    }
+
+    // Ajouter les écouteurs d'événements pour chaque champ
+    document.getElementById('category').addEventListener('change', () => { validateCategory(); updateSubmitButton(); });
+    document.getElementById('name').addEventListener('input', () => { validateName(); updateSubmitButton(); });
+    document.getElementById('description').addEventListener('input', () => { validateDescription(); updateSubmitButton(); });
+    document.getElementById('price').addEventListener('input', () => { validatePrice(); updateSubmitButton(); });
+    document.getElementById('date').addEventListener('change', () => { validateDate(); updateSubmitButton(); });
+    document.getElementById('location').addEventListener('input', () => { validateLocation(); updateSubmitButton(); });
+    document.getElementById('total_seats').addEventListener('input', () => { validateTotalSeats(); updateSubmitButton(); });
+
+    // Validation à la soumission du formulaire
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+        const isValid = validateCategory() && validateName() && validateDescription() && 
+                       validatePrice() && validateDate() && validateLocation() && 
+                       validatePhotoUrl() && validateTotalSeats();
+
+        if (!isValid) {
+            e.preventDefault();
+            alert("Veuillez corriger les erreurs dans le formulaire avant de soumettre.");
+        }
+    });
+
+    // Contrôles du panneau
+    document.getElementById("addBtn").addEventListener("click", () => {
+        document.getElementById("addPanel").classList.add("open");
+        document.getElementById("overlay").classList.add("show");
+        
+        // Réinitialiser le formulaire quand on ouvre le panneau
+        document.getElementById('eventForm').reset();
+        document.querySelectorAll('.error-message, .valid-message').forEach(el => {
+            el.classList.remove('show');
+        });
+        document.querySelectorAll('.form-control').forEach(el => {
+            el.classList.remove('error', 'valid');
+        });
+        document.getElementById('previewImage').style.display = 'none';
+        document.getElementById('submitEventBtn').disabled = true;
+        
+        // Réinitialiser le formulaire en mode création
+        document.getElementById('form_action').value = "create";
+        document.getElementById('edit_event_id').value = "";
+    });
+
+    document.getElementById("closePanel").addEventListener("click", () => {
+        document.getElementById("addPanel").classList.remove("open");
+        document.getElementById("overlay").classList.remove("show");
+    });
+
+    document.getElementById("overlay").addEventListener("click", () => {
+        document.getElementById("addPanel").classList.remove("open");
+        document.getElementById("overlay").classList.remove("show");
+    });
+
+    // Initialiser le bouton de soumission comme désactivé
+    document.getElementById('submitEventBtn').disabled = true;
+});
+
+// Gestion des boutons de modification
+document.querySelectorAll('.edit-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    // Remplir le formulaire
+    document.getElementById('name').value = this.dataset.name;
+    document.getElementById('category').value = this.dataset.category;
+    document.getElementById('description').value = this.dataset.description;
+    document.getElementById('price').value = this.dataset.price;
+    document.getElementById('date').value = this.dataset.date;
+    document.getElementById('location').value = this.dataset.location;
+    document.getElementById('total_seats').value = this.dataset.total;
+    document.getElementById('photo_url').value = this.dataset.photo || '';
+
+    // Afficher l'aperçu de l'image si une URL existe
+    if (this.dataset.photo) {
+        document.getElementById('previewImage').src = this.dataset.photo;
+        document.getElementById('previewImage').style.display = 'block';
+    } else {
+        document.getElementById('previewImage').style.display = 'none';
+    }
+
+    // Passer en mode édition
+    document.getElementById('form_action').value = "edit";
+    document.getElementById('edit_event_id').value = this.dataset.id;
+
+    // Ouvrir le panneau si fermé
+    document.getElementById("addPanel").classList.add("open");
+    document.getElementById("overlay").classList.add("show");
+  });
+});
+</script>
+
+{% endblock %}

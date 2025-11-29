@@ -1,0 +1,384 @@
+{% extends 'stages/Backoffice/base_dashboard.html' %}
+
+{% block title %}Dashboard - Backoffice{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+      <div class="row mt-5">
+        <div class="col-xl-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-8">
+                  <div class="numbers">
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Offers</p>
+                    <h5 class="font-weight-bolder">
+                      {% if total_offres %}{{ total_offres }}{% else %}0{% endif %}
+                    </h5>
+                    <p class="mb-0">
+                      <span class="text-success text-sm font-weight-bolder">+{{ nouvelles_offres|default:"0" }}</span>
+                      new this week
+                    </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                    <i class="ni ni-briefcase-24 text-lg opacity-10" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-8">
+                  <div class="numbers">
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Applications</p>
+                    <h5 class="font-weight-bolder">
+                      {% if total_postulations %}{{ total_postulations }}{% else %}0{% endif %}
+                    </h5>
+                    <p class="mb-0">
+                      <span class="text-success text-sm font-weight-bolder">+{{ nouvelles_postulations|default:"0" }}</span>
+                      this week
+                    </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
+                    <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-8">
+                  <div class="numbers">
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">New Candidates</p>
+                    <h5 class="font-weight-bolder">
+                      {% if nouveaux_candidats %}{{ nouveaux_candidats }}{% else %}0{% endif %}
+                    </h5>
+                    <p class="mb-0">
+                      <span class="text-success text-sm font-weight-bolder">This week</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                    <i class="ni ni-single-02 text-lg opacity-10" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-8">
+                  <div class="numbers">
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Acceptance Rate</p>
+                    <h5 class="font-weight-bolder">
+                      {% if taux_reponse %}{{ taux_reponse }}{% else %}0{% endif %}%
+                    </h5>
+                    <p class="mb-0">
+                      <span class="text-info text-sm font-weight-bolder">{{ postulations_acceptees|default:"0" }} accepted</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                    <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+       <div class="row mt-4">
+        <div class="col-lg-6 mb-lg-0 mb-4">
+          <div class="card h-100">
+            <div class="card-header pb-0 pt-3 bg-transparent">
+              <h6 class="text-capitalize">Top 5 Popular Offers</h6>
+              <p class="text-sm mb-0">Most requested offers</p>
+            </div>
+            <div class="card-body p-3">
+              {% if top_offres %}
+              <ul class="list-group list-group-flush">
+                {% for offre in top_offres %}
+                <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1 text-sm">{{ offre.titre|truncatewords:4 }}</h6>
+                    <p class="mb-0 text-xs text-secondary">{{ offre.domaine }}</p>
+                  </div>
+                  <span class="badge badge-sm bg-gradient-primary">{{ offre.nb_postulations }} application{{ offre.nb_postulations|pluralize }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-center text-secondary mt-4">No offers at the moment</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-lg border-0">
+            <div class="card-header pb-0 pt-3 bg-transparent border-0">
+              <h6 class="text-capitalize font-weight-bold">Statistics Overview</h6>
+              <p class="text-sm mb-0 text-secondary">Key metrics summary</p>
+            </div>
+            <div class="card-body p-4">
+              <div class="radar-simple-container">
+                <svg class="radar-simple-svg" viewBox="0 0 200 200">
+                  <!-- Cercles concentriques -->
+                  <circle cx="100" cy="100" r="75" fill="none" stroke="#e9ecef" stroke-width="1.5"/>
+                  <circle cx="100" cy="100" r="55" fill="none" stroke="#e9ecef" stroke-width="1.5"/>
+                  <circle cx="100" cy="100" r="35" fill="none" stroke="#e9ecef" stroke-width="1.5"/>
+                  
+                  <!-- Lignes radiales principales -->
+                  <line x1="100" y1="100" x2="100" y2="25" stroke="#e9ecef" stroke-width="1.5"/>
+                  <line x1="100" y1="100" x2="175" y2="100" stroke="#e9ecef" stroke-width="1.5"/>
+                  <line x1="100" y1="100" x2="100" y2="175" stroke="#e9ecef" stroke-width="1.5"/>
+                  <line x1="100" y1="100" x2="25" y2="100" stroke="#e9ecef" stroke-width="1.5"/>
+                  
+                  <!-- Lignes de données -->
+                  <line id="radar-line-accepted" class="radar-line" x1="100" y1="100" x2="100" y2="25" stroke="#2dce89" stroke-width="3" stroke-linecap="round"/>
+                  <line id="radar-line-pending" class="radar-line" x1="100" y1="100" x2="175" y2="100" stroke="#fbcf33" stroke-width="3" stroke-linecap="round"/>
+                  <line id="radar-line-rejected" class="radar-line" x1="100" y1="100" x2="100" y2="175" stroke="#f5365c" stroke-width="3" stroke-linecap="round"/>
+                  <line id="radar-line-interviews" class="radar-line" x1="100" y1="100" x2="25" y2="100" stroke="#5e72e4" stroke-width="3" stroke-linecap="round"/>
+                  
+                  <!-- Points sur les axes -->
+                  <circle id="radar-dot-accepted" class="radar-dot" cx="100" cy="25" r="5" fill="#2dce89"/>
+                  <circle id="radar-dot-pending" class="radar-dot" cx="175" cy="100" r="5" fill="#fbcf33"/>
+                  <circle id="radar-dot-rejected" class="radar-dot" cx="100" cy="175" r="5" fill="#f5365c"/>
+                  <circle id="radar-dot-interviews" class="radar-dot" cx="25" cy="100" r="5" fill="#5e72e4"/>
+                  
+                  <!-- Labels autour du radar -->
+                  <text x="100" y="20" text-anchor="middle" dominant-baseline="middle" class="radar-label">Accepted</text>
+                  <text x="100" y="12" text-anchor="middle" dominant-baseline="middle" class="radar-value">{{ postulations_acceptees|default:"0" }}</text>
+                  
+                  <text x="180" y="105" text-anchor="middle" dominant-baseline="middle" class="radar-label">Pending</text>
+                  <text x="180" y="97" text-anchor="middle" dominant-baseline="middle" class="radar-value">{{ postulations_en_attente|default:"0" }}</text>
+                  
+                  <text x="100" y="190" text-anchor="middle" dominant-baseline="middle" class="radar-label">Rejected</text>
+                  <text x="100" y="182" text-anchor="middle" dominant-baseline="middle" class="radar-value">{{ postulations_refusees|default:"0" }}</text>
+                  
+                  <text x="20" y="105" text-anchor="middle" dominant-baseline="middle" class="radar-label">Interviews</text>
+                  <text x="20" y="97" text-anchor="middle" dominant-baseline="middle" class="radar-value">{{ total_entretiens|default:"0" }}</text>
+                  
+                  <!-- Centre -->
+                  <circle cx="100" cy="100" r="30" fill="#ffffff" stroke="#5e72e4" stroke-width="2"/>
+                  <text x="100" y="95" text-anchor="middle" dominant-baseline="middle" class="radar-center-total">{{ total_postulations|default:"0" }}</text>
+                  <text x="100" y="105" text-anchor="middle" dominant-baseline="middle" class="radar-center-label">Total</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header pb-0 p-3">
+              <div class="d-flex justify-content-between">
+                <h6 class="mb-2">Latest Applications</h6>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-items-center">
+                <thead>
+                  <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Candidate</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Offer</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for postulation in postulations|slice:":5" %}
+                  <tr>
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ postulation.email|default:"N/A" }}</h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="text-xs font-weight-bold mb-0">{{ postulation.offre.titre|truncatewords:5|default:"N/A" }}</p>
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                      <span class="text-secondary text-xs font-weight-bold">{{ postulation.date_postulation|date:"d/m/Y"|default:"N/A" }}</span>
+                    </td>
+                    <td class="align-middle text-center">
+                      {% if postulation.statut == 'en_attente' %}
+                      <span class="badge badge-sm bg-gradient-warning">Pending</span>
+                      {% elif postulation.statut == 'acceptee' %}
+                      <span class="badge badge-sm bg-gradient-success">Accepted</span>
+                      {% elif postulation.statut == 'refusee' %}
+                      <span class="badge badge-sm bg-gradient-danger">Rejected</span>
+                      {% else %}
+                      <span class="badge badge-sm bg-gradient-secondary">{{ postulation.statut }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      <p class="text-xs text-secondary mb-0">No applications at the moment</p>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer pt-3">
+        <div class="container-fluid">
+          <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6 mb-lg-0 mb-4">
+              <div class="copyright text-center text-sm text-muted text-lg-start">
+                © <script>
+                  document.write(new Date().getFullYear())
+                </script>,
+                Backoffice - Internship Management
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+<style>
+  .radar-simple-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 350px;
+  }
+
+  .radar-simple-svg {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+  }
+
+  .radar-line {
+    transition: stroke-width 0.3s ease;
+  }
+
+  .radar-simple-svg:hover .radar-line {
+    stroke-width: 4;
+  }
+
+  .radar-dot {
+    transition: r 0.3s ease;
+  }
+
+  .radar-simple-svg:hover .radar-dot {
+    r: 7;
+  }
+
+  .radar-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: #67748e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+
+  .radar-value {
+    font-size: 14px;
+    font-weight: 700;
+    fill: #344767;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+
+  .radar-center-total {
+    font-size: 18px;
+    font-weight: 700;
+    fill: #5e72e4;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+
+  .radar-center-label {
+    font-size: 9px;
+    font-weight: 600;
+    fill: #67748e;
+    text-transform: uppercase;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+</style>
+
+<script>
+(function() {
+  'use strict';
+  
+  const stats = {
+    total: {{ total_postulations|default:0 }},
+    accepted: {{ postulations_acceptees|default:0 }},
+    pending: {{ postulations_en_attente|default:0 }},
+    rejected: {{ postulations_refusees|default:0 }},
+    interviews: {{ total_entretiens|default:0 }}
+  };
+  
+  const centerX = 100;
+  const centerY = 100;
+  const maxRadius = 75;
+  
+  // Normaliser les valeurs (0-1)
+  const normalize = (value, max) => max > 0 ? Math.min(value / max, 1) : 0;
+  
+  const acceptedRatio = normalize(stats.accepted, stats.total);
+  const pendingRatio = normalize(stats.pending, stats.total);
+  const rejectedRatio = normalize(stats.rejected, stats.total);
+  const interviewsRatio = stats.accepted > 0 ? normalize(stats.interviews, stats.accepted) : 0;
+  
+  // Calculer les positions des points
+  const acceptedY = centerY - (acceptedRatio * maxRadius);
+  const pendingX = centerX + (pendingRatio * maxRadius);
+  const rejectedY = centerY + (rejectedRatio * maxRadius);
+  const interviewsX = centerX - (interviewsRatio * maxRadius);
+  
+  // Mettre à jour les lignes
+  const lineAccepted = document.getElementById('radar-line-accepted');
+  const linePending = document.getElementById('radar-line-pending');
+  const lineRejected = document.getElementById('radar-line-rejected');
+  const lineInterviews = document.getElementById('radar-line-interviews');
+  
+  if (lineAccepted) lineAccepted.setAttribute('y2', acceptedY);
+  if (linePending) linePending.setAttribute('x2', pendingX);
+  if (lineRejected) lineRejected.setAttribute('y2', rejectedY);
+  if (lineInterviews) lineInterviews.setAttribute('x2', interviewsX);
+  
+  // Mettre à jour les points
+  const dotAccepted = document.getElementById('radar-dot-accepted');
+  const dotPending = document.getElementById('radar-dot-pending');
+  const dotRejected = document.getElementById('radar-dot-rejected');
+  const dotInterviews = document.getElementById('radar-dot-interviews');
+  
+  if (dotAccepted) dotAccepted.setAttribute('cy', acceptedY);
+  if (dotPending) dotPending.setAttribute('cx', pendingX);
+  if (dotRejected) dotRejected.setAttribute('cy', rejectedY);
+  if (dotInterviews) dotInterviews.setAttribute('cx', interviewsX);
+})();
+</script>
+{% endblock %}
+

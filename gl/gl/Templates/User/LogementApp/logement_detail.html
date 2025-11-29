@@ -1,0 +1,824 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}{{ logement.title }} • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      position: relative;
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+      z-index: 1;
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      letter-spacing: -0.5px;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .detail-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Carrousel principal au début */
+    .main-carousel-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .main-carousel-wrapper {
+      display: flex;
+      transition: transform 0.5s ease;
+      width: 100%;
+    }
+
+    .main-carousel-slide {
+      min-width: 100%;
+      height: 500px;
+      position: relative;
+    }
+
+    .main-carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .main-carousel-slide .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 4rem;
+    }
+
+    .main-carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      z-index: 10;
+      transition: all 0.3s;
+    }
+
+    .main-carousel-nav:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .main-carousel-nav.prev {
+      left: 15px;
+    }
+
+    .main-carousel-nav.next {
+      right: 15px;
+    }
+
+    .main-carousel-nav:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .main-carousel-indicators {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .main-carousel-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .main-carousel-indicator.active {
+      background: white;
+      width: 30px;
+      border-radius: 5px;
+    }
+
+    .detail-content {
+      padding: 2.5rem;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .detail-title-section h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-type {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-location {
+      color: #6b7280;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-item-icon {
+      font-size: 2rem;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-item-label {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-item-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .detail-description {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .detail-description h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .detail-description p {
+      color: #4b5563;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .detail-owner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin-top: 2rem;
+    }
+
+    .owner-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .owner-info h4 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .owner-info p {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-edit:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-edit:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .btn-edit:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-delete::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-delete:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-delete:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn-back {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-back:hover {
+      background: #d1d5db;
+      color: #1f2937;
+    }
+
+    .btn-contact {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-contact::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-contact:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-contact:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .btn-contact:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .badge-available {
+      display: inline-block;
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-unavailable {
+      display: inline-block;
+      background: #ef4444;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Styles pour le carrousel d'images */
+    .images-gallery {
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .images-gallery h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #f8f9fa;
+    }
+
+    .carousel-wrapper {
+      display: flex;
+      transition: transform 0.5s ease;
+      width: 100%;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 400px;
+      position: relative;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      z-index: 10;
+      transition: all 0.3s;
+    }
+
+    .carousel-nav:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-nav.prev {
+      left: 15px;
+    }
+
+    .carousel-nav.next {
+      right: 15px;
+    }
+
+    .carousel-nav:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .carousel-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .carousel-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .carousel-indicator.active {
+      background: #667eea;
+      width: 30px;
+      border-radius: 5px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">{{ logement.title }}</h1>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'logement' %}">Logements</a>
+              <span>/</span>
+              <span class="current">{{ logement.title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="detail-container">
+        <!-- Carrousel principal avec image principale et images supplémentaires -->
+        <div class="main-carousel-container">
+          <div class="main-carousel-wrapper" id="main-carousel-wrapper">
+            <!-- Image principale -->
+            {% if logement.image %}
+              <div class="main-carousel-slide">
+                <img src="{{ logement.image.url }}" alt="{{ logement.title }}">
+              </div>
+            {% else %}
+              <div class="main-carousel-slide">
+                <div class="placeholder">
+                  <i class="bi bi-house"></i>
+                </div>
+              </div>
+            {% endif %}
+            <!-- Images supplémentaires -->
+            {% for img in logement.images.all %}
+              <div class="main-carousel-slide">
+                <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
+              </div>
+            {% endfor %}
+          </div>
+          {% if logement.image or logement.images.all %}
+            <button class="main-carousel-nav prev" id="main-carousel-prev" aria-label="Image précédente">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="main-carousel-nav next" id="main-carousel-next" aria-label="Image suivante">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <div class="main-carousel-indicators" id="main-carousel-indicators">
+              {% if logement.image %}
+                <button class="main-carousel-indicator active" data-slide="0" aria-label="Image principale"></button>
+              {% endif %}
+              {% for img in logement.images.all %}
+                <button class="main-carousel-indicator {% if not logement.image and forloop.first %}active{% endif %}" data-slide="{% if logement.image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" aria-label="Image {{ forloop.counter }}"></button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="detail-content">
+          <div class="detail-header">
+            <div class="detail-title-section">
+              <span class="detail-type">{{ logement.get_type_logement_display }}</span>
+              <h1>{{ logement.title }}</h1>
+              <div class="detail-location">
+                <i class="bi bi-geo-alt"></i>
+                {{ logement.address }}, {{ logement.city }}
+              </div>
+              <div style="margin-top: 0.5rem;">
+                {% if logement.available %}
+                  <span class="badge-available">Disponible</span>
+                {% else %}
+                  <span class="badge-unavailable">Non disponible</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="detail-price">
+              {{ logement.price|floatformat:0 }} DZD
+            </div>
+          </div>
+
+          <div class="detail-info-grid">
+            <div class="info-item">
+              <div class="info-item-icon"><i class="bi bi-rulers"></i></div>
+              <div class="info-item-label">Surface</div>
+              <div class="info-item-value">{{ logement.surface }} m²</div>
+            </div>
+            <div class="info-item">
+              <div class="info-item-icon"><i class="bi bi-door-open"></i></div>
+              <div class="info-item-label">Pièces</div>
+              <div class="info-item-value">{{ logement.rooms }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-item-icon"><i class="bi bi-droplet"></i></div>
+              <div class="info-item-label">Salles de bain</div>
+              <div class="info-item-value">{{ logement.bathrooms }}</div>
+            </div>
+          </div>
+
+          <div class="detail-description">
+            <h3>Description</h3>
+            <p>{{ logement.description }}</p>
+          </div>
+
+          {% if logement.model_3d %}
+          <div class="detail-description" style="margin-top: 2rem;">
+            <h3>Modèle 3D</h3>
+            <p>
+              <a href="{{ logement.model_3d }}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                <i class="bi bi-box-arrow-up-right"></i> Voir le modèle 3D
+              </a>
+            </p>
+          </div>
+          {% endif %}
+
+          <div class="detail-owner">
+            <div class="owner-avatar">
+              {% if logement.owner.avatar %}
+                <img src="{{ logement.owner.avatar.url }}" alt="{{ logement.owner.get_full_name|default:logement.owner.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+              {% else %}
+                {{ logement.owner.first_name|default:logement.owner.username|make_list|first|upper }}{% if logement.owner.last_name %}{{ logement.owner.last_name|make_list|first|upper }}{% endif %}
+              {% endif %}
+            </div>
+            <div class="owner-info">
+              <h4>Propriétaire</h4>
+              <p>{{ logement.owner.get_full_name|default:logement.owner.username }}</p>
+            </div>
+          </div>
+
+          {% if request.user == logement.owner %}
+          <div class="detail-actions">
+            <a href="{% url 'logement_edit' logement.id %}" class="btn-action btn-edit">
+              <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a href="{% url 'logement_delete' logement.id %}" class="btn-action btn-delete">
+              <i class="bi bi-trash"></i> Supprimer
+            </a>
+          </div>
+          {% endif %}
+
+          <div style="margin-top: 2rem;">
+            <a href="{% url 'logement' %}" class="btn-action btn-back">
+              <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if logement.image or logement.images.all %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const wrapper = document.getElementById('main-carousel-wrapper');
+      const prevBtn = document.getElementById('main-carousel-prev');
+      const nextBtn = document.getElementById('main-carousel-next');
+      const indicators = document.querySelectorAll('.main-carousel-indicator');
+      const slides = document.querySelectorAll('.main-carousel-slide');
+      
+      if (!wrapper || !prevBtn || !nextBtn || slides.length === 0) return;
+      
+      let currentSlide = 0;
+      const totalSlides = slides.length;
+
+      function updateCarousel() {
+        // Déplacer le wrapper
+        wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        // Mettre à jour les indicateurs
+        indicators.forEach((indicator, index) => {
+          if (index === currentSlide) {
+            indicator.classList.add('active');
+          } else {
+            indicator.classList.remove('active');
+          }
+        });
+        
+        // Mettre à jour les boutons de navigation
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+      }
+
+      // Navigation avec les flèches
+      prevBtn.addEventListener('click', function() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateCarousel();
+        }
+      });
+
+      nextBtn.addEventListener('click', function() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateCarousel();
+        }
+      });
+
+      // Navigation avec les indicateurs
+      indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', function() {
+          currentSlide = index;
+          updateCarousel();
+        });
+      });
+
+      // Navigation au clavier
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' && currentSlide > 0) {
+          currentSlide--;
+          updateCarousel();
+        } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateCarousel();
+        }
+      });
+
+      // Initialiser
+      updateCarousel();
+    });
+  </script>
+  {% endif %}
+  
+  <!-- Toast Notifications -->
+  {% include 'includes/toast_notifications.html' %}
+{% endblock %}

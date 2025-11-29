@@ -1,0 +1,639 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block body_class %}notifications-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section - Using Evently Template Styles */
+    .notifications-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .notifications-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    /* Header normal - no transparency */
+    body.notifications-hero-page #header.header {
+      background-color: rgba(34, 18, 2, 0.95) !important;
+      background: rgba(34, 18, 2, 0.95) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Active state for notifications icon */
+    body.notifications-hero-page .notifications-icon-link {
+      background: rgba(255, 255, 255, 0.1) !important;
+      opacity: 1 !important;
+    }
+
+    .notifications-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .notifications-hero .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 80px 0 60px;
+    }
+
+    .notifications-hero .hero-text {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .notifications-hero .hero-title {
+      font-size: 4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .notifications-hero .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .notifications-hero .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .notifications-hero .hero-subtitle {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .notifications-hero .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    .notifications-breadcrumb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .notifications-breadcrumb a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .notifications-breadcrumb a:hover {
+      color: var(--accent-color);
+    }
+
+    .notifications-breadcrumb span {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0.5rem;
+    }
+
+    .notifications-breadcrumb .current {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Main Content Section - LinkedIn Style */
+    .notifications-main-content {
+      background: #f3f2ef;
+      padding: 24px 0;
+      min-height: calc(100vh - 70px);
+    }
+
+    .notifications-layout {
+      max-width: 1128px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 24px;
+      padding: 0 16px;
+    }
+
+    @media (max-width: 992px) {
+      .notifications-layout {
+        grid-template-columns: 1fr;
+      }
+      .notifications-sidebar {
+        display: none;
+      }
+      .notifications-right-sidebar {
+        display: none;
+      }
+    }
+
+    /* Left Sidebar */
+    .notifications-sidebar {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .sidebar-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .sidebar-card-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+
+    .sidebar-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #000;
+      margin: 0;
+    }
+
+    .sidebar-card-content {
+      padding: 16px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 8px 16px;
+      color: #0a66c2;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: #f3f2ef;
+      text-decoration: underline;
+    }
+
+    /* Main Content Area */
+    .notifications-main-area {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .notifications-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      background: white;
+    }
+
+    .notifications-tab {
+      padding: 16px 24px;
+      border: none;
+      background: none;
+      color: #666;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .notifications-tab:hover {
+      color: #000;
+      background: #f3f2ef;
+    }
+
+    .notifications-tab.active {
+      color: #0a66c2;
+      border-bottom-color: #0a66c2;
+    }
+
+    .notifications-container {
+      padding: 0;
+    }
+
+    .notification-item {
+      background: white;
+      border: none;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      margin: 0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-item:hover {
+      background: #f3f2ef;
+    }
+
+    .notification-item.unread {
+      background: #f0f7ff;
+    }
+
+    .notification-item.unread::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #0a66c2;
+    }
+
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e6f2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: #0a66c2;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+    }
+
+    .notification-text {
+      color: #333;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .notification-text a {
+      color: #0a66c2;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .notification-text a:hover {
+      color: #004182;
+      text-decoration: underline;
+    }
+
+    .notification-text a strong {
+      color: inherit;
+    }
+
+    .notification-time {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .notification-menu {
+      margin-left: auto;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .notification-item:hover .notification-menu {
+      opacity: 1;
+    }
+
+    .notification-menu-btn {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .notification-menu-btn:hover {
+      background: #e0e0e0;
+      color: #000;
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-accept, .btn-reject {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-accept {
+      background: #0a66c2;
+      color: white;
+    }
+
+    .btn-accept:hover {
+      background: #004182;
+    }
+
+    .btn-reject {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-reject:hover {
+      background: #d0d0d0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+      display: block;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Main Content Section -->
+  <section class="notifications-main-content" style="margin-top: 70px;">
+    <div class="notifications-layout">
+      <!-- Left Sidebar -->
+      <div class="notifications-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-card-header">
+            <h3 class="sidebar-card-title">Gérer vos notifications</h3>
+            </div>
+          <div class="sidebar-card-content">
+            <a href="#" class="sidebar-link">Voir les paramètres</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="notifications-main-area">
+        <!-- Tabs -->
+        <div class="notifications-tabs">
+          <button class="notifications-tab active" data-tab="all">Tout</button>
+          <button class="notifications-tab" data-tab="connections">Connexions</button>
+          <button class="notifications-tab" data-tab="messages">Messages</button>
+    </div>
+
+    <div class="notifications-container">
+      {% if notifications %}
+        {% for notification in notifications %}
+        <div class="notification-item {% if not notification.read %}unread{% endif %}">
+          <div class="notification-icon">
+            {% if notification.verb == 'connection_request' %}
+              <i class="bi bi-person-plus"></i>
+            {% elif notification.verb == 'connection_accepted' %}
+              <i class="bi bi-check-circle"></i>
+            {% elif notification.verb == 'post_liked' %}
+              <i class="bi bi-hand-thumbs-up-fill"></i>
+            {% elif notification.verb == 'post_commented' %}
+              <i class="bi bi-chat-dots-fill"></i>
+            {% elif notification.verb == 'post_shared' %}
+              <i class="bi bi-share-fill"></i>
+            {% else %}
+              <i class="bi bi-bell"></i>
+            {% endif %}
+          </div>
+          <div class="notification-content">
+            <div class="notification-text">
+              {% if notification.verb == 'connection_request' %}
+                {% if notification.data.from_user_id %}
+                  <a href="{% url 'user_profile' notification.data.from_user_id %}">
+                    {% if notification.data.from_user_name %}
+                      <strong>{{ notification.data.from_user_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.from_user_name %}
+                    <strong>{{ notification.data.from_user_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 veut se connecter avec vous.
+              {% elif notification.verb == 'connection_accepted' %}
+                {% if notification.data.from_user_id %}
+                  <a href="{% url 'user_profile' notification.data.from_user_id %}">
+                    {% if notification.data.from_user_name %}
+                      <strong>{{ notification.data.from_user_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.from_user_name %}
+                    <strong>{{ notification.data.from_user_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 a accepté votre demande de connexion.
+              {% elif notification.verb == 'connection_request_message' %}
+                {% if notification.data.from_user_id %}
+                  <a href="{% url 'user_profile' notification.data.from_user_id %}">
+                    {% if notification.data.from_user_name %}
+                      <strong>{{ notification.data.from_user_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.from_user_name %}
+                    <strong>{{ notification.data.from_user_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 vous a envoyé un message de demande de connexion.
+              {% elif notification.verb == 'post_liked' %}
+                {% if notification.data.liker_id %}
+                  <a href="{% url 'user_profile' notification.data.liker_id %}">
+                    {% if notification.data.liker_name %}
+                      <strong>{{ notification.data.liker_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.liker_name %}
+                    <strong>{{ notification.data.liker_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 a aimé votre publication
+                {% if notification.data.post_id %}
+                  <a href="{% url 'evently_schedule' %}#post-{{ notification.data.post_id }}" style="color: #667eea; text-decoration: none; margin-left: 0.25rem;">
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                {% endif %}
+              {% elif notification.verb == 'post_commented' %}
+                {% if notification.data.commenter_id %}
+                  <a href="{% url 'user_profile' notification.data.commenter_id %}">
+                    {% if notification.data.commenter_name %}
+                      <strong>{{ notification.data.commenter_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.commenter_name %}
+                    <strong>{{ notification.data.commenter_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 a commenté votre publication
+                {% if notification.data.comment_text_preview %}
+                  <span style="color: #6b7280; font-style: italic;">: "{{ notification.data.comment_text_preview }}"</span>
+                {% endif %}
+                {% if notification.data.post_id %}
+                  <a href="{% url 'evently_schedule' %}#post-{{ notification.data.post_id }}" style="color: #667eea; text-decoration: none; margin-left: 0.25rem;">
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                {% endif %}
+              {% elif notification.verb == 'post_shared' %}
+                {% if notification.data.sharer_id %}
+                  <a href="{% url 'user_profile' notification.data.sharer_id %}">
+                    {% if notification.data.sharer_name %}
+                      <strong>{{ notification.data.sharer_name }}</strong>
+                    {% else %}
+                      <strong>Quelqu'un</strong>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  {% if notification.data.sharer_name %}
+                    <strong>{{ notification.data.sharer_name }}</strong>
+                  {% else %}
+                    <strong>Quelqu'un</strong>
+                  {% endif %}
+                {% endif %}
+                 a partagé votre publication
+                {% if notification.data.post_id %}
+                  <a href="{% url 'evently_schedule' %}#post-{{ notification.data.post_id }}" style="color: #667eea; text-decoration: none; margin-left: 0.25rem;">
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                {% endif %}
+              {% else %}
+                {{ notification.verb }}
+              {% endif %}
+            </div>
+            <div class="notification-time">{{ notification.created_at|timesince }}</div>
+            {% if notification.verb == 'connection_request' and not notification.read %}
+            <div class="notification-actions">
+              {% with connection_id=notification.data.connection_id %}
+                {% if connection_id %}
+                <form method="post" action="{% url 'accept_connection' connection_id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-accept">
+                    <i class="bi bi-check"></i> Accepter
+                  </button>
+                </form>
+                <form method="post" action="{% url 'reject_connection' connection_id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-reject">
+                    <i class="bi bi-x"></i> Refuser
+                  </button>
+                </form>
+                {% endif %}
+              {% endwith %}
+            </div>
+            {% endif %}
+          </div>
+          <div class="notification-menu">
+            <button class="notification-menu-btn" title="Plus d'options">
+              <i class="bi bi-three-dots"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-bell-slash"></i>
+          <p>Aucune notification pour le moment.</p>
+        </div>
+      {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="notifications-right-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-card-content">
+            <p style="font-size: 0.875rem; color: #666; margin: 0;">Espace publicitaire</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Tab switching functionality
+    document.querySelectorAll('.notifications-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.notifications-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        // Here you can add logic to filter notifications by tab
+      });
+    });
+  </script>
+{% endblock %}
+

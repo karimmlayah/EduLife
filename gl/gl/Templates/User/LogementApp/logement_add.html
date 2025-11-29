@@ -1,0 +1,1279 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Ajouter un logement • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+  <style>
+    .logement-hero {
+      position: relative;
+      min-height: 50vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1920&h=1080&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 60px;
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    #id_latitude,
+    #id_longitude {
+      display: none !important;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-check-input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .form-check-label {
+      cursor: pointer;
+      color: #374151;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 1rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-submit:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-submit:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn-cancel {
+      display: inline-block;
+      width: 100%;
+      padding: 12px;
+      background: #e5e7eb;
+      color: #374151;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+      background: #d1d5db;
+      color: #1f2937;
+    }
+
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0 0;
+      color: #dc3545;
+      font-size: 0.875rem;
+    }
+
+    .errorlist li {
+      padding: 4px 0;
+    }
+
+    /* Styles pour les images supplémentaires */
+    .image-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .image-input-wrapper input[type="file"] {
+      flex: 1;
+    }
+
+    .btn-remove-image {
+      padding: 8px 16px;
+      background: #f5365c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-remove-image:hover {
+      background: #d32f2f;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 54, 92, 0.3);
+    }
+
+    .btn-add-image {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-add-image::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-add-image:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-add-image:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-add-image i {
+      font-size: 1.1rem;
+    }
+
+    /* Styles pour la validation */
+    .form-control.error {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .form-control.valid {
+      border-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .error-message.hidden {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group.has-error .form-label {
+      color: #dc3545;
+    }
+
+    .form-group.has-success .form-label {
+      color: #28a745;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Ajouter un logement</h1>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'logement' %}">Logements</a>
+              <span>/</span>
+              <span class="current">Ajouter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="logement-main-content">
+    <div class="container">
+      <div class="form-container">
+        <h2 class="form-title">Informations du logement</h2>
+        
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="form-group" id="title-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }} <span class="text-danger">*</span></label>
+            {{ form.title }}
+            <span class="error-message hidden" id="title-error"></span>
+            {% if form.title.errors %}
+              <ul class="errorlist">
+                {% for error in form.title.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="type_logement-group">
+            <label for="{{ form.type_logement.id_for_label }}" class="form-label">{{ form.type_logement.label }} <span class="text-danger">*</span></label>
+            {{ form.type_logement }}
+            <span class="error-message hidden" id="type_logement-error"></span>
+            {% if form.type_logement.errors %}
+              <ul class="errorlist">
+                {% for error in form.type_logement.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="description-group">
+            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }} <span class="text-danger">*</span></label>
+            {{ form.description }}
+            <span class="error-message hidden" id="description-error"></span>
+            {% if form.description.errors %}
+              <ul class="errorlist">
+                {% for error in form.description.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="address-group">
+            <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }} <span class="text-danger">*</span></label>
+            {{ form.address }}
+            <span class="error-message hidden" id="address-error"></span>
+            {% if form.address.errors %}
+              <ul class="errorlist">
+                {% for error in form.address.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="city-group">
+            <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }} <span class="text-danger">*</span></label>
+            {{ form.city }}
+            <span class="error-message hidden" id="city-error"></span>
+            {% if form.city.errors %}
+              <ul class="errorlist">
+                {% for error in form.city.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <!-- Bouton pour choisir sur la carte -->
+          <div class="form-group">
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="openMapPicker()">
+              <i class="bi bi-geo-alt-fill"></i> Choisir sur la carte
+            </button>
+            <small class="form-text text-muted d-block mt-1">
+              <i class="bi bi-info-circle"></i> Cliquez sur le bouton pour sélectionner l'emplacement exact sur la carte, ou saisissez l'adresse manuellement
+            </small>
+            <!-- Champs cachés pour latitude/longitude -->
+            {{ form.latitude }}
+            {{ form.longitude }}
+            {% if form.latitude.errors or form.longitude.errors %}
+              <ul class="errorlist">
+                {% for error in form.latitude.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+                {% for error in form.longitude.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group" id="price-group">
+              <label for="{{ form.price.id_for_label }}" class="form-label">{{ form.price.label }} <span class="text-danger">*</span></label>
+              {{ form.price }}
+              <span class="error-message hidden" id="price-error"></span>
+              {% if form.price.errors %}
+                <ul class="errorlist">
+                  {% for error in form.price.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+
+            <div class="form-group" id="surface-group">
+              <label for="{{ form.surface.id_for_label }}" class="form-label">{{ form.surface.label }} <span class="text-danger">*</span></label>
+              {{ form.surface }}
+              <span class="error-message hidden" id="surface-error"></span>
+              {% if form.surface.errors %}
+                <ul class="errorlist">
+                  {% for error in form.surface.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group" id="rooms-group">
+              <label for="{{ form.rooms.id_for_label }}" class="form-label">{{ form.rooms.label }} <span class="text-danger">*</span></label>
+              {{ form.rooms }}
+              <span class="error-message hidden" id="rooms-error"></span>
+              {% if form.rooms.errors %}
+                <ul class="errorlist">
+                  {% for error in form.rooms.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+
+            <div class="form-group" id="bathrooms-group">
+              <label for="{{ form.bathrooms.id_for_label }}" class="form-label">{{ form.bathrooms.label }} <span class="text-danger">*</span></label>
+              {{ form.bathrooms }}
+              <span class="error-message hidden" id="bathrooms-error"></span>
+              {% if form.bathrooms.errors %}
+                <ul class="errorlist">
+                  {% for error in form.bathrooms.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-group" id="image-group">
+            <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
+            {{ form.image }}
+            <span class="error-message hidden" id="image-error"></span>
+            {% if form.image.errors %}
+              <ul class="errorlist">
+                {% for error in form.image.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Images supplémentaires</label>
+            <div id="images-container">
+              <div class="image-input-wrapper mb-2">
+                <input type="file" name="images" class="form-control" accept="image/*" />
+                <button type="button" class="btn-remove-image" style="display: none;">
+                  <i class="bi bi-x-circle"></i> Supprimer
+                </button>
+              </div>
+            </div>
+          <button type="button" id="add-image-btn" class="btn-add-image">
+            <i class="bi bi-plus-circle"></i> Ajouter une image
+          </button>
+          <small class="form-text text-muted d-block mt-2">Vous pouvez ajouter plusieurs images supplémentaires</small>
+          </div>
+
+          <div class="form-group" id="model_3d-group">
+            <label for="{{ form.model_3d.id_for_label }}" class="form-label">{{ form.model_3d.label }}</label>
+            {{ form.model_3d }}
+            <span class="error-message hidden" id="model_3d-error"></span>
+            {% if form.model_3d.help_text %}
+              <small class="form-text text-muted">{{ form.model_3d.help_text }}</small>
+            {% endif %}
+            <small class="form-text text-muted d-block mt-1">
+              <strong>Exemples d'URLs :</strong><br>
+              • Shapespark: <code>https://username.shapespark.com/scene-name/</code><br>
+              • Sketchfab: <code>https://sketchfab.com/models/model-id</code><br>
+              • Autre viewer 3D compatible iframe
+            </small>
+            {% if form.model_3d.errors %}
+              <ul class="errorlist">
+                {% for error in form.model_3d.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="wifi-group">
+            <div class="form-check">
+              {{ form.wifi }}
+              <label for="{{ form.wifi.id_for_label }}" class="form-check-label">{{ form.wifi.label }}</label>
+            </div>
+            {% if form.wifi.errors %}
+              <ul class="errorlist">
+                {% for error in form.wifi.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group" id="video-group">
+            <label for="{{ form.video.id_for_label }}" class="form-label">{{ form.video.label }}</label>
+            {{ form.video }}
+            <span class="error-message hidden" id="video-error"></span>
+            {% if form.video.help_text %}
+              <small class="form-text text-muted">{{ form.video.help_text }}</small>
+            {% endif %}
+            <small class="form-text text-muted d-block mt-1">
+              <strong>Exemples d'URLs :</strong><br>
+              • YouTube: <code>https://www.youtube.com/watch?v=...</code><br>
+              • Vimeo: <code>https://vimeo.com/...</code><br>
+              • Autre plateforme vidéo
+            </small>
+            {% if form.video.errors %}
+              <ul class="errorlist">
+                {% for error in form.video.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <div class="form-check">
+              {{ form.available }}
+              <label for="{{ form.available.id_for_label }}" class="form-check-label">{{ form.available.label }}</label>
+            </div>
+            {% if form.available.errors %}
+              <ul class="errorlist">
+                {% for error in form.available.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="bi bi-check-circle"></i> Ajouter le logement
+          </button>
+          <a href="{% url 'logement' %}" class="btn-cancel">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form[method="POST"]');
+      const imagesContainer = document.getElementById('images-container');
+      const addImageBtn = document.getElementById('add-image-btn');
+      let imageCount = 1;
+
+      // ========== GESTION DES IMAGES MULTIPLES ==========
+      function updateRemoveButtons() {
+        const wrappers = imagesContainer.querySelectorAll('.image-input-wrapper');
+        wrappers.forEach((wrapper, index) => {
+          const removeBtn = wrapper.querySelector('.btn-remove-image');
+          if (wrappers.length > 1) {
+            removeBtn.style.display = 'block';
+          } else {
+            removeBtn.style.display = 'none';
+          }
+        });
+      }
+
+      function addImageField() {
+        imageCount++;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-input-wrapper mb-2';
+        wrapper.innerHTML = `
+          <input type="file" name="images" class="form-control" accept="image/*" />
+          <button type="button" class="btn-remove-image">
+            <i class="bi bi-x-circle"></i> Supprimer
+          </button>
+        `;
+        imagesContainer.appendChild(wrapper);
+        updateRemoveButtons();
+
+        const removeBtn = wrapper.querySelector('.btn-remove-image');
+        removeBtn.addEventListener('click', function() {
+          wrapper.remove();
+          updateRemoveButtons();
+        });
+
+        // Ajouter la validation pour le nouveau champ
+        const newInput = wrapper.querySelector('input[type="file"]');
+        newInput.addEventListener('change', function() {
+          validateImageFile(this);
+        });
+      }
+
+      addImageBtn.addEventListener('click', addImageField);
+      imagesContainer.querySelectorAll('.btn-remove-image').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.closest('.image-input-wrapper').remove();
+          updateRemoveButtons();
+        });
+      });
+      updateRemoveButtons();
+
+      // ========== FONCTIONS DE VALIDATION ==========
+      
+      function showError(fieldId, errorId, message) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        const errorElement = document.getElementById(errorId);
+        const groupElement = field?.closest('.form-group');
+        
+        if (field) {
+          field.classList.remove('valid');
+          field.classList.add('error');
+        }
+        
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.classList.remove('hidden');
+        }
+        
+        if (groupElement) {
+          groupElement.classList.remove('has-success');
+          groupElement.classList.add('has-error');
+        }
+      }
+
+      function showSuccess(fieldId, errorId) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        const errorElement = document.getElementById(errorId);
+        const groupElement = field?.closest('.form-group');
+        
+        if (field) {
+          field.classList.remove('error');
+          field.classList.add('valid');
+        }
+        
+        if (errorElement) {
+          errorElement.classList.add('hidden');
+        }
+        
+        if (groupElement) {
+          groupElement.classList.remove('has-error');
+          groupElement.classList.add('has-success');
+        }
+      }
+
+      function validateRequired(fieldId, errorId, fieldName) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '' || value === '0' || value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      function validateTextLength(fieldId, errorId, fieldName, minLength = 3, maxLength = null) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        if (value.length < minLength) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit contenir au moins ${minLength} caractères`);
+          return false;
+        }
+        if (maxLength && value.length > maxLength) {
+          showError(field.id || fieldId, errorId, `${fieldName} ne doit pas dépasser ${maxLength} caractères`);
+          return false;
+        }
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      function validateNumber(fieldId, errorId, fieldName, min = null, max = null, isInteger = false) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return false;
+        
+        const value = field.value.trim();
+        if (value === '') {
+          showError(field.id || fieldId, errorId, `${fieldName} est obligatoire`);
+          return false;
+        }
+        
+        const numValue = isInteger ? parseInt(value) : parseFloat(value);
+        
+        if (isNaN(numValue)) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit être un nombre valide`);
+          return false;
+        }
+        
+        if (min !== null && numValue < min) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit être supérieur ou égal à ${min}`);
+          return false;
+        }
+        
+        if (max !== null && numValue > max) {
+          showError(field.id || fieldId, errorId, `${fieldName} ne doit pas dépasser ${max}`);
+          return false;
+        }
+        
+        showSuccess(field.id || fieldId, errorId);
+        return true;
+      }
+
+      function validateURL(fieldId, errorId, fieldName) {
+        const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
+        if (!field) return true; // Champ optionnel
+        
+        const value = field.value.trim();
+        if (value === '') {
+          showSuccess(field.id || fieldId, errorId); // Vide est OK pour un champ optionnel
+          return true;
+        }
+        
+        try {
+          new URL(value);
+          showSuccess(field.id || fieldId, errorId);
+          return true;
+        } catch (e) {
+          showError(field.id || fieldId, errorId, `${fieldName} doit être une URL valide (ex: https://exemple.com)`);
+          return false;
+        }
+      }
+
+      function validateImageFile(input) {
+        if (!input || !input.files || input.files.length === 0) {
+          return true; // Pas de fichier = OK (optionnel)
+        }
+        
+        const file = input.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        
+        // Déterminer l'ID d'erreur approprié
+        let errorId = 'image-error';
+        if (input.name === 'images') {
+          // Pour les images supplémentaires, on peut créer un message d'erreur dynamique
+          const wrapper = input.closest('.image-input-wrapper');
+          let errorSpan = wrapper.querySelector('.error-message');
+          if (!errorSpan) {
+            errorSpan = document.createElement('span');
+            errorSpan.className = 'error-message';
+            wrapper.appendChild(errorSpan);
+          }
+          errorSpan.id = 'images-error-' + Date.now();
+          errorId = errorSpan.id;
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+          if (input.name === 'images') {
+            const wrapper = input.closest('.image-input-wrapper');
+            const errorSpan = wrapper.querySelector('.error-message');
+            if (errorSpan) {
+              errorSpan.textContent = 'Le fichier doit être une image (JPG, PNG, GIF ou WEBP)';
+              errorSpan.classList.remove('hidden');
+            }
+            input.classList.add('error');
+          } else {
+            showError(input.id, 'image-error', 'Le fichier doit être une image (JPG, PNG, GIF ou WEBP)');
+          }
+          input.value = '';
+          return false;
+        }
+        
+        if (file.size > maxSize) {
+          if (input.name === 'images') {
+            const wrapper = input.closest('.image-input-wrapper');
+            const errorSpan = wrapper.querySelector('.error-message');
+            if (errorSpan) {
+              errorSpan.textContent = 'L\'image ne doit pas dépasser 5MB';
+              errorSpan.classList.remove('hidden');
+            }
+            input.classList.add('error');
+          } else {
+            showError(input.id, 'image-error', 'L\'image ne doit pas dépasser 5MB');
+          }
+          input.value = '';
+          return false;
+        }
+        
+        if (input.name === 'images') {
+          const wrapper = input.closest('.image-input-wrapper');
+          const errorSpan = wrapper.querySelector('.error-message');
+          if (errorSpan) {
+            errorSpan.classList.add('hidden');
+          }
+          input.classList.remove('error');
+          input.classList.add('valid');
+        } else {
+          showSuccess(input.id, 'image-error');
+        }
+        return true;
+      }
+
+      // ========== VALIDATION EN TEMPS RÉEL ==========
+      
+      // Fonction helper pour trouver un champ par son name
+      function getFieldByName(name) {
+        return form.querySelector(`[name="${name}"]`);
+      }
+
+      // Titre
+      const titleField = getFieldByName('title');
+      if (titleField) {
+        titleField.addEventListener('blur', () => {
+          validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200);
+        });
+        titleField.addEventListener('input', () => {
+          if (titleField.value.trim().length >= 3) {
+            validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200);
+          }
+        });
+      }
+
+      // Type de logement
+      const typeField = getFieldByName('type_logement');
+      if (typeField) {
+        typeField.addEventListener('change', () => {
+          validateRequired(typeField.id || 'type_logement', 'type_logement-error', 'Le type de logement');
+        });
+      }
+
+      // Description
+      const descField = getFieldByName('description');
+      if (descField) {
+        descField.addEventListener('blur', () => {
+          validateTextLength(descField.id || 'description', 'description-error', 'La description', 10);
+        });
+        descField.addEventListener('input', () => {
+          if (descField.value.trim().length >= 10) {
+            validateTextLength(descField.id || 'description', 'description-error', 'La description', 10);
+          }
+        });
+      }
+
+      // Adresse
+      const addressField = getFieldByName('address');
+      if (addressField) {
+        addressField.addEventListener('blur', () => {
+          validateTextLength(addressField.id || 'address', 'address-error', 'L\'adresse', 5, 255);
+        });
+        addressField.addEventListener('input', () => {
+          if (addressField.value.trim().length >= 5) {
+            validateTextLength(addressField.id || 'address', 'address-error', 'L\'adresse', 5, 255);
+          }
+        });
+      }
+
+      // Ville
+      const cityField = getFieldByName('city');
+      if (cityField) {
+        cityField.addEventListener('blur', () => {
+          validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100);
+        });
+        cityField.addEventListener('input', () => {
+          if (cityField.value.trim().length >= 2) {
+            validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100);
+          }
+        });
+      }
+
+      // Prix
+      const priceField = getFieldByName('price');
+      if (priceField) {
+        priceField.addEventListener('blur', () => {
+          validateNumber(priceField.id || 'price', 'price-error', 'Le prix', 0);
+        });
+        priceField.addEventListener('input', () => {
+          const value = parseFloat(priceField.value);
+          if (!isNaN(value) && value >= 0) {
+            validateNumber(priceField.id || 'price', 'price-error', 'Le prix', 0);
+          }
+        });
+      }
+
+      // Surface
+      const surfaceField = getFieldByName('surface');
+      if (surfaceField) {
+        surfaceField.addEventListener('blur', () => {
+          validateNumber(surfaceField.id || 'surface', 'surface-error', 'La surface', 0);
+        });
+        surfaceField.addEventListener('input', () => {
+          const value = parseFloat(surfaceField.value);
+          if (!isNaN(value) && value >= 0) {
+            validateNumber(surfaceField.id || 'surface', 'surface-error', 'La surface', 0);
+          }
+        });
+      }
+
+      // Nombre de pièces
+      const roomsField = getFieldByName('rooms');
+      if (roomsField) {
+        roomsField.addEventListener('blur', () => {
+          validateNumber(roomsField.id || 'rooms', 'rooms-error', 'Le nombre de pièces', 1, null, true);
+        });
+        roomsField.addEventListener('input', () => {
+          const value = parseInt(roomsField.value);
+          if (!isNaN(value) && value >= 1) {
+            validateNumber(roomsField.id || 'rooms', 'rooms-error', 'Le nombre de pièces', 1, null, true);
+          }
+        });
+      }
+
+      // Nombre de salles de bain
+      const bathroomsField = getFieldByName('bathrooms');
+      if (bathroomsField) {
+        bathroomsField.addEventListener('blur', () => {
+          validateNumber(bathroomsField.id || 'bathrooms', 'bathrooms-error', 'Le nombre de salles de bain', 1, null, true);
+        });
+        bathroomsField.addEventListener('input', () => {
+          const value = parseInt(bathroomsField.value);
+          if (!isNaN(value) && value >= 1) {
+            validateNumber(bathroomsField.id || 'bathrooms', 'bathrooms-error', 'Le nombre de salles de bain', 1, null, true);
+          }
+        });
+      }
+
+      // Image principale
+      const imageField = getFieldByName('image');
+      if (imageField) {
+        imageField.addEventListener('change', () => {
+          validateImageFile(imageField);
+        });
+      }
+
+      // Images supplémentaires
+      imagesContainer.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+          validateImageFile(this);
+        });
+      });
+
+      // Modèle 3D (URL)
+      const model3dField = getFieldByName('model_3d');
+      if (model3dField) {
+        model3dField.addEventListener('blur', () => {
+          validateURL(model3dField.id || 'model_3d', 'model_3d-error', 'Le modèle 3D');
+        });
+        model3dField.addEventListener('input', () => {
+          if (model3dField.value.trim() !== '') {
+            validateURL(model3dField.id || 'model_3d', 'model_3d-error', 'Le modèle 3D');
+          }
+        });
+      }
+
+      // ========== VALIDATION À LA SOUMISSION ==========
+      form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        // Valider tous les champs obligatoires
+        if (titleField) {
+          isValid = validateTextLength(titleField.id || 'title', 'title-error', 'Le titre', 3, 200) && isValid;
+        }
+        if (typeField) {
+          isValid = validateRequired(typeField.id || 'type_logement', 'type_logement-error', 'Le type de logement') && isValid;
+        }
+        if (descField) {
+          isValid = validateTextLength(descField.id || 'description', 'description-error', 'La description', 10) && isValid;
+        }
+        if (addressField) {
+          isValid = validateTextLength(addressField.id || 'address', 'address-error', 'L\'adresse', 5, 255) && isValid;
+        }
+        if (cityField) {
+          isValid = validateTextLength(cityField.id || 'city', 'city-error', 'La ville', 2, 100) && isValid;
+        }
+        if (priceField) {
+          isValid = validateNumber(priceField.id || 'price', 'price-error', 'Le prix', 0) && isValid;
+        }
+        if (surfaceField) {
+          isValid = validateNumber(surfaceField.id || 'surface', 'surface-error', 'La surface', 0) && isValid;
+        }
+        if (roomsField) {
+          isValid = validateNumber(roomsField.id || 'rooms', 'rooms-error', 'Le nombre de pièces', 1, null, true) && isValid;
+        }
+        if (bathroomsField) {
+          isValid = validateNumber(bathroomsField.id || 'bathrooms', 'bathrooms-error', 'Le nombre de salles de bain', 1, null, true) && isValid;
+        }
+        
+        // Valider les champs optionnels s'ils sont remplis
+        if (imageField && imageField.files.length > 0) {
+          isValid = validateImageFile(imageField) && isValid;
+        }
+        
+        if (model3dField && model3dField.value.trim() !== '') {
+          isValid = validateURL(model3dField.id || 'model_3d', 'model_3d-error', 'Le modèle 3D') && isValid;
+        }
+
+        // Valider les images supplémentaires
+        imagesContainer.querySelectorAll('input[type="file"]').forEach(input => {
+          if (input.files.length > 0) {
+            isValid = validateImageFile(input) && isValid;
+          }
+        });
+
+        // Valider la carte (latitude/longitude requis)
+        const latitudeField = document.getElementById('id_latitude');
+        const longitudeField = document.getElementById('id_longitude');
+        if (latitudeField && longitudeField) {
+          if (!latitudeField.value || !longitudeField.value) {
+            isValid = false;
+            showToast('Veuillez sélectionner un emplacement sur la carte en cliquant sur le bouton "Choisir sur la carte"', 'error');
+          }
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          // Scroll vers le premier champ en erreur
+          const firstError = document.querySelector('.form-control.error') || document.getElementById('map');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (firstError.focus) firstError.focus();
+          }
+          return false;
+        }
+      });
+    });
+
+    // ========== CARTE INTERACTIVE LEAFLET (Modal) ==========
+    let mapPicker, mapMarker;
+    
+    // Fonction de géocodage inverse
+    async function reverseGeocode(lat, lng) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+          headers: {
+            'User-Agent': 'LogementApp/1.0'
+          }
+        });
+        const data = await response.json();
+        if (data && data.display_name) {
+          return data.display_name;
+        }
+        return `${lat}, ${lng}`;
+      } catch (error) {
+        console.error('Erreur géocodage inverse:', error);
+        return `${lat}, ${lng}`;
+      }
+    }
+    
+    function openMapPicker() {
+      document.getElementById("mapPickerOverlay").style.display = "block";
+      
+      setTimeout(() => {
+        if (!mapPicker) {
+          // Coordonnées par défaut (Alger, Algérie)
+          const defaultLat = 36.7538;
+          const defaultLng = 3.0588;
+          
+          mapPicker = L.map('mapPicker').setView([defaultLat, defaultLng], 13);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+          }).addTo(mapPicker);
+          
+          // Si des coordonnées existent déjà, les utiliser
+          const existingLat = document.getElementById('id_latitude')?.value;
+          const existingLng = document.getElementById('id_longitude')?.value;
+          if (existingLat && existingLng) {
+            mapPicker.setView([parseFloat(existingLat), parseFloat(existingLng)], 15);
+            if (mapMarker) mapPicker.removeLayer(mapMarker);
+            mapMarker = L.marker([parseFloat(existingLat), parseFloat(existingLng)]).addTo(mapPicker)
+              .bindPopup(`<strong>Emplacement actuel</strong>`)
+              .openPopup();
+          }
+          
+          mapPicker.on('click', async function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            
+            if (mapMarker) mapPicker.removeLayer(mapMarker);
+            mapMarker = L.marker([lat, lng], {
+              icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+              })
+            }).addTo(mapPicker)
+              .bindPopup(`<strong>Chargement...</strong>`)
+              .openPopup();
+            
+            // Convertir les coordonnées en nom de lieu
+            const placeName = await reverseGeocode(lat, lng);
+            mapMarker.setPopupContent(`<strong>Lieu sélectionné:</strong><br>${placeName}`);
+            
+            // Remplir les champs
+            const addressField = document.querySelector('input[name="address"]');
+            const cityField = document.querySelector('input[name="city"]');
+            const latField = document.getElementById('id_latitude');
+            const lngField = document.getElementById('id_longitude');
+            
+            if (latField) latField.value = lat;
+            if (lngField) lngField.value = lng;
+            
+            // Géocodage inverse pour remplir l'adresse et la ville
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+              headers: {
+                'User-Agent': 'LogementApp/1.0'
+              }
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data) {
+                  // Remplir l'adresse avec display_name (adresse complète)
+                  if (addressField && data.display_name) {
+                    // Extraire juste la partie adresse (sans le pays)
+                    const addressParts = data.display_name.split(',');
+                    // Prendre les 2-3 premières parties (rue, quartier, ville)
+                    if (addressParts.length >= 2) {
+                      addressField.value = addressParts.slice(0, Math.min(3, addressParts.length - 1)).join(', ').trim();
+                    } else {
+                      addressField.value = data.display_name;
+                    }
+                  }
+                  
+                  // Mettre à jour la ville
+                  if (cityField && data.address) {
+                    if (data.address.city) {
+                      cityField.value = data.address.city;
+                    } else if (data.address.town) {
+                      cityField.value = data.address.town;
+                    } else if (data.address.village) {
+                      cityField.value = data.address.village;
+                    } else if (data.address.municipality) {
+                      cityField.value = data.address.municipality;
+                    } else if (data.address.county) {
+                      cityField.value = data.address.county;
+                    }
+                  }
+                }
+              })
+              .catch(error => {
+                console.log('Erreur de géocodage inverse:', error);
+              });
+            
+            // Fermer le popup après 1.5 secondes
+            setTimeout(function() {
+              closeMapPicker();
+            }, 1500);
+          });
+        } else {
+          mapPicker.invalidateSize();
+        }
+      }, 200);
+    }
+    
+    function closeMapPicker() {
+      document.getElementById("mapPickerOverlay").style.display = "none";
+    }
+    
+    // Permettre de fermer le popup en cliquant sur l'overlay
+    document.addEventListener('DOMContentLoaded', function() {
+      const overlay = document.getElementById("mapPickerOverlay");
+      if (overlay) {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) {
+            closeMapPicker();
+          }
+        });
+      }
+    });
+  </script>
+  
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  
+  <!-- POPUP MAP PICKER -->
+  <div id="mapPickerOverlay"
+       style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+              background:rgba(0,0,0,0.6); z-index:9999;">
+    <div style="position:absolute; top:50%; left:50%; width:80%; height:70%;
+                transform:translate(-50%, -50%); background:white;
+                border-radius:10px; overflow:hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <div style="position:relative; padding:15px; background:#f8f9fa; border-bottom:1px solid #dee2e6;">
+        <h4 style="margin:0; display:inline-block;">Cliquez sur la carte pour sélectionner un lieu</h4>
+        <button onclick="closeMapPicker()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%);
+                background:#dc3545; color:white; border:none; border-radius:5px; padding:5px 15px; cursor:pointer; font-size:16px;">
+          ✕ Fermer
+        </button>
+      </div>
+      <div id="mapPicker" style="width:100%; height:calc(100% - 60px);"></div>
+    </div>
+  </div>
+{% endblock %}

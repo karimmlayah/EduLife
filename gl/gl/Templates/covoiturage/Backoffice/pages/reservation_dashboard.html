@@ -1,0 +1,48 @@
+{% extends 'covoiturage/Backoffice/base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="card">
+    <div class="card-header pb-0">
+      <h6>Liste des Réservations</h6>
+    </div>
+    <div class="card-body px-0 pt-0 pb-2">
+      <div class="table-responsive p-0">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Trajet</th>
+              <th>Date du covoiturage</th>
+              <th>Places réservées</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in reservations %}
+            <tr>
+              <td>{{ r.passager }}</td>
+              <td>{{ r.offre }}</td>
+              <td>
+                {% if r.date %}
+                  {{ r.date|date:"d/m/Y H:i" }}
+                {% else %}
+                  <span class="text-muted">Non définie</span>
+                {% endif %}
+              </td>
+              <td>{{ r.places }}</td>
+              <td>
+                <span class="badge {% if r.statut == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">
+                  {{ r.statut }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Aucune réservation trouvée.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

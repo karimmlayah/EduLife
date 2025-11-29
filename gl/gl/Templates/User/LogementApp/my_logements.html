@@ -1,0 +1,497 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Mes logements • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&h=1080&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Main Content */
+    .logement-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logement-content-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* Add Logement Button */
+    .add-logement-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-logement-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .add-logement-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .add-logement-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .add-logement-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Logements Grid */
+    .logements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .logement-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logement-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .logement-card-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logement-card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: block;
+    }
+
+    .logement-card-image-wrapper .logement-card-image[style*="display: flex"] {
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+    }
+
+    .logement-card-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logement-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .logement-card-location {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logement-card-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .logement-card-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .logement-card-details {
+      display: flex;
+      gap: 1rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .logement-card-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .logement-card-type {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .logement-status-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 5;
+    }
+
+    .status-approved {
+      background: #10b981;
+      color: white;
+    }
+
+    .status-pending {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .status-rejected {
+      background: #ef4444;
+      color: white;
+    }
+
+    .logement-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-card-action {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-edit:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-edit:hover {
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-delete::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-delete:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="logement-hero section dark-background">
+    <div class="background-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Mes logements</h1>
+              <p class="hero-subtitle">Gérez vos logements publiés</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'logement' %}">Logements</a>
+              <span>/</span>
+              <span class="current">Mes logements</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="logement-main-content">
+    <div class="container">
+      <h2 class="logement-content-title">Mes logements</h2>
+      
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <a href="{% url 'logement_add' %}" class="add-logement-btn">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un logement
+        </a>
+      </div>
+
+      {% if logements %}
+      <div class="logements-grid">
+        {% for logement in logements %}
+        <div class="logement-card">
+          <div class="logement-card-image-wrapper">
+            {% if logement.image %}
+              <img src="{{ logement.image.url }}" alt="{{ logement.title }}" class="logement-card-image">
+            {% else %}
+              <div class="logement-card-image" style="display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="bi bi-house"></i>
+              </div>
+            {% endif %}
+            <span class="logement-status-badge {% if logement.rejected %}status-rejected{% elif logement.approved %}status-approved{% else %}status-pending{% endif %}">
+              {% if logement.rejected %}Rejeté{% elif logement.approved %}Approuvé{% else %}En attente{% endif %}
+            </span>
+          </div>
+          <div class="logement-card-content">
+            <span class="logement-card-type">{{ logement.get_type_logement_display }}</span>
+            <h3 class="logement-card-title">{{ logement.title }}</h3>
+            <div class="logement-card-location">
+              <i class="bi bi-geo-alt"></i>
+              {{ logement.address }}, {{ logement.city }}
+            </div>
+            <div class="logement-card-info">
+              <div class="logement-card-price">{{ logement.price|floatformat:0 }} DZD</div>
+              <div class="logement-card-details">
+                <span><i class="bi bi-rulers"></i> {{ logement.surface }} m²</span>
+                <span><i class="bi bi-door-open"></i> {{ logement.rooms }} pièces</span>
+                <span><i class="bi bi-droplet"></i> {{ logement.bathrooms }} sdb</span>
+              </div>
+            </div>
+            <div class="logement-card-actions">
+              <a href="{% url 'logement_detail' logement.id %}" class="btn-card-action" style="background: linear-gradient(135deg, #f87500 0%, #ff9500 100%); color: white; text-decoration: none; box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);">
+                <i class="bi bi-eye"></i> Voir
+              </a>
+              <a href="{% url 'logement_edit' logement.id %}" class="btn-card-action btn-edit" style="text-decoration: none;">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <a href="{% url 'logement_delete' logement.id %}" class="btn-card-action btn-delete" style="text-decoration: none;" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce logement ?');">
+                <i class="bi bi-trash"></i> Supprimer
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-house"></i>
+        </div>
+        <h3>Aucun logement</h3>
+        <p>Vous n'avez pas encore ajouté de logement. <a href="{% url 'logement_add' %}">Ajoutez-en un maintenant !</a></p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+

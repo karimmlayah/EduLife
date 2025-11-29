@@ -1,0 +1,86 @@
+{% extends 'covoiturage/Backoffice/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12">
+
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6>Mes réservations</h6>
+        </div>
+
+        <div class="card-body px-0 pt-0 pb-2">
+          <div class="table-responsive p-4">
+
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bold">Trajet</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bold">Conducteur</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bold">Téléphone</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bold">Places</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bold">Statut</th>
+                  <th class="text-center text-uppercase text-secondary text-xs font-weight-bold">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for r in mes_res %}
+                <tr>
+                  <td>{{ r.offre.depart }} → {{ r.offre.destination }}</td>
+                  <td>{{ r.offre.conducteur.username }}</td>
+                  <td>{{ r.offre.telephone }}</td>
+                  <td>{{ r.nombre_places_reservees }}</td>
+
+                  <td>
+                    {% if r.statut == "pending" %}
+                      <span class="badge bg-warning">En attente</span>
+                    {% elif r.statut == "accepted" %}
+                      <span class="badge bg-success">Acceptée</span>
+                    {% elif r.statut == "rejected" %}
+                      <span class="badge bg-danger">Refusée</span>
+                    {% elif r.statut == "cancelled" %}
+                      <span class="badge bg-secondary">Annulée</span>
+                    {% endif %}
+                  </td>
+
+                  <td class="text-center">
+
+                    {% if r.statut in "pending accepted" %}
+                      <a href="{% url 'res_cancel' r.id %}"
+                         class="btn btn-danger btn-sm">
+                        Annuler
+                      </a>
+                    {% else %}
+                      <span class="text-muted">Aucune action</span>
+                    {% endif %}
+
+                  </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-3">
+                    Vous n’avez réservé aucun trajet.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

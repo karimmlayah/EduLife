@@ -1,0 +1,480 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enregistrement Face ID - GL Project</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{% static 'User/assets/css/login.css' %}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .face-id-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .face-id-container h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .face-id-container p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 4/3;
+        }
+        
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        
+        .face-guide {
+            width: 200px;
+            height: 250px;
+            border: 3px solid rgba(102, 126, 234, 0.6);
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .face-guide::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(102, 126, 234, 0.4);
+            border-radius: 50%;
+        }
+        
+        .face-guide::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 40px;
+            border: 2px solid rgba(102, 126, 234, 0.4);
+            border-radius: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .status-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .camera-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .camera-status.active {
+            background: rgba(76, 175, 80, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="face-id-container">
+        <h1><i class='bx bx-face'></i> Enregistrement Face ID</h1>
+        <p>Positionnez votre visage dans le cadre et entrez votre email</p>
+        
+        <div class="camera-container">
+            <video id="videoElement" autoplay playsinline></video>
+            <div class="camera-overlay">
+                <div class="face-guide"></div>
+            </div>
+            <div class="camera-status" id="cameraStatus">Caméra inactive</div>
+        </div>
+        
+        <div class="input-group">
+            <label for="emailInput"><i class='bx bx-envelope'></i> Email</label>
+            <input type="email" id="emailInput" placeholder="votre.email@example.com" required>
+        </div>
+        
+        <div class="status-message" id="statusMessage"></div>
+        
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="window.location.href='{% url 'login' %}'">
+                <i class='bx bx-arrow-back'></i> Retour
+            </button>
+            <button class="btn btn-primary" id="registerBtn" onclick="registerFaceID()">
+                <i class='bx bx-check'></i> Enregistrer Face ID
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let stream = null;
+        let faceIdSupported = false;
+
+        // Vérifier si WebAuthn est supporté
+        if (window.PublicKeyCredential) {
+            faceIdSupported = true;
+            console.log('Face ID / WebAuthn est supporté');
+        } else {
+            showStatus('WebAuthn n\'est pas supporté sur ce navigateur', 'error');
+            document.getElementById('registerBtn').disabled = true;
+        }
+
+        // Démarrer la caméra
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user', // Caméra frontale
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+                
+                const video = document.getElementById('videoElement');
+                video.srcObject = stream;
+                document.getElementById('cameraStatus').textContent = 'Caméra active';
+                document.getElementById('cameraStatus').classList.add('active');
+            } catch (error) {
+                console.error('Erreur caméra:', error);
+                showStatus('Impossible d\'accéder à la caméra. Vérifiez les permissions.', 'error');
+                document.getElementById('registerBtn').disabled = true;
+            }
+        }
+
+        // Arrêter la caméra
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                document.getElementById('cameraStatus').textContent = 'Caméra inactive';
+                document.getElementById('cameraStatus').classList.remove('active');
+            }
+        }
+
+        // Afficher un message de statut
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Obtenir le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Enregistrer Face ID
+        async function registerFaceID() {
+            if (!faceIdSupported) {
+                showStatus('Face ID n\'est pas supporté sur votre navigateur', 'error');
+                return;
+            }
+
+            const email = document.getElementById('emailInput').value.trim();
+            if (!email) {
+                showStatus('Veuillez entrer votre email', 'error');
+                return;
+            }
+
+            // Validation email basique
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showStatus('Email invalide', 'error');
+                return;
+            }
+
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<span class="loading"></span> Enregistrement...';
+
+            try {
+                const hostname = window.location.hostname;
+                const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0' || hostname === '[::1]';
+                const isIPAddress = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+                const isPrivateIP = hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.') || hostname.startsWith('169.254.');
+                const hasValidDomainFormat = hostname.includes('.') && hostname.split('.').length >= 2;
+                const isValidDomain = hasValidDomainFormat && !isLocalhost && !isIPAddress && !isPrivateIP;
+                const useLocalhostMode = isLocalhost || isIPAddress || isPrivateIP || !hasValidDomainFormat;
+
+                // Créer un challenge
+                const challenge = new Uint8Array(32);
+                crypto.getRandomValues(challenge);
+
+                // Configuration WebAuthn
+                const publicKeyCredentialCreationOptions = {
+                    challenge: challenge,
+                    rp: useLocalhostMode ? {
+                        name: "GL Project"
+                    } : {
+                        name: "GL Project",
+                        id: hostname
+                    },
+                    user: {
+                        id: Uint8Array.from(email, c => c.charCodeAt(0)),
+                        name: email,
+                        displayName: email.split('@')[0]
+                    },
+                    pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        userVerification: "required"
+                    },
+                    timeout: 60000,
+                    attestation: "direct"
+                };
+
+                // Demander l'authentification biométrique
+                let credential;
+                try {
+                    credential = await navigator.credentials.create({
+                        publicKey: publicKeyCredentialCreationOptions
+                    });
+                } catch (webauthnError) {
+                    if (webauthnError.message && (
+                        webauthnError.message.includes('invalid domain') || 
+                        webauthnError.message.includes('Invalid domain') ||
+                        webauthnError.message.includes('not a valid domain') ||
+                        webauthnError.message.includes('This is an invalid domain')
+                    )) {
+                        showStatus('WebAuthn nécessite un domaine valide. Utilisez un tunnel HTTPS (localtunnel/ngrok) ou un domaine valide.', 'error');
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = '<i class=\'bx bx-check\'></i> Enregistrer Face ID';
+                        return;
+                    }
+                    throw webauthnError;
+                }
+
+                // Encoder le credential ID
+                const credentialIdArray = new Uint8Array(credential.rawId);
+                const credentialId = btoa(String.fromCharCode(...credentialIdArray));
+                const publicKey = credentialId;
+
+                // Envoyer au serveur
+                const csrftoken = getCookie('csrftoken');
+                const response = await fetch('{% url "face_id_register" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        credentialId: credentialId,
+                        publicKey: publicKey,
+                        email: email
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('Face ID enregistré avec succès!', 'success');
+                    stopCamera();
+                    setTimeout(() => {
+                        window.location.href = '{% url "login" %}';
+                    }, 2000);
+                } else {
+                    showStatus('Erreur: ' + (data.error || 'Erreur inconnue'), 'error');
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '<i class=\'bx bx-check\'></i> Enregistrer Face ID';
+                }
+            } catch (error) {
+                console.error('Erreur Face ID:', error);
+                if (error.name === 'NotAllowedError') {
+                    showStatus('L\'authentification biométrique a été annulée ou refusée.', 'error');
+                } else {
+                    showStatus('Erreur lors de l\'enregistrement: ' + error.message, 'error');
+                }
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = '<i class=\'bx bx-check\'></i> Enregistrer Face ID';
+            }
+        }
+
+        // Démarrer la caméra au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            startCamera();
+        });
+
+        // Arrêter la caméra avant de quitter
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+        });
+    </script>
+</body>
+</html>
+

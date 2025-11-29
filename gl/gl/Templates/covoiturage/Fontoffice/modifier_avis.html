@@ -1,0 +1,424 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Modifier l'avis - Covoiturage</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'frontoffice/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'frontoffice/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontoffice/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'frontoffice/assets/css/main.css' %}" rel="stylesheet">
+
+  <style>
+    .rating-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .star-rating {
+      font-size: 3rem;
+      cursor: pointer;
+      color: #ddd;
+      transition: all 0.2s;
+    }
+    .star-rating:hover,
+    .star-rating.active {
+      color: #ffc107;
+    }
+    .star-rating.filled {
+      color: #ffc107;
+    }
+    .rating-label {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #666;
+    }
+    .comment-section {
+      margin-top: 30px;
+    }
+    .btn-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s;
+      padding: 12px 40px;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      color: white;
+    }
+    .trip-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+    /* User Avatar Styles */
+    .user-avatar-mini {
+      display:inline-flex;align-items:center;justify-content:center;
+      width:36px;height:36px;border-radius:50%;
+      color:#fff;font-weight:700;text-decoration:none;
+      box-shadow:0 0 0 3px rgba(37,117,252,.18);
+    }
+    .user-avatar-initials{ font-size:.9rem; letter-spacing:.5px; }
+    .avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); box-shadow: 0 0 0 3px rgba(17,205,239,.55) }
+    .avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); box-shadow: 0 0 0 3px rgba(45,206,137,.55) }
+    .avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.55) }
+    .avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); box-shadow: 0 0 0 3px rgba(251,99,64,.55) }
+    .avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); box-shadow: 0 0 0 3px rgba(94,114,228,.55) }
+    .avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); box-shadow: 0 0 0 3px rgba(106,17,203,.45) }
+    .user-menu{ position: relative; display:inline-block; }
+    .user-dropdown{
+      position: absolute; right:0; top:46px; min-width: 160px;
+      background: rgba(16,23,42,.92); color:#fff; border-radius:12px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+      padding:6px; display:none; z-index:1050; backdrop-filter: blur(8px);
+    }
+    .user-dropdown a{ display:block; padding:10px 12px; border-radius:8px; color:#e5e7eb; text-decoration:none; font-weight:600; font-size:.9rem; }
+    .user-dropdown a:hover{ background: rgba(59,130,246,.18); color:#fff; }
+    .user-menu.open .user-dropdown{ display:block; }
+    /* Notifications and Messages Icons */
+    .notifications-icon-link:hover,
+    .messages-icon-link:hover {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    /* Fix dropdown menu visibility */
+    .navmenu .dropdown ul {
+      background: #ffffff !important;
+      color: #40372e !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      z-index: 9999 !important;
+      min-width: 220px !important;
+      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    .navmenu .dropdown:hover ul {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .navmenu .dropdown ul li {
+      background: transparent !important;
+      list-style: none !important;
+    }
+    .navmenu .dropdown ul a {
+      color: #40372e !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 10px 20px !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: all 0.3s !important;
+    }
+    .navmenu .dropdown ul a:hover {
+      color: #f87500 !important;
+      background: rgba(248, 117, 0, 0.1) !important;
+    }
+    .navmenu .dropdown ul a i {
+      color: inherit !important;
+      font-size: 14px !important;
+      width: 18px !important;
+      display: inline-flex !important;
+    }
+  </style>
+</head>
+
+<body class="contact-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">EduLife</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'evently_schedule' %}" class="{% if request.resolver_match.url_name == 'evently_schedule' %}active{% endif %}"><i class="bi bi-newspaper me-1"></i> Fil d'actualité</a></li>
+          <li><a href="{% url 'event_home' %}" class="{% if request.resolver_match.url_name == 'event_home' or request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'view_seats' or request.resolver_match.url_name == 'reserve_event' %}active{% endif %}"><i class="bi bi-calendar-event me-1"></i> Événements</a></li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'logement' or request.resolver_match.url_name == 'logement_add' or request.resolver_match.url_name == 'my_logements' or request.resolver_match.url_name == 'logement_detail' or request.resolver_match.url_name == 'logement_edit' or request.resolver_match.url_name == 'binome_search' or request.resolver_match.url_name == 'binome_detail' %}active{% endif %}"><span><i class="bi bi-house-door me-1"></i> Logement</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="{% url 'logement' %}"><i class="bi bi-list-ul me-1"></i> Voir tous les logements</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'logement_add' %}"><i class="bi bi-plus-circle me-1"></i> Ajouter un logement</a></li>
+                <li><a href="{% url 'my_logements' %}"><i class="bi bi-house-check me-1"></i> Mes logements</a></li>
+                <li><a href="{% url 'binome_search' %}"><i class="bi bi-people me-1"></i> Chercher un binôme</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="{% if request.resolver_match.url_name == 'mes_offres' or request.resolver_match.url_name == 'mes_reservations' or request.resolver_match.url_name == 'mes_reservations_passager' %}active{% endif %}"><span><i class="bi bi-car-front me-1"></i> Covoiturage</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/covoiturage/"><i class="bi bi-car-front me-1"></i> Covoiturage</a></li>
+              {% if request.user.is_authenticated %}
+                <li><a href="{% url 'mes_offres' %}"><i class="bi bi-briefcase me-1"></i> Mes offres</a></li>
+                <li><a href="{% url 'mes_reservations_passager' %}"><i class="bi bi-ticket-perforated me-1"></i> Mes réservations</a></li>
+                <li><a href="{% url 'mes_reservations' %}"><i class="bi bi-inbox me-1"></i> Demandes reçues</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="{% url 'internships' %}" class="{% if request.resolver_match.url_name == 'internships' or request.resolver_match.url_name == 'my_applications' or request.resolver_match.url_name == 'my_interviews' %}active{% endif %}">Internships <i class="bi bi-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+            </ul>
+          </li>
+          <li><a href="{% url 'evently_about' %}" class="{% if request.resolver_match.url_name == 'evently_about' %}active{% endif %}">About</a></li>
+          <li><a href="{% url 'evently_contact' %}" class="{% if request.resolver_match.url_name == 'evently_contact' %}active{% endif %}">Contact</a></li>
+          {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          {% endif %}
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      {% if True %}
+        {% if request.user.is_authenticated %}
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Notifications Icon -->
+            <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+              {% if unread_notifications_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+            <!-- Messages Icon -->
+            <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages" style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9; text-decoration: none; color: inherit;">
+              <i class="bi bi-chat-dots" style="font-size: 1.2rem;"></i>
+              {% if unread_messages_count > 0 %}
+                <span style="position: absolute; top: -2px; right: -2px; background: #ff6b35; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid white;">{{ unread_messages_count }}</span>
+              {% endif %}
+            </a>
+            {% with user_id=request.user.id|default:0 %}
+            <div class="user-menu" id="hdrUserMenu">
+              <a href="#" onclick="return false;"
+                 class="user-avatar-mini {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}"
+                 title="{{ request.user.first_name|default:request.user.username }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}"
+                 style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0;{% endif %}">
+                {% if request.user.avatar %}
+                  <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                  <span class="user-avatar-initials">
+                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                  </span>
+                {% endif %}
+              </a>
+            <div class="user-dropdown" id="hdrUserDropdown">
+            <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
+            <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+              {% if request.user.is_superuser %}
+                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+              {% endif %}
+              <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
+              <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
+            </div>
+          </div>
+          {% endwith %}
+          </div>
+         {% else %}
+           <a class="user-avatar-mini avatar-c5" href="{% url 'login' %}" title="S'inscrire"><span class="user-avatar-initials">+</span></a>
+         {% endif %}
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-title dark-background" style="background-image: url({% static 'frontoffice/assets/img/events/showcase-9.webp' %});">
+      <div class="container position-relative">
+        <h1>Modifier l'avis</h1>
+        <p>Modifiez votre évaluation du trajet</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <!-- Informations du trajet -->
+                <div class="trip-info">
+                  <h5 class="mb-3"><i class="bi bi-route"></i> Détails du trajet</h5>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-geo-alt-fill text-primary"></i> Départ :</strong> {{ reservation.offre.depart }}
+                  </p>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-geo-alt text-success"></i> Destination :</strong> {{ reservation.offre.destination }}
+                  </p>
+                  <p class="mb-2">
+                    <strong><i class="bi bi-person"></i> Conducteur :</strong> {{ reservation.offre.conducteur.username }}
+                  </p>
+                  {% if reservation.offre.date_covoiturage %}
+                  <p class="mb-0">
+                    <strong><i class="bi bi-calendar-event"></i> Date :</strong> {{ reservation.offre.date_covoiturage|date:"d/m/Y H:i" }}
+                  </p>
+                  {% endif %}
+                </div>
+
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'modifier_avis' reservation.id %}">
+                  {% csrf_token %}
+                  
+                  <!-- Système de notation par étoiles -->
+                  <div class="rating-container">
+                    <h4 class="mb-4">Comment évaluez-vous ce trajet ?</h4>
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                      {% for i in "12345" %}
+                        <i class="bi bi-star star-rating" data-rating="{{ i }}" onclick="selectRating({{ i }})"></i>
+                      {% endfor %}
+                    </div>
+                    <input type="hidden" name="note" id="note-input" value="{{ avis.note }}" required>
+                    <div class="rating-label" id="rating-label">Note actuelle : {{ avis.note }}/5</div>
+                  </div>
+
+                  <!-- Commentaire -->
+                  <div class="comment-section">
+                    <label for="commentaire" class="form-label">
+                      <strong>Commentaire (optionnel)</strong>
+                    </label>
+                    <textarea 
+                      class="form-control" 
+                      id="commentaire" 
+                      name="commentaire" 
+                      rows="5" 
+                      placeholder="Partagez votre expérience : Comment s'est passé le trajet ? Y a-t-il eu des problèmes ? Le service était-il satisfaisant ?"
+                      maxlength="1000">{% if avis.commentaire %}{{ avis.commentaire }}{% endif %}</textarea>
+                    <small class="text-muted">Maximum 1000 caractères</small>
+                  </div>
+
+                  <!-- Boutons -->
+                  <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'mes_reservations_passager' %}" class="btn btn-secondary">
+                      <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-orange">
+                      <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Covoiturage</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'frontoffice/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'frontoffice/assets/js/main.js' %}"></script>
+
+  <script>
+    let selectedRating = {{ avis.note }};
+    const labels = {
+      1: "Très mauvais - Le trajet ne s'est pas bien passé",
+      2: "Mauvais - Service insatisfaisant",
+      3: "Moyen - Expérience correcte",
+      4: "Bien - Bon service",
+      5: "Excellent - Parfait !"
+    };
+
+    // Initialiser l'affichage avec la note actuelle
+    window.addEventListener('DOMContentLoaded', function() {
+      selectRating({{ avis.note }});
+    });
+
+    function selectRating(rating) {
+      selectedRating = rating;
+      document.getElementById('note-input').value = rating;
+      document.getElementById('rating-label').textContent = labels[rating];
+      
+      // Mettre à jour l'affichage des étoiles
+      const stars = document.querySelectorAll('.star-rating');
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('filled');
+          star.classList.remove('bi-star');
+          star.classList.add('bi-star-fill');
+        } else {
+          star.classList.remove('filled');
+          star.classList.remove('bi-star-fill');
+          star.classList.add('bi-star');
+        }
+      });
+    }
+
+    // Hover effect sur les étoiles
+    document.querySelectorAll('.star-rating').forEach((star, index) => {
+      star.addEventListener('mouseenter', function() {
+        const rating = index + 1;
+        const stars = document.querySelectorAll('.star-rating');
+        stars.forEach((s, i) => {
+          if (i < rating) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    document.querySelector('.rating-container').addEventListener('mouseleave', function() {
+      const stars = document.querySelectorAll('.star-rating');
+      stars.forEach((star, index) => {
+        star.classList.remove('active');
+        if (index < selectedRating) {
+          star.classList.add('filled');
+        }
+      });
+    });
+  </script>
+  <script>
+    // Dropdown for avatar (header)
+    (function(){
+      const menu = document.getElementById('hdrUserMenu');
+      if (!menu) return;
+      const toggle = menu.querySelector('.user-avatar-mini');
+      const dd = document.getElementById('hdrUserDropdown');
+      function closeAll(e){ if(!menu.contains(e.target)){ menu.classList.remove('open'); document.removeEventListener('click', closeAll); } }
+      toggle.addEventListener('click', function(){
+        menu.classList.toggle('open');
+        if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
+      });
+    })();
+  </script>
+
+</body>
+</html>
+

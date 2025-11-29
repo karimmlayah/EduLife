@@ -1,0 +1,682 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'User/argon/assets/img/apple-icon.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'User/argon/assets/img/favicon.png' %}">
+  <title>EduBot • Admin</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link id="pagestyle" href="{% static 'User/argon/assets/css/argon-dashboard.css' %}?v=2.1.0" rel="stylesheet" />
+  <style>
+    /* Reprendre le style du nav du dashboard/tables */
+    .topmenu .nav-link {
+      color: #fff;
+      padding: .4rem .8rem;
+      border-radius: .5rem;
+      transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+      position: relative;
+    }
+    .topmenu .nav-link:hover { background: rgba(255,255,255,0.12); }
+    .topmenu .nav-link.active {
+      background: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,255,255,.12));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+      color: #fff !important;
+    }
+    .topmenu .nav-item + .nav-item { margin-left: .35rem; }
+
+    .nav-link-top {
+      color: rgba(255, 255, 255, 0.8) !important;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .nav-link-top:hover:not(.nav-link-disabled) {
+      color: white !important;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .nav-link-top.active {
+      color: white !important;
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+    }
+    .nav-link-top i {
+      font-size: 16px;
+    }
+
+    /* User avatar + menu (même que tables.html) */
+    .user-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      box-shadow:
+        0 0 0 3px rgba(45, 255, 241, .85),
+        0 0 10px 2px rgba(45, 255, 241, .35);
+      color: #fff;
+      font-weight: 700;
+    }
+    .user-avatar.avatar-c0 { background: linear-gradient(135deg, #5e72e4 0%, #11cdef 100%); }
+    .user-avatar.avatar-c1 { background: linear-gradient(135deg, #11cdef 0%, #2dce89 100%); }
+    .user-avatar.avatar-c2 { background: linear-gradient(135deg, #2dce89 0%, #5e72e4 100%); }
+    .user-avatar.avatar-c3 { background: linear-gradient(135deg, #f5365c 0%, #fb6340 100%); }
+    .user-avatar.avatar-c4 { background: linear-gradient(135deg, #172b4d 0%, #5e72e4 100%); }
+    .user-avatar.avatar-c5 { background: linear-gradient(135deg, #11cdef 0%, #6a11cb 100%); }
+
+    .user-menu-dashboard {
+      position: relative;
+      display: inline-block;
+    }
+    .user-dropdown-dashboard {
+      position: absolute;
+      right: 0;
+      top: 46px;
+      min-width: 200px;
+      background: rgba(16, 23, 42, 0.95);
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 8px;
+      display: none;
+      z-index: 1050;
+      backdrop-filter: blur(8px);
+    }
+    .user-menu-dashboard.active .user-dropdown-dashboard {
+      display: block;
+    }
+    .user-dropdown-dashboard a {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .user-dropdown-dashboard a:hover {
+      background: rgba(59, 130, 246, 0.18);
+      color: #fff;
+    }
+    .user-dropdown-dashboard a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .btn-site-dashboard {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transition: all 0.2s;
+      opacity: 0.9;
+    }
+    .btn-site-dashboard:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .notifications-icon-dashboard,
+    .messages-icon-dashboard {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transition: all 0.2s;
+      opacity: 0.9;
+      color: #111827;
+    }
+    .notifications-icon-dashboard:hover,
+    .messages-icon-dashboard:hover {
+      opacity: 1;
+      background: rgba(17, 24, 39, 0.06);
+    }
+    .notifications-badge-dashboard,
+    .messages-badge-dashboard {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #f5365c;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border: 2px solid #1e293b;
+    }
+
+    /* Bouton logout en bas */
+    #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
+    .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+
+    /* Styles spécifiques EduBot */
+    .edubot-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 180px);
+      max-height: 720px;
+    }
+    .edubot-messages {
+      flex: 1;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 16px;
+      overflow-y: auto;
+      background: #0f172a;
+      color: #e5e7eb;
+      box-shadow: 0 10px 25px rgba(15,23,42,0.45);
+    }
+    .edubot-input-area {
+      margin-top: 16px;
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    }
+    .edubot-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edubot-input {
+      flex: 1;
+      resize: none;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      background: white;
+    }
+    .edubot-input:focus {
+      outline: none;
+      border-color: #f87500;
+      box-shadow: 0 0 0 2px rgba(248, 117, 0, 0.2);
+    }
+    .edubot-send-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg,#f87500,#ff9500);
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .edubot-send-btn i {
+      font-size: 14px;
+    }
+
+    .edubot-action-btn {
+      border: none;
+      border-radius: 999px;
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(248, 117, 0, 0.08);
+      border: 1px solid rgba(248, 117, 0, 0.8);
+      color: #111827;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .edubot-action-btn:hover {
+      background: #f87500;
+      border-color: #f87500;
+      color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(248, 117, 0, 0.25);
+    }
+    .edubot-action-btn span {
+      color: #111827;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .edubot-action-btn:hover span {
+      color: #ffffff;
+    }
+
+    .edubot-tts-btn {
+      margin-top: 4px;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edubot-tts-btn:hover {
+      color: #fbbf24;
+    }
+
+    .edubot-msg-user > div:first-child { color:#fbbf24; font-weight:600; }
+    .edubot-msg-bot  > div:first-child { color:#34d399; font-weight:600; }
+    .edubot-msg {
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body class="g-sidenav-show bg-gray-100">
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+
+  {% comment %} Sidebar reprise de tables.html {% endcomment %}
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 " id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href="javascript:;">
+        <img src="{% static 'User/argon/assets/img/logo-ct-dark.png' %}" width="26" height="26" class="navbar-brand-img h-100" alt="logo">
+        <span class="ms-1 font-weight-bold">EduLife Admin</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_dashboard' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_tables' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Utilisateurs</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'admin_edubot' %}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-chat-round text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">EduBot</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sidenav-footer mx-3">
+      <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100 mb-0 btn-logout">
+        <i class="ni ni-button-power"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content position-relative border-radius-lg">
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur" data-scroll="false">
+      <div class="container-fluid py-1 px-3">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+              <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
+              <li class="breadcrumb-item text-sm text-white active" aria-current="page">EduBot</li>
+            </ol>
+            <h6 class="font-weight-bolder text-white mb-0">EduBot</h6>
+          </nav>
+          <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+            <div class="d-flex align-items-center w-100 pe-md-3">
+              <!-- Center: Navigation Links -->
+              <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
+                <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' %}active{% endif %}">
+                  <i class="ni ni-single-02 me-1"></i>
+                  <span>User</span>
+                </a>
+                <a href="{% url 'offres_stage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+                  <i class="ni ni-briefcase-24 me-1"></i>
+                  <span>Internship</span>
+                </a>
+                <a href="{% url 'dashboard_startup' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_startup' or request.resolver_match.url_name == 'startupList' or request.resolver_match.url_name == 'investmentList' or 'startup' in request.path %}active{% endif %}">
+                  <i class="ni ni-building me-1"></i>
+                  <span>Startup</span>
+                </a>
+                <a href="{% url 'housing' %}" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
+                  <i class="fas fa-home me-1"></i>
+                  <span>Housing</span>
+                </a>
+                <a href="{% url 'dashboard_covoiturage' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_covoiturage' %}active{% endif %}">
+                  <i class="ni ni-delivery-fast me-1"></i>
+                  <span>Ride sharing</span>
+                </a>
+                <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' %}active{% endif %}">
+                  <i class="ni ni-calendar-grid-58 me-1"></i>
+                  <span>Events</span>
+                </a>
+                <a href="{% url 'admin_edubot' %}" class="nav-link-top active">
+                  <i class="ni ni-chat-round me-1"></i>
+                  <span>EduBot</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <ul class="navbar-nav  justify-content-end">
+            {% if request.user.is_authenticated %}
+                <!-- Button to go to site -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'index' %}" class="nav-link text-white p-0 btn-site-dashboard" title="Aller au site" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; opacity: 0.9;">
+                        <i class="ni ni-world" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+                <!-- Notifications Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'notifications' %}" class="nav-link text-white p-0 notifications-icon-dashboard" title="Notifications" style="position: relative;">
+                        <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- Messages Icon -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <a href="{% url 'messages' %}" class="nav-link text-white p-0 messages-icon-dashboard" title="Messages" style="position: relative;">
+                        <i class="ni ni-chat-round" style="font-size: 1.2rem;"></i>
+                        {% if unread_messages_count > 0 %}
+                            <span class="messages-badge-dashboard">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <!-- User Avatar Menu -->
+                <li class="nav-item d-flex align-items-center">
+                    {% with user_id=request.user.id|default:0 %}
+                    <div class="user-menu-dashboard" id="dashboardUserMenu">
+                        <a href="javascript:;" onclick="return false;" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                            <span class="user-avatar me-2 {% if not request.user.avatar %}{% if user_id|divisibleby:'6' %}avatar-c0{% elif user_id|add:'-1'|divisibleby:'6' %}avatar-c1{% elif user_id|add:'-2'|divisibleby:'6' %}avatar-c2{% elif user_id|add:'-3'|divisibleby:'6' %}avatar-c3{% elif user_id|add:'-4'|divisibleby:'6' %}avatar-c4{% else %}avatar-c5{% endif %}{% endif %}" style="{% if request.user.avatar %}background: none; box-shadow: none; padding: 0; width: 36px; height: 36px;{% endif %}">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.first_name|default:request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                                {% endif %}
+                            </span>
+                        </a>
+                        <div class="user-dropdown-dashboard" id="dashboardUserDropdown">
+                            <a href="{% url 'profile' %}"><i class="ni ni-single-02 me-2"></i> Profile</a>
+                            <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
+                            <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
+                            <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                </li>
+            {% else %}
+                <li class="nav-item d-flex align-items-center">
+                    <a href="{% url 'login' %}" class="nav-link text-white font-weight-bold px-0 d-flex align-items-center">
+                        <span class="user-avatar me-2 avatar-c5">+</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line bg-white"></i>
+                  <i class="sidenav-toggler-line bg-white"></i>
+                  <i class="sidenav-toggler-line bg-white"></i>
+                </div>
+              </a>
+            </li>
+            <li class="nav-item px-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white p-0">
+                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+              </a>
+            </li>
+            <li class="nav-item dropdown pe-2 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bell cursor-pointer"></i>
+              </a>
+
+              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                <li class="mb-2 text-center text-xs text-secondary">
+                  Aucune notification
+                </li>
+              </ul>
+            </li>
+          </ul>
+      </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>EduBot – Assistant IA</h6>
+              <p class="text-sm text-secondary mb-0">Pose tes questions sur la plateforme, les utilisateurs, les logements, etc.</p>
+            </div>
+            <div class="card-body">
+              <div class="edubot-container">
+                <div id="edubot-messages" class="edubot-messages"></div>
+                <div class="edubot-input-area">
+                  <form id="edubot-form" onsubmit="sendEduBotMessage(event)">
+                    <div class="edubot-input-row">
+                      <button type="button" class="edubot-action-btn" id="edubot-mic-btn" title="Parler à EduBot">
+                        <span>🎤</span>
+                      </button>
+                      <button type="button" class="edubot-action-btn" id="edubot-file-btn" title="Joindre un fichier texte">
+                        <span>📎</span>
+                      </button>
+                      <textarea id="edubot-input" rows="2" class="edubot-input" placeholder="Parle au micro ou écris ta question ici..."></textarea>
+                      <button type="submit" class="edubot-send-btn">
+                        <i class="ni ni-send"></i>
+                        <span>Envoyer</span>
+                      </button>
+                    </div>
+                    <input type="file" id="edubot-file-input" accept=".txt,.md,.log,.json" style="display:none">
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'User/argon/assets/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'User/argon/assets/js/argon-dashboard.min.js' %}?v=2.1.0"></script>
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return '';
+    }
+
+    // ==== Speech to Text (Web Speech API) ====
+    let edubotRecognition = null;
+    let edubotListening = false;
+
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("La reconnaissance vocale n'est pas supportée par ce navigateur.");
+        return null;
+      }
+      const rec = new SpeechRecognition();
+      rec.lang = 'fr-FR';
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('edubot-input');
+        input.value = (input.value ? input.value + ' ' : '') + transcript;
+        input.focus();
+      };
+      rec.onend = function() {
+        edubotListening = false;
+        const micBtn = document.getElementById('edubot-mic-btn');
+        if (micBtn) micBtn.style.background = 'white';
+      };
+      return rec;
+    }
+
+    function toggleSpeechToText() {
+      if (!edubotRecognition) {
+        edubotRecognition = initSpeechRecognition();
+        if (!edubotRecognition) return;
+      }
+      if (edubotListening) {
+        edubotRecognition.stop();
+        return;
+      }
+      edubotListening = true;
+      const micBtn = document.getElementById('edubot-mic-btn');
+      if (micBtn) micBtn.style.background = '#fee2e2';
+      edubotRecognition.start();
+    }
+
+    // ==== Text to Speech (lecture des réponses) ====
+    function speakText(text) {
+      if (!window.speechSynthesis) {
+        alert("La synthèse vocale n'est pas supportée par ce navigateur.");
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'fr-FR';
+      window.speechSynthesis.speak(utter);
+    }
+
+    // ==== Fichier texte attaché ====
+    function setupFileInput() {
+      const fileInput = document.getElementById('edubot-file-input');
+      const fileBtn = document.getElementById('edubot-file-btn');
+      const input = document.getElementById('edubot-input');
+      if (!fileInput || !fileBtn || !input) return;
+
+      fileBtn.addEventListener('click', function() {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const content = (e.target.result || '').toString().slice(0, 5000);
+          input.value += (input.value ? "\n\n" : "") +
+            "Voici le contenu du fichier " + file.name + " :\n" + content;
+        };
+        reader.readAsText(file, 'utf-8');
+      });
+    }
+
+    async function sendEduBotMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('edubot-input');
+      const container = document.getElementById('edubot-messages');
+      const text = (input.value || '').trim();
+      if (!text) return;
+
+      const userDiv = document.createElement('div');
+      userDiv.className = 'edubot-msg edubot-msg-user';
+      userDiv.innerHTML = '<div>Vous</div><div>'+text.replace(/</g,'&lt;')+'</div>';
+      container.appendChild(userDiv);
+      container.scrollTop = container.scrollHeight;
+      input.value = '';
+
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'edubot-msg';
+      loadingDiv.style.color = '#9ca3af';
+      loadingDiv.textContent = 'EduBot réfléchit...';
+      container.appendChild(loadingDiv);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const resp = await fetch("{% url 'edubot_chat' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') || ''
+          },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await resp.json();
+        container.removeChild(loadingDiv);
+
+        const botDiv = document.createElement('div');
+        botDiv.className = 'edubot-msg edubot-msg-bot';
+        const reply = (data.reply || data.error || 'Erreur');
+        const safeReply = reply.replace(/</g,'&lt;');
+        botDiv.innerHTML =
+          '<div>EduBot</div>' +
+          '<div>'+ safeReply +'</div>' +
+          '<button type="button" class="edubot-tts-btn" onclick="speakText(`'+ safeReply +'`)">' +
+          '<i class="ni ni-sound-wave"></i> Lire la réponse' +
+          '</button>';
+        container.appendChild(botDiv);
+        container.scrollTop = container.scrollHeight;
+      } catch (err) {
+        container.removeChild(loadingDiv);
+        const errDiv = document.createElement('div');
+        errDiv.className = 'edubot-msg';
+        errDiv.style.color = '#f87171';
+        errDiv.textContent = 'Erreur lors de la réponse d’EduBot.';
+        container.appendChild(errDiv);
+      }
+    }
+
+    // User dropdown menu toggle (même comportement que tables.html)
+    document.addEventListener('DOMContentLoaded', function() {
+      const userMenu = document.getElementById('dashboardUserMenu');
+      if (userMenu) {
+        const dropdown = document.getElementById('dashboardUserDropdown');
+        const toggle = userMenu.querySelector('a[href="javascript:;"]');
+        if (toggle && dropdown) {
+          toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle('active');
+          });
+          document.addEventListener('click', function(e) {
+            if (!userMenu.contains(e.target)) {
+              userMenu.classList.remove('active');
+            }
+          });
+        }
+      }
+
+      // Initialiser les fonctionnalités EduBot (STT, fichier)
+      const micBtn = document.getElementById('edubot-mic-btn');
+      if (micBtn) {
+        micBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          toggleSpeechToText();
+        });
+      }
+      setupFileInput();
+    });
+  </script>
+</body>
+</html>
+
+

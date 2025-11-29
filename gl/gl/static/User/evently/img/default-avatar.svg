@@ -1,0 +1,15 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#357ABD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E5A8A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Circle background with gradient -->
+  <circle cx="100" cy="100" r="100" fill="url(#blueGradient)"/>
+  <!-- Person silhouette (head and shoulders) with same gradient -->
+  <path d="M 100 30 C 65 30, 40 55, 40 85 C 40 110, 55 130, 75 145 L 75 170 C 75 180, 83 188, 93 188 L 107 188 C 117 188, 125 180, 125 170 L 125 145 C 145 130, 160 110, 160 85 C 160 55, 135 30, 100 30 Z" fill="url(#blueGradient)"/>
+  <!-- Large white question mark in the center of the silhouette -->
+  <text x="100" y="115" font-family="Arial, sans-serif" font-size="90" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="central">?</text>
+</svg>

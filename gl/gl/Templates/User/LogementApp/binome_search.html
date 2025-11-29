@@ -1,0 +1,593 @@
+{% extends 'User/evently/base.html' %}
+{% load static %}
+
+{% block title %}Chercher un binôme • EduLife{% endblock %}
+
+{% block body_class %}logement-hero-page{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Hero Section */
+    .logement-hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      background: transparent;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin-top: 0;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .logement-hero {
+        background-attachment: scroll;
+        min-height: 50vh;
+        padding-top: 100px;
+        padding-bottom: 60px;
+      }
+    }
+
+    body.logement-hero-page #header.header {
+      --background-color: rgba(255, 255, 255, 0) !important;
+      background-color: rgba(255, 255, 255, 0) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body.logement-hero-page.scrolled #header.header {
+      --background-color: rgba(34, 18, 2, 0.9) !important;
+      background-color: rgba(34, 18, 2, 0.9) !important;
+      box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.logement-hero-page #header.header,
+    body.logement-hero-page #header.header .logo h1 {
+      color: #ffffff !important;
+    }
+
+    .logement-hero .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .logement-hero .hero-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .schedule-breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .schedule-breadcrumb a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .schedule-breadcrumb a:hover {
+      color: #ffffff;
+    }
+
+    .schedule-breadcrumb .current {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .binome-main-content {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 50vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .binome-content-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .add-binome-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-binome-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .add-binome-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .add-binome-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .add-binome-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .binome-requests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .binome-request-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .binome-request-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .binome-request-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .binome-request-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .binome-request-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .binome-request-user-info h4 {
+      margin: 0;
+      font-size: 1rem;
+      color: #1f2937;
+    }
+
+    .binome-request-user-info p {
+      margin: 0.25rem 0 0 0;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .binome-request-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .binome-request-description {
+      color: #6b7280;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      flex: 1;
+    }
+
+    .binome-request-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .binome-request-info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #374151;
+    }
+
+    .binome-request-info-item i {
+      color: #667eea;
+    }
+
+    .binome-request-budget {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .binome-request-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-contact-binome {
+      flex: 1;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-contact-binome::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-contact-binome:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-contact-binome:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .btn-view-binome {
+      padding: 10px 16px;
+      background: #f3f4f6;
+      color: #374151;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .btn-view-binome:hover {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+
+    .btn-edit-binome {
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit-binome::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-edit-binome:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-edit-binome:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+      color: white;
+    }
+
+    .btn-delete-binome {
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-delete-binome::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-delete-binome:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-delete-binome:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+      color: white;
+    }
+
+    .my-requests-section {
+      margin-top: 3rem;
+      padding-top: 3rem;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="logement-hero section dark-background" style="position: relative; overflow: hidden;">
+    <div class="background-overlay" style="background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);"></div>
+    <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1920&h=1080&fit=crop" alt="Recherche de binôme" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+    <div class="hero-content" style="position: relative; z-index: 2;">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-10">
+            <div class="hero-text">
+              <h1 class="hero-title">Chercher un binôme</h1>
+              <p class="hero-subtitle">Trouvez un colocataire pour partager un logement</p>
+            </div>
+            <div class="schedule-breadcrumb">
+              <a href="{% url 'index' %}">Home</a>
+              <span>/</span>
+              <a href="{% url 'logement' %}">Logements</a>
+              <span>/</span>
+              <span class="current">Chercher un binôme</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="binome-main-content">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <a href="{% url 'binome_add' %}" class="add-binome-btn">
+          <i class="bi bi-plus-circle"></i>
+          Créer une demande de binôme
+        </a>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="binome-content-title">Demandes de binômes disponibles</h2>
+      </div>
+
+      {% if binome_requests %}
+        <div class="binome-requests-grid">
+          {% for request in binome_requests %}
+            <div class="binome-request-card">
+              <div class="binome-request-header">
+                <div class="binome-request-avatar">
+                  {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}">
+                  {% else %}
+                    {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                  {% endif %}
+                </div>
+                <div class="binome-request-user-info">
+                  <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+                  <p>{{ request.created_at|date:"d/m/Y" }}</p>
+                </div>
+              </div>
+              
+              <h3 class="binome-request-title">{{ request.title }}</h3>
+              <p class="binome-request-description">{{ request.description|truncatewords:30 }}</p>
+              
+              <div class="binome-request-info">
+                <div class="binome-request-info-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ request.city }}</span>
+                </div>
+                <div class="binome-request-info-item binome-request-budget">
+                  <i class="bi bi-cash-stack"></i>
+                  <span>{{ request.budget_max|floatformat:0 }} DZD/mois</span>
+                </div>
+                {% if request.logement %}
+                  <div class="binome-request-info-item">
+                    <i class="bi bi-house"></i>
+                    <span>Logement spécifique</span>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="binome-request-actions">
+                <a href="{% url 'binome_detail' request.id %}" class="btn-view-binome">
+                  <i class="bi bi-eye"></i> Voir détails
+                </a>
+                <a href="{% url 'binome_contact' request.id %}" class="btn-contact-binome">
+                  <i class="bi bi-chat-dots"></i> Contacter
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="bi bi-people"></i>
+          </div>
+          <h3>Aucune demande disponible</h3>
+          <p>Il n'y a pas encore de demandes de binômes disponibles.</p>
+        </div>
+      {% endif %}
+
+      {% if my_requests %}
+        <div class="my-requests-section">
+          <h2 class="binome-content-title" style="font-size: 2rem; margin-bottom: 1.5rem;">Mes demandes</h2>
+          <div class="binome-requests-grid">
+            {% for request in my_requests %}
+              <div class="binome-request-card">
+                <div class="binome-request-header">
+                  <div class="binome-request-avatar">
+                    {% if request.user.avatar %}
+                      <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}">
+                    {% else %}
+                      {{ request.user.first_name|default:request.user.username|make_list|first|upper }}{% if request.user.last_name %}{{ request.user.last_name|make_list|first|upper }}{% endif %}
+                    {% endif %}
+                  </div>
+                  <div class="binome-request-user-info">
+                    <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+                    <p>{{ request.created_at|date:"d/m/Y" }}</p>
+                  </div>
+                </div>
+                
+                <h3 class="binome-request-title">{{ request.title }}</h3>
+                <p class="binome-request-description">{{ request.description|truncatewords:30 }}</p>
+                
+                <div class="binome-request-info">
+                  <div class="binome-request-info-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>{{ request.city }}</span>
+                  </div>
+                  <div class="binome-request-info-item binome-request-budget">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>{{ request.budget_max|floatformat:0 }} DZD/mois</span>
+                  </div>
+                  <div class="binome-request-info-item">
+                    <span class="badge badge-sm bg-gradient-{% if request.status == 'PENDING' %}warning{% elif request.status == 'ACCEPTED' %}success{% elif request.status == 'REJECTED' %}danger{% else %}info{% endif %}" style="border-radius:12px;">
+                      {{ request.get_status_display }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="binome-request-actions">
+                  <a href="{% url 'binome_detail' request.id %}" class="btn-view-binome" style="flex: 1;">
+                    <i class="bi bi-eye"></i> Voir détails
+                  </a>
+                  <a href="{% url 'binome_edit' request.id %}" class="btn-edit-binome" style="flex: 1;">
+                    <i class="bi bi-pencil"></i> Modifier
+                  </a>
+                  <a href="{% url 'binome_delete' request.id %}" class="btn-delete-binome" style="flex: 1;" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette demande de binôme ?');">
+                    <i class="bi bi-trash"></i> Supprimer
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
