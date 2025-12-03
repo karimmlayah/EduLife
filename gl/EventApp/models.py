@@ -36,6 +36,8 @@ class Event(models.Model):
         null=True,
         default=None,
     )
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     @property
     def formatted_date_for_countdown(self):
         """Retourne la date formatée pour le JavaScript du compte à rebours"""

@@ -8,15 +8,13 @@
 {% block extra_css %}
   <style>
     /* Hero Section - Using Evently Template Styles */
-    .schedule-hero {
+    body.schedule-hero-page #hero.hero {
       position: relative;
       min-height: 60vh;
       display: flex;
       align-items: center;
-      background-image: url('{% static "User/evently/img/events/showcase-5.webp" %}');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      background-image: none !important;
+      background: linear-gradient(135deg, #e3f2fd 0%, #fff3e0 50%, #f3e5f5 100%) !important;
       margin-top: 0;
       padding-top: 120px;
       padding-bottom: 80px;
@@ -26,8 +24,7 @@
     }
 
     @media (max-width: 768px) {
-      .schedule-hero {
-        background-attachment: scroll;
+      body.schedule-hero-page #hero.hero {
         min-height: 50vh;
         padding-top: 100px;
         padding-bottom: 60px;
@@ -48,82 +45,167 @@
       background: rgba(34, 18, 2, 0.9) !important;
       box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
     }
+
+    /* Header Navigation - Black text for visibility */
+    body.schedule-hero-page #header.header .logo .sitename {
+      color: #000000 !important;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+    }
+
+    body.schedule-hero-page #header.header .logo:hover .sitename {
+      color: #f87500 !important;
+    }
+
+    /* Navigation links - Black text */
+    body.schedule-hero-page #header.header .navmenu > ul > li > a {
+      color: #000000 !important;
+      font-weight: 600 !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+
+    body.schedule-hero-page #header.header .navmenu > ul > li > a:hover,
+    body.schedule-hero-page #header.header .navmenu > ul > li > a.active {
+      color: #f87500 !important;
+    }
+
+    /* Icons in header - Black color */
+    body.schedule-hero-page #header.header .notifications-icon-link,
+    body.schedule-hero-page #header.header .messages-icon-link {
+      color: #000000 !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    }
+
+    body.schedule-hero-page #header.header .notifications-icon-link:hover,
+    body.schedule-hero-page #header.header .messages-icon-link:hover {
+      color: #f87500 !important;
+    }
+
+    /* User avatar menu - Black text */
+    body.schedule-hero-page #header.header .user-avatar-mini {
+      color: #000000 !important;
+    }
+
+    /* Dropdown chevrons - Black color */
+    body.schedule-hero-page #header.header .navmenu > ul > li > a .bi-chevron-down {
+      color: #000000 !important;
+    }
+
+    /* When scrolled, keep text black or make it white based on background */
+    body.schedule-hero-page.scrolled #header.header .logo .sitename {
+      color: #ffffff !important;
+      text-shadow: none !important;
+    }
+
+    body.schedule-hero-page.scrolled #header.header .navmenu > ul > li > a {
+      color: #ffffff !important;
+      text-shadow: none !important;
+    }
+
+    body.schedule-hero-page.scrolled #header.header .navmenu > ul > li > a.active {
+      color: #f87500 !important;
+    }
+
+    body.schedule-hero-page.scrolled #header.header .notifications-icon-link,
+    body.schedule-hero-page.scrolled #header.header .messages-icon-link {
+      color: #ffffff !important;
+      text-shadow: none !important;
+    }
+
+    body.schedule-hero-page.scrolled #header.header .navmenu > ul > li > a .bi-chevron-down {
+      color: #ffffff !important;
+    }
     
 
 
-    .schedule-hero .background-overlay {
+    body.schedule-hero-page #hero.hero .background-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(16, 9, 1, 0.7) 0%, rgba(16, 9, 1, 0.5) 100%);
-      z-index: 1;
-      pointer-events: none;
+      background-image: url("{% static 'User/evently/img/hero-background-schedule.png' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+      opacity: 1;
     }
 
-    .schedule-hero .hero-content {
+    /* Fallback gradient if image not loaded */
+    body.schedule-hero-page #hero.hero .background-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, 
+        rgba(230, 240, 255, 0.95) 0%, 
+        rgba(200, 220, 255, 0.9) 50%, 
+        rgba(240, 248, 255, 0.95) 100%);
+      z-index: -1;
+    }
+
+    body.schedule-hero-page #hero.hero .hero-content {
       position: relative;
       z-index: 2;
       width: 100%;
       padding: 80px 0 60px;
     }
 
-    .schedule-hero .hero-text {
-      text-align: center;
+    body.schedule-hero-page #hero.hero .hero-text {
+      text-align: left;
       margin-bottom: 40px;
     }
 
-    .schedule-hero .hero-title {
+    body.schedule-hero-page #hero.hero .hero-title {
       font-size: 4rem;
       font-weight: 600;
       letter-spacing: -0.02em;
       line-height: 1.2;
       margin-bottom: 24px;
-      color: #ffffff;
+      color: #000000;
     }
 
     @media (max-width: 1200px) {
-      .schedule-hero .hero-title {
+      body.schedule-hero-page #hero.hero .hero-title {
         font-size: 3.5rem;
       }
     }
 
     @media (max-width: 768px) {
-      .schedule-hero .hero-title {
+      body.schedule-hero-page #hero.hero .hero-title {
         font-size: 2.5rem;
         margin-bottom: 20px;
       }
     }
 
-    .schedule-hero .hero-subtitle {
+    body.schedule-hero-page #hero.hero .hero-subtitle {
       font-size: 1.2rem;
       line-height: 1.6;
-      margin-bottom: 0;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 24px;
+      max-width: 600px;
+      color: #1a1a1a;
     }
 
     @media (max-width: 768px) {
-      .schedule-hero .hero-subtitle {
+      body.schedule-hero-page #hero.hero .hero-subtitle {
         font-size: 1rem;
       }
     }
 
     .schedule-breadcrumb {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       gap: 0.5rem;
       font-size: 0.95rem;
-      margin-top: 40px;
-      color: rgba(255, 255, 255, 0.8);
+      margin-top: 24px;
+      color: #333333;
     }
 
     .schedule-breadcrumb a {
-      color: rgba(255, 255, 255, 0.8);
+      color: #333333;
       text-decoration: none;
       transition: color 0.3s;
     }
@@ -133,13 +215,50 @@
     }
 
     .schedule-breadcrumb span {
-      color: rgba(255, 255, 255, 0.6);
+      color: #666666;
       margin: 0 0.5rem;
     }
 
     .schedule-breadcrumb .current {
       color: var(--accent-color);
       font-weight: 600;
+    }
+
+    /* Hide "Built with Spline" badge - Multiple approaches */
+    spline-viewer::part(badge),
+    spline-viewer::part(logo),
+    spline-viewer a[href*="spline"],
+    spline-viewer a[href*="Built"],
+    spline-viewer button,
+    spline-viewer .spline-badge,
+    spline-viewer [class*="badge"],
+    spline-viewer [class*="logo"],
+    spline-viewer [id*="badge"],
+    spline-viewer [id*="logo"],
+    spline-viewer [class*="spline"][class*="badge"],
+    spline-viewer [class*="spline"][class*="logo"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+    }
+    
+    /* Hide any button or link in spline-viewer except canvas */
+    spline-viewer *:not(canvas) {
+      pointer-events: none;
+    }
+    
+    /* Re-enable pointer events for canvas only */
+    spline-viewer canvas {
+      pointer-events: auto !important;
+    }
+    
+    /* Additional rule to hide badge using shadow DOM targeting */
+    spline-viewer {
+      --spline-badge-display: none !important;
     }
 
     /* Main Content Section */
@@ -154,32 +273,210 @@
       padding: 0 1rem;
     }
 
-    .schedule-content-title {
-      font-size: 2.5rem;
+    /* Advanced Search Section */
+    .advanced-search-container {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 2rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+    }
+
+    .search-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .search-title {
+      font-size: 1.8rem;
       font-weight: 600;
-      color: var(--heading-color);
-      margin-bottom: 16px;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .toggle-filters-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, #f87500 0%, #ff6b35 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .toggle-filters-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+    }
+
+    .search-main-form {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-input-wrapper {
+      flex: 1;
       position: relative;
-      padding-bottom: 20px;
     }
 
-    .schedule-content-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 80px;
-      height: 4px;
-      background: var(--accent-color);
-      border-radius: 2px;
-    }
-
-    .schedule-content-description {
-      color: var(--default-color);
+    .search-input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 3rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
       font-size: 1rem;
-      line-height: 1.6;
-      margin-top: 16px;
-      opacity: 0.8;
+      transition: all 0.3s;
+      background: #f9fafb;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #f87500;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 1.2rem;
+    }
+
+    .search-submit-btn {
+      padding: 0.9rem 2rem;
+      background: linear-gradient(135deg, #f87500 0%, #ff6b35 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+
+    .search-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+    }
+
+    .advanced-filters {
+      display: none;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .advanced-filters.active {
+      display: block;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    .filter-input,
+    .filter-select {
+      padding: 0.7rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      background: #f9fafb;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: #f87500;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    .clear-filters-btn {
+      padding: 0.7rem 1.5rem;
+      background: #f3f4f6;
+      color: #475569;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .clear-filters-btn:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
+    }
+
+    .search-results-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f0f9ff;
+      border-radius: 8px;
+      color: #0369a1;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .search-results-info.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .search-main-form {
+        flex-direction: column;
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions {
+        flex-direction: column;
+      }
+
+      .search-submit-btn,
+      .clear-filters-btn {
+        width: 100%;
+      }
     }
 
     .feed-container {
@@ -192,12 +489,21 @@
     }
 
     @media (max-width: 992px) {
-      .schedule-hero h1 {
+      body.schedule-hero-page #hero.hero .hero-title {
         font-size: 2.5rem;
       }
-      .schedule-hero {
+      body.schedule-hero-page #hero.hero {
         min-height: 300px;
         margin-top: 60px;
+      }
+      body.schedule-hero-page #hero.hero .col-lg-6:last-child {
+        display: none;
+      }
+      body.schedule-hero-page #hero.hero .hero-text {
+        text-align: center;
+      }
+      body.schedule-hero-page .schedule-breadcrumb {
+        justify-content: center;
       }
       .feed-container {
         grid-template-columns: 1fr;
@@ -254,8 +560,8 @@
 
     .create-post-textarea:focus {
       outline: none;
-      border-color: #11cdef;
-      box-shadow: 0 0 0 3px rgba(17, 205, 239, 0.1);
+      border-color: #f87500;
+      box-shadow: 0 0 0 3px rgba(248, 117, 0, 0.1);
     }
 
     .create-post-actions {
@@ -281,12 +587,12 @@
 
     .create-post-media-btn:hover {
       background: #f5f5f5;
-      border-color: #11cdef;
-      color: #11cdef;
+      border-color: #f87500;
+      color: #f87500;
     }
 
     .create-post-submit {
-      background: linear-gradient(135deg, #11cdef, #5e72e4);
+      background: linear-gradient(135deg, #f87500, #ff6b35);
       color: white;
       border: none;
       padding: 0.6rem 1.5rem;
@@ -298,7 +604,7 @@
 
     .create-post-submit:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(17, 205, 239, 0.3);
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
     }
 
     /* Post Card */
@@ -465,7 +771,7 @@
 
     .post-action-btn:hover {
       background: #f5f5f5;
-      color: #11cdef;
+      color: #f87500;
     }
 
     .post-action-btn i {
@@ -474,11 +780,11 @@
 
     /* Like Button Styles */
     .post-action-btn.liked {
-      color: #667eea !important;
+      color: #f87500 !important;
     }
     
     .post-action-btn.liked i {
-      color: #667eea;
+      color: #f87500;
     }
 
     /* Comments Section */
@@ -648,34 +954,135 @@
 
 {% block content %}
   <!-- Hero Section -->
-  <section class="schedule-hero section dark-background">
+  <section id="hero" class="hero section dark-background">
     <div class="background-overlay"></div>
     <div class="hero-content">
-  <div class="container">
-        <div class="row justify-content-center text-center">
-          <div class="col-lg-10">
-            <div class="hero-text">
-              <h1 class="hero-title">Fil d'actualité</h1>
-              <p class="hero-subtitle">Partagez vos pensées, expériences et connectez-vous avec la communauté EduLife.</p>
+      <div class="container">
+        <div class="row align-items-center">
+          <!-- Text Content - Left Side -->
+          <div class="col-lg-6">
+            <div class="hero-text-wrapper">
+              <div class="hero-text">
+                <h1 class="hero-title">Fil d'actualité</h1>
+                <p class="hero-subtitle">Partagez vos pensées, expériences et connectez-vous avec la communauté EduLife.</p>
+                <div class="schedule-breadcrumb">
+                  <a href="{% url 'index' %}">Home</a>
+                  <span>/</span>
+                  <span class="current">Fil d'actualité</span>
+                </div>
+              </div>
             </div>
-            <div class="schedule-breadcrumb">
-              <a href="{% url 'index' %}">Home</a>
-              <span>/</span>
-              <span class="current">Fil d'actualité</span>
+          </div>
+          <!-- Spline 3D Viewer - Right Side -->
+          <div class="col-lg-6">
+            <div style="
+              width:110%;
+              height:400px;
+              overflow:hidden;
+              border-radius:20px;
+              position:relative;
+              margin-left:150px;
+              margin-top: -50px;
+            ">
+              
+              <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.0/build/spline-viewer.js"></script>
+
+              <spline-viewer 
+                url="https://prod.spline.design/HG6NNGgo9o8-Hzxw/scene.splinecode"
+                style="
+                  width:120%;
+                  height:100%;
+                  display:block;
+                  transform: translateX(-100px);
+                  margin-right: 40px;
+                ">
+              </spline-viewer>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </section><!-- /Hero Section -->
 
   <!-- Main Content Section -->
   <section class="schedule-main-content">
-    <div class="schedule-content-header">
-      <h2 class="schedule-content-title">Fil d'actualité</h2>
-      <p class="schedule-content-description">
-        Découvrez les dernières publications de la communauté et partagez vos propres expériences.
-      </p>
+    <!-- Advanced Search Section -->
+    <div class="advanced-search-container">
+      <div class="search-header">
+        <button type="button" class="toggle-filters-btn" onclick="toggleAdvancedFilters()">
+          <i class="bi bi-funnel"></i>
+          <span id="filters-toggle-text">Afficher les filtres</span>
+        </button>
+      </div>
+
+      <form id="advanced-search-form" onsubmit="performSearch(event)">
+        <div class="search-main-form">
+          <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" 
+                   id="search-query" 
+                   class="search-input" 
+                   placeholder="Rechercher dans les publications, commentaires, auteurs..." 
+                   autocomplete="off">
+          </div>
+          <button type="submit" class="search-submit-btn">
+            <i class="bi bi-search me-1"></i> Rechercher
+          </button>
+        </div>
+
+        <div class="advanced-filters" id="advanced-filters">
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label class="filter-label">Auteur</label>
+              <input type="text" 
+                     id="filter-author" 
+                     class="filter-input" 
+                     placeholder="Nom d'utilisateur ou nom">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Date de publication</label>
+              <select id="filter-date" class="filter-select">
+                <option value="">Toutes les dates</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="year">Cette année</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Tri par</label>
+              <select id="filter-sort" class="filter-select">
+                <option value="recent">Plus récent</option>
+                <option value="oldest">Plus ancien</option>
+                <option value="likes">Plus de likes</option>
+                <option value="comments">Plus de commentaires</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Type de contenu</label>
+              <select id="filter-type" class="filter-select">
+                <option value="">Tous les types</option>
+                <option value="text">Texte uniquement</option>
+                <option value="image">Avec images</option>
+                <option value="video">Avec vidéos</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button type="button" class="clear-filters-btn" onclick="clearFilters()">
+              <i class="bi bi-x-circle me-1"></i> Réinitialiser
+            </button>
+            <button type="submit" class="search-submit-btn">
+              <i class="bi bi-search me-1"></i> Appliquer les filtres
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="search-results-info" id="search-results-info">
+        <i class="bi bi-info-circle me-1"></i>
+        <span id="search-results-text"></span>
+      </div>
     </div>
 
     <div class="feed-container">
@@ -708,10 +1115,10 @@
       </div>
       {% else %}
       <!-- Message for non-authenticated users -->
-      <div class="create-post-card" style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 2rem;">
+      <div class="create-post-card" style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #f87500 0%, #ff6b35 100%); border-radius: 12px; color: white; margin-bottom: 2rem;">
         <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">Connectez-vous pour participer</h3>
         <p style="margin-bottom: 1.5rem; opacity: 0.9;">Vous pouvez voir les publications, mais vous devez vous connecter pour publier, commenter ou interagir.</p>
-        <a href="{% url 'login' %}" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <a href="{% url 'login' %}" style="display: inline-block; background: white; color: #f87500; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
           <i class="bi bi-box-arrow-in-right"></i> Se connecter
         </a>
       </div>
@@ -767,10 +1174,10 @@
                 {% endif %}
                 {% if request.user.is_authenticated and post.author != request.user %}
                   <span>•</span>
-                  <a href="{% url 'user_profile' post.author.id %}" style="color: #11cdef; text-decoration: none; font-weight: 600;">Voir le profil</a>
+                  <a href="{% url 'user_profile' post.author.id %}" style="color: #f87500; text-decoration: none; font-weight: 600;">Voir le profil</a>
                 {% elif not request.user.is_authenticated %}
                   <span>•</span>
-                  <a href="{% url 'login' %}" style="color: #11cdef; text-decoration: none; font-weight: 600;">Voir le profil</a>
+                  <a href="{% url 'login' %}" style="color: #f87500; text-decoration: none; font-weight: 600;">Voir le profil</a>
                 {% endif %}
               </div>
             </div>
@@ -819,7 +1226,7 @@
           <div class="post-stats" style="padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #6b7280;">
             <div class="likes-count" id="likes-count-{{ post.id }}">
               {% if post.likes.count > 0 %}
-                <i class="bi bi-hand-thumbs-up-fill" style="color: #667eea;"></i> {{ post.likes.count }} j'aime
+                <i class="bi bi-hand-thumbs-up-fill" style="color: #f87500;"></i> {{ post.likes.count }} j'aime
               {% endif %}
             </div>
             <div class="comments-count" id="comments-count-{{ post.id }}">
@@ -877,7 +1284,7 @@
                     </button>
                     <button type="submit" 
                             class="btn-submit-comment"
-                            style="padding: 0.4rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
+                            style="padding: 0.4rem 1rem; background: linear-gradient(135deg, #f87500 0%, #ff6b35 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
                       Commenter
                     </button>
                   </div>
@@ -941,7 +1348,7 @@
           </div>
           <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-top: 1rem;">
             <p style="margin: 0; color: #666; font-size: 0.9rem;">
-              <a href="{% url 'login' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Connectez-vous</a> pour interagir avec cette publication
+              <a href="{% url 'login' %}" style="color: #f87500; text-decoration: none; font-weight: 600;">Connectez-vous</a> pour interagir avec cette publication
             </p>
           </div>
           {% endif %}
@@ -986,7 +1393,7 @@
           <button type="button" onclick="closeEditCommentModal()" style="padding: 0.75rem 1.5rem; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
             Annuler
           </button>
-          <button type="submit" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
+          <button type="submit" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #f87500 0%, #ff6b35 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
             Enregistrer
           </button>
         </div>
@@ -1087,7 +1494,7 @@
             btn.classList.add('liked');
             if (icon) icon.className = 'bi bi-hand-thumbs-up-fill';
             if (likeText) likeText.textContent = 'J\'aime';
-            btn.style.color = '#667eea';
+            btn.style.color = '#f87500';
           } else {
             btn.classList.remove('liked');
             if (icon) icon.className = 'bi bi-hand-thumbs-up';
@@ -1098,7 +1505,7 @@
           // Update likes count
           if (likesCountEl) {
             if (data.likes_count > 0) {
-              likesCountEl.innerHTML = `<i class="bi bi-hand-thumbs-up-fill" style="color: #667eea;"></i> ${data.likes_count} j'aime`;
+              likesCountEl.innerHTML = `<i class="bi bi-hand-thumbs-up-fill" style="color: #f87500;"></i> ${data.likes_count} j'aime`;
               likesCountEl.style.display = 'block';
             } else {
               likesCountEl.style.display = 'none';
@@ -1538,6 +1945,287 @@
       }
       if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
+      }
+    });
+
+    // Hide "Built with Spline" badge
+    (function() {
+      function hideSplineBadge() {
+        const splineViewer = document.querySelector('spline-viewer');
+        if (!splineViewer) return;
+        
+        // Try multiple methods to hide the badge
+        const shadowRoot = splineViewer.shadowRoot;
+        if (shadowRoot) {
+          // Hide badge in shadow DOM
+          const badge = shadowRoot.querySelector('a[href*="spline"], a[href*="Built"], button, [class*="badge"], [class*="logo"], [id*="badge"], [id*="logo"]');
+          if (badge) {
+            badge.style.display = 'none';
+            badge.style.visibility = 'hidden';
+            badge.style.opacity = '0';
+            badge.style.height = '0';
+            badge.style.width = '0';
+            badge.style.overflow = 'hidden';
+            badge.style.pointerEvents = 'none';
+          }
+          
+          // Hide all links and buttons except canvas
+          shadowRoot.querySelectorAll('a, button').forEach(el => {
+            if (el.tagName !== 'CANVAS') {
+              el.style.display = 'none';
+              el.style.visibility = 'hidden';
+              el.style.opacity = '0';
+              el.style.pointerEvents = 'none';
+            }
+          });
+        }
+        
+        // Also hide any badge outside shadow DOM
+        const badges = document.querySelectorAll('a[href*="spline"], a[href*="Built"][href*="spline"], [class*="spline"][class*="badge"]');
+        badges.forEach(badge => {
+          if (splineViewer.contains(badge) || splineViewer.shadowRoot?.contains(badge)) {
+            badge.style.display = 'none';
+            badge.style.visibility = 'hidden';
+            badge.style.opacity = '0';
+            badge.style.pointerEvents = 'none';
+          }
+        });
+      }
+      
+      // Try immediately and after delays (badge might load asynchronously)
+      hideSplineBadge();
+      setTimeout(hideSplineBadge, 500);
+      setTimeout(hideSplineBadge, 1000);
+      setTimeout(hideSplineBadge, 2000);
+      
+      // Also observe for changes
+      const observer = new MutationObserver(hideSplineBadge);
+      const splineViewer = document.querySelector('spline-viewer');
+      if (splineViewer) {
+        observer.observe(splineViewer, { childList: true, subtree: true });
+        if (splineViewer.shadowRoot) {
+          observer.observe(splineViewer.shadowRoot, { childList: true, subtree: true });
+        }
+      }
+      
+      // Wait for shadow root to be available
+      if (splineViewer && !splineViewer.shadowRoot) {
+        const shadowObserver = new MutationObserver(() => {
+          if (splineViewer.shadowRoot) {
+            hideSplineBadge();
+            observer.observe(splineViewer.shadowRoot, { childList: true, subtree: true });
+            shadowObserver.disconnect();
+          }
+        });
+        shadowObserver.observe(splineViewer, { childList: true, subtree: true });
+      }
+    })();
+
+    // Advanced Search Functions
+    function toggleAdvancedFilters() {
+      const filters = document.getElementById('advanced-filters');
+      const toggleText = document.getElementById('filters-toggle-text');
+      
+      if (filters.classList.contains('active')) {
+        filters.classList.remove('active');
+        toggleText.textContent = 'Afficher les filtres';
+      } else {
+        filters.classList.add('active');
+        toggleText.textContent = 'Masquer les filtres';
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('search-query').value = '';
+      document.getElementById('filter-author').value = '';
+      document.getElementById('filter-date').value = '';
+      document.getElementById('filter-sort').value = 'recent';
+      document.getElementById('filter-type').value = '';
+      
+      // Reset search results
+      const resultsInfo = document.getElementById('search-results-info');
+      resultsInfo.classList.remove('active');
+      
+      // Show all posts
+      performSearch(null, true);
+    }
+
+    function performSearch(event, showAll = false) {
+      if (event) {
+        event.preventDefault();
+      }
+
+      const query = document.getElementById('search-query').value.toLowerCase().trim();
+      const author = document.getElementById('filter-author').value.toLowerCase().trim();
+      const dateFilter = document.getElementById('filter-date').value;
+      const sortBy = document.getElementById('filter-sort').value;
+      const contentType = document.getElementById('filter-type').value;
+
+      const posts = document.querySelectorAll('.post-card');
+      let visibleCount = 0;
+      const now = new Date();
+
+      // Convert date filter to date range
+      let dateFrom = null;
+      if (dateFilter === 'today') {
+        dateFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (dateFilter === 'week') {
+        dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (dateFilter === 'month') {
+        dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (dateFilter === 'year') {
+        dateFrom = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      }
+
+      // Filter posts
+      const filteredPosts = Array.from(posts).filter(post => {
+        if (showAll && !query && !author && !dateFilter && !contentType) {
+          return true;
+        }
+
+        // Get post content
+        const contentEl = post.querySelector('.post-content');
+        const content = contentEl ? contentEl.textContent.toLowerCase() : '';
+        
+        // Get author name
+        const authorEl = post.querySelector('.post-author-name');
+        const authorName = authorEl ? authorEl.textContent.toLowerCase() : '';
+        
+        // Get post date
+        const metaEl = post.querySelector('.post-meta');
+        const timeText = metaEl ? metaEl.textContent : '';
+        
+        // Check media type
+        const hasImage = post.querySelector('.post-media img');
+        const hasVideo = post.querySelector('.post-media video');
+        
+        // Search query match
+        if (query && !content.includes(query) && !authorName.includes(query)) {
+          // Also search in comments
+          const comments = post.querySelectorAll('.comment-text');
+          let foundInComments = false;
+          comments.forEach(comment => {
+            if (comment.textContent.toLowerCase().includes(query)) {
+              foundInComments = true;
+            }
+          });
+          if (!foundInComments) return false;
+        }
+        
+        // Author filter
+        if (author && !authorName.includes(author)) {
+          return false;
+        }
+        
+        // Date filter
+        if (dateFrom) {
+          // Parse time text (e.g., "2 hours ago", "3 days ago")
+          const postDate = parseTimeText(timeText);
+          if (!postDate || postDate < dateFrom) {
+            return false;
+          }
+        }
+        
+        // Content type filter
+        if (contentType === 'text' && (hasImage || hasVideo)) {
+          return false;
+        } else if (contentType === 'image' && !hasImage) {
+          return false;
+        } else if (contentType === 'video' && !hasVideo) {
+          return false;
+        }
+        
+        return true;
+      });
+
+      // Sort posts
+      filteredPosts.sort((a, b) => {
+        if (sortBy === 'recent') {
+          return 0; // Already in order
+        } else if (sortBy === 'oldest') {
+          return 0; // Reverse would be needed
+        } else if (sortBy === 'likes') {
+          const likesA = parseInt(a.querySelector('.likes-count')?.textContent.match(/\d+/) || [0])[0];
+          const likesB = parseInt(b.querySelector('.likes-count')?.textContent.match(/\d+/) || [0])[0];
+          return likesB - likesA;
+        } else if (sortBy === 'comments') {
+          const commentsA = parseInt(a.querySelector('.comments-count')?.textContent.match(/\d+/) || [0])[0];
+          const commentsB = parseInt(b.querySelector('.comments-count')?.textContent.match(/\d+/) || [0])[0];
+          return commentsB - commentsA;
+        }
+        return 0;
+      });
+
+      // Hide all posts first
+      posts.forEach(post => {
+        post.style.display = 'none';
+      });
+
+      // Show filtered posts
+      filteredPosts.forEach(post => {
+        post.style.display = 'block';
+        visibleCount++;
+      });
+
+      // Update results info
+      const resultsInfo = document.getElementById('search-results-info');
+      const resultsText = document.getElementById('search-results-text');
+      
+      if (showAll || (!query && !author && !dateFilter && !contentType)) {
+        resultsInfo.classList.remove('active');
+      } else {
+        resultsInfo.classList.add('active');
+        if (visibleCount === 0) {
+          resultsText.textContent = 'Aucun résultat trouvé pour votre recherche.';
+          resultsInfo.style.background = '#fef2f2';
+          resultsInfo.style.color = '#991b1b';
+        } else {
+          resultsText.textContent = `${visibleCount} résultat${visibleCount > 1 ? 's' : ''} trouvé${visibleCount > 1 ? 's' : ''} pour votre recherche.`;
+          resultsInfo.style.background = '#f0fdf4';
+          resultsInfo.style.color = '#166534';
+        }
+      }
+
+      // Scroll to results
+      if (visibleCount > 0) {
+        filteredPosts[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function parseTimeText(timeText) {
+      if (!timeText) return null;
+      
+      const now = new Date();
+      const match = timeText.match(/(\d+)\s*(second|minute|hour|day|week|month|year)/);
+      
+      if (!match) return null;
+      
+      const value = parseInt(match[1]);
+      const unit = match[2];
+      
+      let milliseconds = 0;
+      if (unit.includes('second')) milliseconds = value * 1000;
+      else if (unit.includes('minute')) milliseconds = value * 60 * 1000;
+      else if (unit.includes('hour')) milliseconds = value * 60 * 60 * 1000;
+      else if (unit.includes('day')) milliseconds = value * 24 * 60 * 60 * 1000;
+      else if (unit.includes('week')) milliseconds = value * 7 * 24 * 60 * 60 * 1000;
+      else if (unit.includes('month')) milliseconds = value * 30 * 24 * 60 * 60 * 1000;
+      else if (unit.includes('year')) milliseconds = value * 365 * 24 * 60 * 60 * 1000;
+      
+      return new Date(now.getTime() - milliseconds);
+    }
+
+    // Real-time search on input
+    let searchTimeout;
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('search-query');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+            performSearch(null, false);
+          }, 500); // Debounce 500ms
+        });
       }
     });
   </script>

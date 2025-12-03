@@ -136,14 +136,21 @@ def reservation_home(request):
 
 def mes_reservations(request):
     # Afficher toutes les demandes pour le conducteur
-    demandes = Reservation.objects.all()
-    return render(request, "covoiturage/Backoffice/pages/mes_reservations.html", {"demandes": demandes})
+    # Filtrer uniquement les réservations pour les offres du conducteur connecté
+    if request.user.is_authenticated:
+        demandes = Reservation.objects.filter(offre__conducteur=request.user).order_by('-date_reservation')
+    else:
+        # Si non connecté, afficher toutes les réservations (pour le développement)
+        demandes = Reservation.objects.all().order_by('-date_reservation')
+    return render(request, "covoiturage/Fontoffice/mes_reservations.html", {"demandes": demandes})
 
 
 def reservation_accept(request, id):
     r = get_object_or_404(Reservation, id=id)
     r.statut = "accepted"
     r.save()
+    messages.success(request, "La réservation a été acceptée avec succès.")
+    messages.set_level(request, messages.SUCCESS)
     return redirect("mes_reservations")
 
 
@@ -151,6 +158,8 @@ def reservation_reject(request, id):
     r = get_object_or_404(Reservation, id=id)
     r.statut = "rejected"
     r.save()
+    messages.success(request, "La réservation a été refusée.")
+    messages.set_level(request, messages.SUCCESS)
     return redirect("mes_reservations")
 
 def mes_reservations_passager(request):

@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>My Favoris - EduLife Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+
+<body class="buy-tickets-page">
+
+  <main class="main">
+
+    <!-- Buy Tickets Section -->
+    <section id="buy-tickets" class="buy-tickets section">
+
+      <div class="container">
+
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+
+            <div class="ticket-form-wrapper">
+              
+              <div class="mb-4">
+                <a href="{% url 'internships' %}" class="btn btn-link text-decoration-none p-0" style="color: #333;">
+                  <i class="bi bi-arrow-left me-2"></i>Back to Internships
+                </a>
+              </div>
+              
+              <div class="event-info mb-5">
+                <h3>My Favoris</h3>
+                <p class="text-muted">View all your favorite internship offers</p>
+              </div>
+
+              <!-- Liste des favoris -->
+              {% if favoris %}
+              <div class="favoris-list mt-5">
+                {% for favori in favoris %}
+                <div class="favori-item mb-4 p-4" style="background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ff6b35;">
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <h5 class="mb-1">{{ favori.offre.titre }}</h5>
+                      <p class="text-muted mb-0"><small>{{ favori.offre.domaine }} • {{ favori.offre.lieu }}</small></p>
+                    </div>
+                    <button type="button" 
+                            class="btn btn-sm btn-outline-danger" 
+                            onclick="removeFavori({{ favori.offre.id_offre }}, this)"
+                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                      <i class="bi bi-heart-fill"></i>
+                    </button>
+                  </div>
+                  
+                  {% if favori.offre.image %}
+                  <div class="mb-3">
+                    <img src="{{ favori.offre.image.url }}" alt="{{ favori.offre.titre }}" class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
+                  </div>
+                  {% endif %}
+                  
+                  <div class="mb-3">
+                    <p class="mb-0">{{ favori.offre.description|truncatewords:30 }}</p>
+                  </div>
+                  
+                  <div class="mb-3 d-flex gap-3">
+                    <span class="badge bg-info"><i class="bi bi-clock me-1"></i>{{ favori.offre.duree }} weeks</span>
+                    <span class="badge bg-success"><i class="bi bi-cash me-1"></i>{{ favori.offre.remuneration }} DT</span>
+                    <span class="badge bg-primary">{{ favori.offre.etat }}</span>
+                  </div>
+                  
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'internships' %}#offre-{{ favori.offre.id_offre }}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye me-1"></i>View Details
+                    </a>
+                    <a href="{% url 'postuler' %}?offre={{ favori.offre.id_offre }}" class="btn btn-sm" style="background: #ff6b35; color: white;">
+                      <i class="bi bi-send-fill me-1"></i>Apply Now
+                    </a>
+                  </div>
+                  
+                  <div class="mt-2">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar me-1"></i>Added on {{ favori.date_ajout|date:"d/m/Y" }}
+                    </small>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-center py-5 mt-5">
+                <i class="bi bi-heart" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h4 class="text-muted">No favorites yet</h4>
+                <p class="text-muted">Start adding offers to your favorites by clicking the heart icon on any offer.</p>
+                <a href="{% url 'internships' %}" class="btn" style="background: #ff6b35; color: white;">
+                  <i class="bi bi-search me-2"></i>Browse Offers
+                </a>
+              </div>
+              {% endif %}
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Buy Tickets Section -->
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+  <script>
+    function removeFavori(offreId, button) {
+      fetch(`/api/favoris/${offreId}/toggle/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && !data.is_favori) {
+          // Supprimer l'élément de la liste
+          button.closest('.favori-item').style.transition = 'opacity 0.3s';
+          button.closest('.favori-item').style.opacity = '0';
+          setTimeout(() => {
+            button.closest('.favori-item').remove();
+            
+            // Vérifier s'il reste des favoris
+            const favorisList = document.querySelector('.favoris-list');
+            if (!favorisList || favorisList.children.length === 0) {
+              location.reload(); // Recharger pour afficher le message "No favorites"
+            }
+          }, 300);
+        }
+      })
+      .catch(error => {
+        console.error('Error removing favori:', error);
+        alert('Une erreur est survenue');
+      });
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
+
+</body>
+
+</html>

@@ -8,6 +8,12 @@ urlpatterns = [
     path('delete_startup/<int:id>/', views.delete_startup, name='delete_startup'),
     path('edit_startup/<int:id>/', views.edit_startup, name='edit_startup'),
 
+    # AI logo generator
+    path('generate-logo/', views.generate_logo, name='generate_logo'),
+
+    # Chatbot endpoint
+    path('chatbot/', views.startup_chatbot, name='startup_chatbot'),
+
     # BACKOFFICE
     path('dashboard_startup/', views.dashboard_startup, name='dashboard_startup'),
     path('startupList/', views.startupList, name='startupList'),

@@ -13,7 +13,7 @@ import json
 import requests
 from django.conf import settings
 
-from .models import CustomUser, Connection, Post, Comment, Message, Notification
+from .models import CustomUser, Connection, Post, Comment, Message, Notification, AdminMessage
 from .serializers import (
     CustomUserSerializer, CustomUserCreateSerializer, CustomUserUpdateSerializer,
     ConnectionSerializer, PostSerializer, CommentSerializer,
@@ -396,3 +396,305 @@ def edubot_public_chat(request):
     if error:
         return JsonResponse({"error": error}, status=status)
     return JsonResponse({"reply": reply})
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def edubox_send_message(request):
+    """
+    API pour envoyer un message dans EduBox (chat entre admins)
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé. Seuls les administrateurs peuvent envoyer des messages."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        
+        # Gérer les fichiers (FormData) ou JSON
+        content = ''
+        audio_file = None
+        file = None
+        
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Formulaire avec fichiers
+            content = request.POST.get('content', '').strip()
+            audio_file = request.FILES.get('audio', None)
+            file = request.FILES.get('file', None)
+        else:
+            # JSON simple
+            try:
+                data = json.loads(request.body)
+                content = data.get('content', '').strip()
+            except json.JSONDecodeError:
+                pass
+        
+        if not content and not audio_file and not file:
+            return JsonResponse({"error": "Le message ne peut pas être vide."}, status=400)
+        
+        # Créer le message
+        # Si c'est uniquement un message vocal ou fichier, on laisse le contenu vide
+        message_content = content if content else ""
+        message = AdminMessage.objects.create(
+            sender=request.user,
+            content=message_content
+        )
+        
+        # Ajouter le fichier audio si présent
+        if audio_file:
+            message.audio_file = audio_file
+            message.save()
+        
+        # Ajouter le fichier si présent
+        if file:
+            message.file = file
+            message.save()
+        
+        # Préparer la réponse
+        response_data = {
+            "id": message.id,
+            "content": message.content,
+            "sender": {
+                "id": message.sender.id,
+                "username": message.sender.username,
+                "first_name": message.sender.first_name or "",
+                "last_name": message.sender.last_name or "",
+            },
+            "sent_at": message.sent_at.isoformat(),
+        }
+        
+        # Ajouter l'URL de l'audio si disponible
+        if message.audio_file:
+            try:
+                response_data["audio_url"] = message.audio_file.url
+            except:
+                response_data["audio_url"] = None
+        else:
+            response_data["audio_url"] = None
+        
+        # Ajouter l'URL du fichier si disponible
+        if message.file:
+            try:
+                response_data["file_url"] = message.file.url
+                response_data["file_name"] = message.file.name.split('/')[-1]
+            except:
+                response_data["file_url"] = None
+                response_data["file_name"] = None
+        else:
+            response_data["file_url"] = None
+            response_data["file_name"] = None
+        
+        return JsonResponse({
+            "success": True,
+            "message": response_data
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors de l'envoi du message: {str(e)}"}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def edubox_get_messages(request):
+    """
+    API pour récupérer les messages d'EduBox
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        # Récupérer les messages (d'abord filtrer, puis slice)
+        messages_queryset = AdminMessage.objects.filter(deleted=False).select_related('sender').order_by('sent_at')
+        
+        # Marquer comme lus (avant le slice)
+        unread_messages = messages_queryset.exclude(read_by=request.user)
+        for msg in unread_messages:
+            msg.mark_as_read(request.user)
+        
+        # Prendre les 100 derniers messages
+        messages = messages_queryset[:100]
+        
+        messages_list = []
+        for msg in messages:
+            sender_data = {
+                "id": msg.sender.id,
+                "username": msg.sender.username,
+                "first_name": msg.sender.first_name or "",
+                "last_name": msg.sender.last_name or "",
+                "is_superuser": msg.sender.is_superuser,
+                "role": getattr(msg.sender, 'role', None),
+            }
+            # Ajouter l'URL de l'avatar si disponible
+            if hasattr(msg.sender, 'avatar') and msg.sender.avatar:
+                sender_data["avatar"] = msg.sender.avatar.url
+            else:
+                sender_data["avatar"] = None
+            
+            message_data = {
+                "id": msg.id,
+                "content": msg.content,
+                "sender": sender_data,
+                "sent_at": msg.sent_at.isoformat(),
+                "is_own": msg.sender.id == request.user.id,
+                "edited": msg.edited,
+                "edited_at": msg.edited_at.isoformat() if msg.edited_at else None,
+            }
+            # Ajouter l'URL de l'audio si disponible
+            if hasattr(msg, 'audio_file') and msg.audio_file:
+                try:
+                    message_data["audio_url"] = msg.audio_file.url
+                except:
+                    message_data["audio_url"] = None
+            else:
+                message_data["audio_url"] = None
+            
+            # Ajouter l'URL du fichier si disponible
+            if hasattr(msg, 'file') and msg.file:
+                try:
+                    message_data["file_url"] = msg.file.url
+                    message_data["file_name"] = msg.file.name.split('/')[-1]
+                except:
+                    message_data["file_url"] = None
+                    message_data["file_name"] = None
+            else:
+                message_data["file_url"] = None
+                message_data["file_name"] = None
+            
+            messages_list.append(message_data)
+        
+        return JsonResponse({
+            "success": True,
+            "messages": messages_list
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors de la récupération des messages: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@login_required
+def edubox_update_message(request, message_id):
+    """
+    API pour modifier un message dans EduBox
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        from django.utils import timezone
+        
+        message = AdminMessage.objects.get(id=message_id, deleted=False)
+        
+        # Vérifier que l'utilisateur est le propriétaire du message
+        if message.sender.id != request.user.id:
+            return JsonResponse({"error": "Vous ne pouvez modifier que vos propres messages."}, status=403)
+        
+        data = json.loads(request.body)
+        new_content = data.get('content', '').strip()
+        
+        if not new_content:
+            return JsonResponse({"error": "Le message ne peut pas être vide."}, status=400)
+        
+        message.content = new_content
+        message.edited = True
+        message.edited_at = timezone.now()
+        message.save()
+        
+        return JsonResponse({
+            "success": True,
+            "message": {
+                "id": message.id,
+                "content": message.content,
+                "edited": message.edited,
+                "edited_at": message.edited_at.isoformat(),
+            }
+        })
+    except AdminMessage.DoesNotExist:
+        return JsonResponse({"error": "Message introuvable."}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Données JSON invalides."}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors de la modification: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@login_required
+def edubox_delete_message(request, message_id):
+    """
+    API pour supprimer un message dans EduBox
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        
+        message = AdminMessage.objects.get(id=message_id, deleted=False)
+        
+        # Vérifier que l'utilisateur est le propriétaire du message ou un superuser
+        if message.sender.id != request.user.id and not request.user.is_superuser:
+            return JsonResponse({"error": "Vous ne pouvez supprimer que vos propres messages."}, status=403)
+        
+        # Soft delete
+        message.deleted = True
+        message.save()
+        
+        return JsonResponse({"success": True, "message": "Message supprimé."})
+    except AdminMessage.DoesNotExist:
+        return JsonResponse({"error": "Message introuvable."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors de la suppression: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@login_required
+def edubox_clear_all_messages(request):
+    """
+    API pour supprimer tous les messages d'EduBox
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        
+        # Vérifier que l'utilisateur est superuser (seuls les superusers peuvent vider toute la discussion)
+        if not request.user.is_superuser:
+            return JsonResponse({"error": "Seuls les superusers peuvent vider toute la discussion."}, status=403)
+        
+        # Soft delete de tous les messages
+        AdminMessage.objects.update(deleted=True)
+        
+        return JsonResponse({"success": True, "message": "Tous les messages ont été supprimés."})
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors de la suppression: {str(e)}"}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def edubox_unread_count(request):
+    """
+    API pour obtenir le nombre de messages non lus dans EduBox
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        return JsonResponse({"error": "Accès refusé."}, status=403)
+    
+    try:
+        from .models import AdminMessage
+        
+        # Compter les messages non lus (non supprimés et non lus par l'utilisateur)
+        unread_count = AdminMessage.objects.filter(
+            deleted=False
+        ).exclude(
+            read_by=request.user
+        ).count()
+        
+        return JsonResponse({
+            "success": True,
+            "unread_count": unread_count
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"Erreur lors du comptage: {str(e)}"}, status=500)

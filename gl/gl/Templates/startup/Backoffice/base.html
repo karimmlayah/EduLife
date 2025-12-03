@@ -268,7 +268,7 @@
           <i class="ni ni-button-power"></i><span>Déconnexion</span>
         </a>
       </div>
-</aside>
+    </aside>
 
     <main class="main-content position-relative border-radius-lg">
       <!-- Navbar -->
@@ -277,14 +277,14 @@
           <div class="d-flex align-items-center justify-content-between w-100">
             <!-- Left side: Breadcrumb -->
             <div class="flex-grow-1">
-          <nav aria-label="breadcrumb">
+              <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
                   <li class="breadcrumb-item text-sm text-white active" aria-current="page">{% block breadcrumb %}Dashboard{% endblock %}</li>
-            </ol>
+                </ol>
                 <h6 class="font-weight-bolder text-white mb-0">{% block page_title %}Dashboard{% endblock %}</h6>
-          </nav>
-              </div>
-
+              </nav>
+            </div>
+            
             <!-- Center: Navigation Links -->
             <div class="d-flex align-items-center gap-3 justify-content-center flex-grow-1">
               <a href="{% url 'admin_dashboard' %}" class="nav-link-top {% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_tables' or request.path == '/admin/' %}active{% endif %}">
@@ -312,7 +312,7 @@
                 <span>Events</span>
               </a>
             </div>
-
+            
             <!-- Right side: Notifications, Messages, and User Menu -->
             <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2">
               {% if request.user.is_authenticated %}
@@ -322,7 +322,7 @@
                 </a>
                 <!-- Notifications Icon -->
                 <a href="{% url 'notifications' %}" class="notifications-icon-dashboard" title="Notifications" style="position: relative;">
-                  <i class="ni ni-bell-55" style="font-size: 1.2rem;"></i>
+                  <i class="ni ni-bell-55" style="font-size: 1.2rem; color: white;"></i>
                   {% if unread_notifications_count > 0 %}
                     <span class="notifications-badge-dashboard">{{ unread_notifications_count }}</span>
                   {% endif %}
@@ -351,15 +351,15 @@
                     <a href="{% url 'account_settings' %}"><i class="ni ni-settings-gear-65 me-2"></i> Account Settings</a>
                     <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 6px 4px;"></div>
                     <a href="{% url 'logout' %}"><i class="ni ni-user-run me-2"></i> Déconnexion</a>
-                        </div>
-                      </div>
+                  </div>
+                </div>
                 {% endwith %}
               {% else %}
                 <a href="{% url 'login' %}" class="nav-link-top login-link">
                   <i class="ni ni-single-02"></i>
                 </a>
               {% endif %}
-                        </div>
+            </div>
           </div>
         </div>
       </nav>
@@ -367,9 +367,6 @@
       <!-- End Navbar -->
           {% block content %}
       {% endblock %}
-      
-      <!-- Toast Notifications -->
-      {% include 'includes/toast_notifications.html' %}
 
     </main>
     <div class="fixed-plugin">

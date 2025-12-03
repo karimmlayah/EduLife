@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
+from django.core.files.storage import default_storage
 import json
 import base64
 import json as json_lib
@@ -157,46 +158,37 @@ Si vous n'avez pas demandé cette réinitialisation, ignorez ce message.'''
         # Message générique pour l'utilisateur
         raise Exception('Erreur lors de l\'envoi du SMS. Veuillez utiliser la récupération par email ou contacter l\'administrateur.')
 
-# Fonction pour valider le reCAPTCHA
+# Fonction pour valider le reCAPTCHA (obligatoire, même en développement)
 def verify_recaptcha(recaptcha_response):
     """
-    Vérifie la réponse du reCAPTCHA avec l'API Google
+    Vérifie la réponse du reCAPTCHA avec l'API Google.
+    Retourne toujours False si :
+      - la clé secrète n'est pas configurée
+      - la réponse est vide
+      - l'appel à l'API échoue
     """
     recaptcha_secret = getattr(settings, 'RECAPTCHA_SECRET_KEY', None)
-    recaptcha_verify_url = getattr(settings, 'RECAPTCHA_VERIFY_URL', 'https://www.google.com/recaptcha/api/siteverify')
-    
-    if not recaptcha_secret:
-        # Si la clé secrète n'est pas configurée, on retourne True en mode développement
-        return True
-    
-    if not recaptcha_response:
-        # En mode développement (DEBUG=True), on accepte même sans réponse reCAPTCHA
-        if getattr(settings, 'DEBUG', False):
-            return True
+    recaptcha_verify_url = getattr(
+        settings,
+        'RECAPTCHA_VERIFY_URL',
+        'https://www.google.com/recaptcha/api/siteverify'
+    )
+
+    # Si la clé n'est pas configurée ou pas de réponse, on refuse systématiquement
+    if not recaptcha_secret or not recaptcha_response:
         return False
-    
+
     data = {
         'secret': recaptcha_secret,
         'response': recaptcha_response
     }
-    
+
     try:
         response = requests.post(recaptcha_verify_url, data=data, timeout=5)
         result = response.json()
-        
-        # Si la vérification échoue à cause du domaine (localhost), on accepte en mode développement
-        if not result.get('success', False) and getattr(settings, 'DEBUG', False):
-            error_codes = result.get('error-codes', [])
-            # Erreurs liées au domaine (localhost non autorisé)
-            if any(code in ['invalid-input-response', 'missing-input-response', 'bad-request'] for code in error_codes):
-                # En développement, on accepte quand même
-                return True
-        
         return result.get('success', False)
-    except Exception as e:
-        # En cas d'erreur, en mode développement on accepte, sinon on refuse
-        if getattr(settings, 'DEBUG', False):
-            return True
+    except Exception:
+        # En cas d'erreur réseau ou autre, on refuse aussi
         return False
 
 # Create your views here.
@@ -1584,7 +1576,101 @@ def profile_update_public_view(request):
     """
     import json
     user = request.user
+    action = request.POST.get('action', '').strip()
     
+    # Gestion des actions de suppression / mise à jour ciblée (expérience / formation)
+    # Ces actions retournent immédiatement après mise à jour.
+    if action == 'delete_experience':
+        try:
+            index = int(request.POST.get('exp_index', '-1'))
+            experiences = list(user.experience or [])
+            if 0 <= index < len(experiences):
+                experiences.pop(index)
+                user.experience = experiences
+                user.save(update_fields=['experience'])
+                messages.success(request, 'Expérience supprimée avec succès.')
+            else:
+                messages.error(request, 'Indice d’expérience invalide.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la suppression de l'expérience: {e}")
+        return redirect('profile')
+
+    if action == 'delete_education':
+        try:
+            index = int(request.POST.get('edu_index', '-1'))
+            educations = list(user.education or [])
+            if 0 <= index < len(educations):
+                educations.pop(index)
+                user.education = educations
+                user.save(update_fields=['education'])
+                messages.success(request, 'Formation supprimée avec succès.')
+            else:
+                messages.error(request, 'Indice de formation invalide.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la suppression de la formation: {e}")
+        return redirect('profile')
+
+    if action == 'update_experience':
+        try:
+            index = int(request.POST.get('exp_index', '-1'))
+            experiences = list(user.experience or [])
+            if 0 <= index < len(experiences):
+                exp_item = {
+                    'position': request.POST.get('exp_position', '').strip(),
+                    'company': request.POST.get('exp_company', '').strip(),
+                    'start_date': request.POST.get('exp_start', '').strip() or None,
+                    'end_date': request.POST.get('exp_end', '').strip() or None,
+                    'current': not request.POST.get('exp_end', '').strip(),
+                    'description': request.POST.get('exp_description', '').strip() or None
+                }
+                exp_item = {k: v for k, v in exp_item.items() if v is not None and v != ''}
+                experiences[index] = exp_item
+                user.experience = experiences
+                user.save(update_fields=['experience'])
+                messages.success(request, 'Expérience mise à jour avec succès.')
+            else:
+                messages.error(request, 'Indice d’expérience invalide.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la mise à jour de l'expérience: {e}")
+        return redirect('profile')
+
+    if action == 'update_education':
+        try:
+            index = int(request.POST.get('edu_index', '-1'))
+            educations = list(user.education or [])
+            if 0 <= index < len(educations):
+                current = educations[index] or {}
+                image_url = current.get('image_url')
+
+                img_file = request.FILES.get('edu_image_file')
+                if img_file:
+                    try:
+                        path = default_storage.save(f'education/{img_file.name}', img_file)
+                        image_url = settings.MEDIA_URL + path
+                    except Exception:
+                        pass
+
+                edu_item = {
+                    'degree': request.POST.get('edu_degree', '').strip(),
+                    'school': request.POST.get('edu_school', '').strip(),
+                    'start_year': request.POST.get('edu_start', '').strip() or None,
+                    'end_year': request.POST.get('edu_end', '').strip() or None,
+                    'field': request.POST.get('edu_field', '').strip() or None,
+                }
+                edu_item = {k: v for k, v in edu_item.items() if v is not None and v != ''}
+                if image_url:
+                    edu_item['image_url'] = image_url
+                educations[index] = edu_item
+                user.education = educations
+                user.save(update_fields=['education'])
+                messages.success(request, 'Formation mise à jour avec succès.')
+            else:
+                messages.error(request, 'Indice de formation invalide.')
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la mise à jour de la formation: {e}")
+        return redirect('profile')
+
+    # --------- Cas général : mise à jour des informations publiques / ajout d'éléments ---------
     # Champs texte simples
     if 'headline' in request.POST:
         user.headline = request.POST.get('headline', '').strip() or None
@@ -1602,35 +1688,58 @@ def profile_update_public_view(request):
             messages.error(request, 'Format JSON invalide pour les compétences.')
             return redirect('profile')
     
-    if 'education' in request.POST:
+    # ----- Education -----
+    # Deux modes supportés :
+    # 1) Envoi JSON complet via un champ "education"
+    # 2) Ajout d'une formation via les champs edu_* (modal du profil)
+    if 'education' in request.POST or 'edu_degree' in request.POST or 'edu_school' in request.POST:
         try:
-            education_data = request.POST.get('education', '[]')
-            new_education = json.loads(education_data) if education_data else []
-            # Si c'est un ajout (champs edu_* présents), ajouter à la liste existante
-            if 'edu_degree' in request.POST:
+            education_data = request.POST.get('education', '')
+            # Mode 1: JSON complet reçu
+            if education_data:
+                new_education = json.loads(education_data) if education_data else []
+                user.education = new_education
+            # Mode 2: ajout d'un seul élément depuis le formulaire
+            elif request.POST.get('edu_degree') or request.POST.get('edu_school'):
+                image_url = None
+                img_file = request.FILES.get('edu_image_file')
+                if img_file:
+                    try:
+                        path = default_storage.save(f'education/{img_file.name}', img_file)
+                        image_url = settings.MEDIA_URL + path
+                    except Exception:
+                        image_url = None
+
                 edu_item = {
                     'degree': request.POST.get('edu_degree', '').strip(),
                     'school': request.POST.get('edu_school', '').strip(),
                     'start_year': request.POST.get('edu_start', '').strip() or None,
                     'end_year': request.POST.get('edu_end', '').strip() or None,
-                    'field': request.POST.get('edu_field', '').strip() or None
+                    'field': request.POST.get('edu_field', '').strip() or None,
                 }
                 # Filtrer les valeurs vides
                 edu_item = {k: v for k, v in edu_item.items() if v}
+                if image_url:
+                    edu_item['image_url'] = image_url
                 existing_edu = user.education if user.education else []
                 user.education = existing_edu + [edu_item]
-            else:
-                user.education = new_education
         except json.JSONDecodeError:
             messages.error(request, 'Format JSON invalide pour la formation.')
             return redirect('profile')
     
-    if 'experience' in request.POST:
+    # ----- Experience -----
+    # Deux modes supportés :
+    # 1) Envoi JSON complet via un champ "experience"
+    # 2) Ajout d'une expérience via les champs exp_* (modal du profil)
+    if 'experience' in request.POST or 'exp_position' in request.POST or 'exp_company' in request.POST:
         try:
-            experience_data = request.POST.get('experience', '[]')
-            new_experience = json.loads(experience_data) if experience_data else []
-            # Si c'est un ajout (champs exp_* présents), ajouter à la liste existante
-            if 'exp_position' in request.POST:
+            experience_data = request.POST.get('experience', '')
+            # Mode 1: JSON complet reçu
+            if experience_data:
+                new_experience = json.loads(experience_data) if experience_data else []
+                user.experience = new_experience
+            # Mode 2: ajout d'un seul élément depuis le formulaire
+            elif request.POST.get('exp_position') or request.POST.get('exp_company'):
                 exp_item = {
                     'position': request.POST.get('exp_position', '').strip(),
                     'company': request.POST.get('exp_company', '').strip(),
@@ -1643,8 +1752,6 @@ def profile_update_public_view(request):
                 exp_item = {k: v for k, v in exp_item.items() if v}
                 existing_exp = user.experience if user.experience else []
                 user.experience = existing_exp + [exp_item]
-            else:
-                user.experience = new_experience
         except json.JSONDecodeError:
             messages.error(request, 'Format JSON invalide pour l\'expérience.')
             return redirect('profile')
@@ -1845,6 +1952,7 @@ def google_login(request):
         "&redirect_uri=" + settings.GOOGLE_OAUTH2_REDIRECT_URI +
         "&scope=email profile"
         "&access_type=online"
+        "&prompt=select_account"
     )
     return redirect(google_auth_url)
 

@@ -429,3 +429,67 @@ class PasswordResetCode(models.Model):
     def generate_code():
         """Génère un code de 6 chiffres"""
         return ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+
+
+class AdminMessage(models.Model):
+    """
+    Modèle pour les messages entre administrateurs (EduBox)
+    Chat de groupe pour tous les admins
+    """
+    sender = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='admin_messages_sent',
+        verbose_name="Expéditeur"
+    )
+    content = models.TextField(
+        verbose_name="Contenu du message"
+    )
+    audio_file = models.FileField(
+        upload_to='edubox_audio/',
+        blank=True,
+        null=True,
+        verbose_name="Fichier audio"
+    )
+    file = models.FileField(
+        upload_to='edubox_files/',
+        blank=True,
+        null=True,
+        verbose_name="Fichier"
+    )
+    edited = models.BooleanField(
+        default=False,
+        verbose_name="Modifié"
+    )
+    edited_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Date de modification"
+    )
+    sent_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date d'envoi"
+    )
+    read_by = models.ManyToManyField(
+        CustomUser,
+        related_name='admin_messages_read',
+        blank=True,
+        verbose_name="Lu par"
+    )
+    deleted = models.BooleanField(
+        default=False,
+        verbose_name="Supprimé"
+    )
+    
+    class Meta:
+        verbose_name = "Message Admin"
+        verbose_name_plural = "Messages Admin"
+        ordering = ['-sent_at']
+    
+    def __str__(self):
+        return f"Message de {self.sender.username} - {self.sent_at.strftime('%d/%m/%Y %H:%M')}"
+    
+    def mark_as_read(self, user):
+        """Marquer le message comme lu par un utilisateur"""
+        if user not in self.read_by.all():
+            self.read_by.add(user)

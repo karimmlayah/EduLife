@@ -280,6 +280,86 @@
       opacity: 1 !important;
       background: rgba(255, 255, 255, 0.1);
     }
+    
+    /* Custom Confirmation Modal */
+    .custom-confirm-modal .modal-content {
+      border-radius: 20px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    
+    .custom-confirm-modal .modal-header {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: none;
+      padding: 25px 30px;
+    }
+    
+    .custom-confirm-modal .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
+    }
+    
+    .custom-confirm-modal .modal-header .btn-close:hover {
+      opacity: 1;
+    }
+    
+    .custom-confirm-modal .modal-body {
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .custom-confirm-modal .modal-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    
+    .custom-confirm-modal .modal-icon.warning {
+      color: #ffc107;
+    }
+    
+    .custom-confirm-modal .modal-icon.success {
+      color: #28a745;
+    }
+    
+    .custom-confirm-modal .modal-icon.danger {
+      color: #dc3545;
+    }
+    
+    .custom-confirm-modal .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+    
+    .custom-confirm-modal .modal-message {
+      font-size: 1.1rem;
+      color: #6c757d;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    
+    .custom-confirm-modal .modal-footer {
+      border: none;
+      padding: 20px 30px 30px;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .custom-confirm-modal .btn-confirm {
+      min-width: 120px;
+      padding: 12px 30px;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    
+    .custom-confirm-modal .btn-confirm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 
@@ -374,9 +454,6 @@
             <div class="user-dropdown" id="hdrUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
-              {% if request.user.is_superuser %}
-                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
-              {% endif %}
               <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
               <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
             </div>
@@ -521,9 +598,9 @@
                             <a href="{% url 'res_update' r.id %}" class="btn btn-warning">
                               <i class="bi bi-pencil"></i> Modifier
                             </a>
-                            <a href="{% url 'res_cancel' r.id %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">
+                            <button type="button" class="btn btn-danger" onclick="showCancelConfirm({{ r.id }}, '{{ r.offre.depart }}', '{{ r.offre.destination }}')">
                               <i class="bi bi-x-circle"></i> Annuler
-                            </a>
+                            </button>
                           {% endif %}
                           {% if r.statut == "accepted" %}
                             {% if r.avis %}
@@ -648,6 +725,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+
+  <!-- Toast Notifications -->
+  {% include 'includes/toast_notifications.html' %}
 
   <script>
     // Fonction pour calculer la distance entre deux points (formule de Haversine)
@@ -830,7 +910,57 @@
       }
     });
   </script>
+  <!-- Custom Confirmation Modal -->
+  <div class="modal fade custom-confirm-modal" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-white" id="confirmModalLabel">Confirmation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon" id="modalIcon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+          <h5 class="modal-title" id="modalTitle">Êtes-vous sûr ?</h5>
+          <p class="modal-message" id="modalMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-confirm" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Annuler
+          </button>
+          <button type="button" class="btn btn-danger btn-confirm" id="confirmBtn">
+            <i class="bi bi-check-circle"></i> Confirmer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Fonction pour afficher la confirmation d'annulation
+    function showCancelConfirm(reservationId, depart, destination) {
+      const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      const confirmBtn = document.getElementById('confirmBtn');
+      
+      // Configurer le modal
+      modalIcon.innerHTML = '<i class="bi bi-exclamation-triangle-fill danger"></i>';
+      modalTitle.textContent = 'Annuler la réservation';
+      modalMessage.innerHTML = `Êtes-vous sûr de vouloir annuler cette réservation ?<br><strong>${depart} → ${destination}</strong><br><small class="text-muted">Cette action est irréversible.</small>`;
+      confirmBtn.className = 'btn btn-danger btn-confirm';
+      confirmBtn.innerHTML = '<i class="bi bi-x-circle"></i> Oui, annuler';
+      
+      // Gérer la confirmation
+      confirmBtn.onclick = function() {
+        window.location.href = `/reservation/cancel/${reservationId}/`;
+      };
+      
+      modal.show();
+    }
+    
     // Dropdown for avatar (header)
     (function(){
       const menu = document.getElementById('hdrUserMenu');
@@ -842,6 +972,90 @@
         menu.classList.toggle('open');
         if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
       });
+    })();
+    
+    // Script pour afficher les messages Django - UN SEUL SCRIPT
+    (function() {
+        let messagesDisplayed = false; // Éviter les doublons
+        
+        function createToastDirect(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+                console.error('❌ Toast container non trouvé');
+                const newContainer = document.createElement('div');
+                newContainer.id = 'toast-container';
+                newContainer.className = 'toast-container';
+                document.body.appendChild(newContainer);
+                return createToastDirect(message, type);
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification ' + type;
+            
+            const iconMap = {
+                'success': '<i class="bi bi-check-circle-fill toast-icon"></i>',
+                'error': '<i class="bi bi-x-circle-fill toast-icon"></i>',
+                'warning': '<i class="bi bi-exclamation-triangle-fill toast-icon"></i>',
+                'info': '<i class="bi bi-info-circle-fill toast-icon"></i>'
+            };
+            
+            const icon = iconMap[type] || iconMap['info'];
+            
+            toast.innerHTML = `
+                ${icon}
+                <span class="toast-content">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(function() {
+                toast.classList.add('hiding');
+                setTimeout(function() {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        function displayDjangoMessages() {
+            if (messagesDisplayed) return; // Éviter les doublons
+            messagesDisplayed = true;
+            
+            {% if messages %}
+            {% for message in messages %}
+            (function() {
+                const msgText = '{{ message|escapejs }}';
+                const msgLevel = '{{ message.tags|default:"info" }}';
+                let toastType = 'info';
+                
+                if (msgLevel === 'error' || msgLevel === 'danger') {
+                    toastType = 'error';
+                } else if (msgLevel === 'warning') {
+                    toastType = 'warning';
+                } else if (msgLevel === 'success') {
+                    toastType = 'success';
+                }
+                
+                if (typeof window.showToast !== 'undefined') {
+                    window.showToast(msgText, toastType);
+                } else {
+                    createToastDirect(msgText, toastType);
+                }
+            })();
+            {% endfor %}
+            {% endif %}
+        }
+        
+        // Exécuter une seule fois après le chargement
+        if (document.readyState === 'complete') {
+            setTimeout(displayDjangoMessages, 300);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(displayDjangoMessages, 300);
+            });
+        }
     })();
   </script>
 

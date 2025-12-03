@@ -27,9 +27,6 @@
   <!-- Main CSS File -->
   <link href="{% static 'User/evently/css/main.css' %}" rel="stylesheet">
   
-  <!-- Spline 3D Viewer Script -->
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.11.2/build/spline-viewer.js"></script>
-  
   <style>
     .user-avatar-mini {display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 0 0 3px rgba(37,117,252,.18)}
     .user-avatar-initials{font-size:.9rem;letter-spacing:.5px}
@@ -221,73 +218,59 @@
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* Hero Section Layout - Improved design */
+    /* Hero Section Layout - Particle Animation */
     .hero {
+      width: 100vw;
+      height: 100vh;
+      background: #ffffff;
       position: relative;
       overflow: hidden;
-      max-height: 700px;
-      min-height: 0;
-      display: flex;
-      align-items: center;
-      background-image: none !important; /* Remove background image from hero */
-      background: linear-gradient(135deg, #e3f2fd 0%, #fff3e0 50%, #f3e5f5 100%) !important;
       margin-top: 0;
       padding: 0;
     }
-    
-    .hero::before {
-      content: '';
+
+    #heroCanvas {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(248, 117, 0, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
-      z-index: 0;
-    }
-    
-    .hero .background-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
-      max-height: 700px;
-      background-image: url("{% static 'User/evently/img/hero-background.webp' %}");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: 0;
-      opacity: 1;
+      z-index: 1;
     }
-    
-    /* Fallback gradient if image not loaded - matching the blue gradient */
-    .hero .background-overlay::before {
-      content: '';
+
+    .hero-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      max-height: 700px;
-      background: linear-gradient(180deg, 
-        rgba(230, 240, 255, 0.95) 0%, 
-        rgba(200, 220, 255, 0.9) 50%, 
-        rgba(240, 248, 255, 0.95) 100%);
-      z-index: -1;
+      inset: 0;
+      background: linear-gradient(to bottom right, rgba(204,0,0,0.05), rgba(255,153,0,0.05));
+      pointer-events: none;
+      z-index: 2;
     }
-    
+
     .hero-content {
       position: relative;
-      z-index: 2;
-      width: 100%;
-      padding: 15px 0 15px;
-      max-height: 700px;
+      z-index: 10;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding-top: 80px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 1rem;
       animation: fadeInUp 0.8s ease-out;
     }
-    
+
+    .gradient-text {
+      background: linear-gradient(to right, #cc0000, #ff9900);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -298,171 +281,11 @@
         transform: translateY(0);
       }
     }
-    
-    .hero-content .container {
-      pointer-events: auto;
-    }
-    
-    /* Hero Text Section */
-    .hero-text-wrapper {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
-    }
-    
-    .hero-text {
-      text-align: left;
-    }
-    
-    /* Change text color to black/dark for better visibility */
-    .hero-title,
-    .hero-subtitle,
-    .hero-text,
-    .hero-text *,
-    .event-details,
-    .event-details *,
-    .detail-item,
-    .detail-item span,
-    .detail-item i,
-    .countdown-section,
-    .countdown-section *,
-    .countdown-label,
-    .countdown h3,
-    .countdown h4,
-    .cta-section,
-    .cta-section *,
-    .cta-note {
-      color: #000000 !important;
-      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 
-                   0 1px 2px rgba(255, 255, 255, 0.9) !important;
-    }
-    
-    .hero-title {
-      font-weight: 700 !important;
-      text-shadow: 0 3px 6px rgba(255, 255, 255, 0.9), 
-                   0 2px 4px rgba(255, 255, 255, 1) !important;
-    }
-    
-    /* Icons visibility */
-    .detail-item i {
-      color: #000000 !important;
-      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
-      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
-    }
-    
-    @media (max-width: 991px) {
-      .hero-text {
-        text-align: center;
-      }
-      
-      .countdown-section .countdown {
-        justify-content: center !important;
-      }
-    }
-    
-    /* Spline 3D Viewer Container - Agrandi avec animation */
-    .spline-container-hero {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      animation: fadeInRight 1s ease-out 0.3s both;
-    }
-    
-    @keyframes fadeInRight {
-      from {
-        opacity: 0;
-        transform: translateX(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    .spline-container-hero spline-viewer {
 
-      min-height: 600px !important;
-      display: block;
-      pointer-events: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
-      transition: transform 0.3s ease;
-    }
-    
-    .spline-container-hero:hover spline-viewer {
-      transform: scale(1.02);
-    }
-    
-    canvas.spline-viewer {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      pointer-events: auto;
-      object-fit: contain;
-    }
-    
-    /* Hide "Built with Spline" badge - Multiple approaches */
-    spline-viewer::part(badge),
-    spline-viewer::part(logo),
-    spline-viewer a[href*="spline"],
-    spline-viewer a[href*="Built"],
-    spline-viewer button,
-    spline-viewer .spline-badge,
-    spline-viewer [class*="badge"],
-    spline-viewer [class*="logo"],
-    spline-viewer [id*="badge"],
-    spline-viewer [id*="logo"],
-    spline-viewer [class*="spline"][class*="badge"],
-    spline-viewer [class*="spline"][class*="logo"] {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-      height: 0 !important;
-      width: 0 !important;
-      overflow: hidden !important;
-    }
-    
-    /* Hide any button or link in spline-viewer except canvas */
-    spline-viewer *:not(canvas) {
-      pointer-events: none;
-    }
-    
-    /* Re-enable pointer events for canvas only */
-    spline-viewer canvas {
-      pointer-events: auto !important;
-    }
-    
-    /* Additional rule to hide badge using shadow DOM targeting */
-    spline-viewer {
-      --spline-badge-display: none !important;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 991px) {
-      .spline-container-hero {
-        min-height: 400px;
-        margin-top: 2rem;
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
       }
-      
-      .spline-container-hero spline-viewer {
-        max-width: 100% !important;
-        max-height: 450px !important;
-        min-width: unset !important;
-        min-height: unset !important;
-      }
-    }
-    
-    /* Make interactive elements clickable */
-    .hero-content a,
-    .hero-content button,
-    .hero-content .btn {
-      pointer-events: auto;
     }
     
     /* ============================================
@@ -2334,9 +2157,6 @@
           <div class="user-dropdown" id="idxUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
-            {% if request.user.is_superuser %}
-              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
-            {% endif %}
             <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
             <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
           </div>
@@ -2353,52 +2173,14 @@
   <main class="main">
 
     <!-- Hero Section -->
-    <section id="hero" class="hero section dark-background">
-      <div class="background-overlay"></div>
+    <section id="hero" class="hero section">
+      <canvas id="heroCanvas"></canvas>
+      <div class="hero-overlay"></div>
       <div class="hero-content">
         <div class="container">
-          <div class="row align-items-center">
-            <!-- Text Content - Left Side -->
-            <div class="col-lg-6">
-              <div class="hero-text-wrapper">
-                <div class="hero-text">
-                  <h1 class="hero-title">Transform Your Future with&nbsp;<br>EduLife Education</h1>
-                  <p class="hero-subtitle">Discover innovative learning solutions, connect with expert educators, and unlock your potential through our comprehensive educational platform designed for lifelong learners.</p>
-                  <div class="event-details">
-                    <div class="detail-item"><i class="bi bi-book"></i><span>1000+ Courses Available</span></div>
-                    <div class="detail-item"><i class="bi bi-people"></i><span>50,000+ Active Students</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Spline 3D Viewer - Right Side -->
-<div class="col-lg-6">
-  <div style="
-    width:110%;
-    height:400px;
-    overflow:hidden;
-    border-radius:20px;
-    position:relative;
-    margin-left:150px;     /* décalage à gauche valable */
-    margin-top: -50px;
-  ">
-    
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.0/build/spline-viewer.js"></script>
-
-    <spline-viewer 
-      url="https://prod.spline.design/HG6NNGgo9o8-Hzxw/scene.splinecode"
-      style="
-        width:120%;              /* un peu plus large pour couper le vide */
-        height:100%;
-        display:block;
-        transform: translateX(-100px);  /* coupe la partie vide à gauche */
-        margin-right: 40px;
-      ">
-    </spline-viewer>
-  </div>
-</div>
-
-          </div>
+          <h1 class="hero-title">
+            Transform Your Future with <span class="gradient-text">EduLife</span>
+          </h1>
         </div>
       </div>
     </section><!-- /Hero Section -->
@@ -2849,65 +2631,115 @@
        }
     })();
     
-    // Hide "Built with Spline" badge
+    // Hero Particle Animation
     (function() {
-      function hideSplineBadge() {
-        const splineViewer = document.querySelector('spline-viewer');
-        if (!splineViewer) return;
-        
-        // Try multiple methods to hide the badge
-        const shadowRoot = splineViewer.shadowRoot;
-        if (shadowRoot) {
-          // Hide badge in shadow DOM
-          const badge = shadowRoot.querySelector('a[href*="spline"], a[href*="Built"], button, [class*="badge"], [class*="logo"], [id*="badge"], [id*="logo"]');
-          if (badge) {
-            badge.style.display = 'none';
-            badge.style.visibility = 'hidden';
-            badge.style.opacity = '0';
-            badge.style.height = '0';
-            badge.style.width = '0';
-            badge.style.overflow = 'hidden';
-            badge.style.pointerEvents = 'none';
-          }
-          
-          // Hide all links and buttons except canvas
-          shadowRoot.querySelectorAll('a, button').forEach(el => {
-            if (el.tagName !== 'CANVAS') {
-              el.style.display = 'none';
-              el.style.visibility = 'hidden';
-              el.style.opacity = '0';
-              el.style.pointerEvents = 'none';
-            }
-          });
-        }
-        
-        // Also hide any badge outside shadow DOM
-        const badges = document.querySelectorAll('a[href*="spline"], a[href*="Built"][href*="spline"], [class*="spline"][class*="badge"]');
-        badges.forEach(badge => {
-          if (splineViewer.contains(badge) || splineViewer.shadowRoot?.contains(badge)) {
-            badge.style.display = 'none';
-            badge.style.visibility = 'hidden';
-            badge.style.opacity = '0';
-            badge.style.pointerEvents = 'none';
-          }
+      const canvas = document.getElementById("heroCanvas");
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext("2d");
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      
+      resizeCanvas();
+      
+      let mouseX = canvas.width / 2;
+      let mouseY = canvas.height / 2;
+      
+      // Mouse tracking
+      document.addEventListener("mousemove", e => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      
+      // ============= PARTICLES =============
+      const particlesCount = 250;
+      const particles = [];
+      
+      for (let i = 0; i < particlesCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 1.4,
+          vy: (Math.random() - 0.5) * 1.4,
+          r: Math.random() * 1.8 + 1,
+          color: Math.random() > 0.5
+            ? "rgba(204, 0, 0, 0.28)"
+            : "rgba(255, 153, 0, 0.22)"
         });
       }
       
-      // Try immediately and after delays (badge might load asynchronously)
-      hideSplineBadge();
-      setTimeout(hideSplineBadge, 500);
-      setTimeout(hideSplineBadge, 1000);
-      setTimeout(hideSplineBadge, 2000);
-      
-      // Also observe for changes
-      const observer = new MutationObserver(hideSplineBadge);
-      const splineViewer = document.querySelector('spline-viewer');
-      if (splineViewer) {
-        observer.observe(splineViewer, { childList: true, subtree: true });
-        if (splineViewer.shadowRoot) {
-          observer.observe(splineViewer.shadowRoot, { childList: true, subtree: true });
+      // ============= ANIMATION LOOP =============
+      function animate() {
+        // background ultra light
+        ctx.fillStyle = "rgba(255,255,255,0.97)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(p => {
+          // distance à la souris
+          const dx = mouseX - p.x;
+          const dy = mouseY - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // attraction soft & élégante
+          if (dist < 320) {
+            p.vx += dx / dist * 0.15;
+            p.vy += dy / dist * 0.15;
+          }
+          
+          // friction douce → stabilité
+          p.vx *= 0.988;
+          p.vy *= 0.988;
+          
+          p.x += p.vx;
+          p.y += p.vy;
+          
+          // rebond naturel
+          if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+          
+          // dessin des particules
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        
+        // ========== LIGNES ENTRE PARTICULES ==========
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // lignes super clean
+            if (dist < 140) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(204,0,0,${(1 - dist / 140) * 0.12})`;
+              ctx.lineWidth = 0.45;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
         }
+        
+        requestAnimationFrame(animate);
       }
+      
+      animate();
+      
+      // update canvas on resize
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        // Réinitialiser les particules après resize
+        particles.forEach(p => {
+          if (p.x > canvas.width) p.x = canvas.width;
+          if (p.y > canvas.height) p.y = canvas.height;
+        });
+      });
     })();
   </script>
 
@@ -3432,6 +3264,15 @@
             voicePanel.classList.remove('open');
             if (recognition && listening) recognition.stop();
           }
+          // Fermer le widget Messaging s'il est ouvert
+          try {
+            const messaging = document.getElementById('messagingWidget');
+            if (messaging && !messaging.classList.contains('minimized')) {
+              messaging.classList.add('minimized');
+            }
+          } catch (err) {
+            console.error("Erreur lors de la fermeture de Messaging depuis EduBot :", err);
+          }
           widget.classList.add('open');
         }
       };
@@ -3446,6 +3287,15 @@
           // Fermer EduBot si ouvert
           if (widget && widget.classList.contains('open')) {
             widget.classList.remove('open');
+          }
+          // Fermer le widget Messaging s'il est ouvert
+          try {
+            const messaging = document.getElementById('messagingWidget');
+            if (messaging && !messaging.classList.contains('minimized')) {
+              messaging.classList.add('minimized');
+            }
+          } catch (e) {
+            console.error("Erreur lors de la fermeture de Messaging depuis EduVoice :", e);
           }
           voicePanel.classList.add('open');
         }

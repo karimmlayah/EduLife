@@ -1,6 +1,7 @@
 from django import forms
-from .models import OffreStage
+from .models import OffreStage, CVData
 import re
+import json
 
 class OffreStageForm(forms.ModelForm):
     titre = forms.CharField(
@@ -219,4 +220,157 @@ class OffreStageForm(forms.ModelForm):
         elif self.instance.pk and not self.instance.image and not image:
             raise forms.ValidationError("L'image est obligatoire.")
         return image
+
+
+class CVForm(forms.ModelForm):
+    """Formulaire pour remplir les données CV"""
+    
+    full_name = forms.CharField(
+        required=True,
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ex: John Doe'
+        })
+    )
+    
+    phone = forms.CharField(
+        required=False,
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ex: +216 12 345 678'
+        })
+    )
+    
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com'
+        })
+    )
+    
+    address = forms.CharField(
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ex: Tunis, Tunisia'
+        })
+    )
+    
+    linkedin = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'https://linkedin.com/in/yourprofile'
+        })
+    )
+    
+    github = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'https://github.com/yourusername'
+        })
+    )
+    
+    website = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'https://yourwebsite.com'
+        })
+    )
+    
+    professional_summary = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Write a brief professional summary about yourself...'
+        })
+    )
+    
+    # Les champs JSON seront gérés via JavaScript dans le template
+    skills = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    education = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    experience = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    projects = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    languages = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    certifications = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    class Meta:
+        model = CVData
+        fields = [
+            'full_name', 'phone', 'email', 'address', 'linkedin', 'github', 'website',
+            'professional_summary', 'skills', 'education', 'experience',
+            'projects', 'languages', 'certifications'
+        ]
+    
+    def clean_skills(self):
+        skills_str = self.cleaned_data.get('skills', '[]')
+        try:
+            return json.loads(skills_str) if skills_str else []
+        except json.JSONDecodeError:
+            return []
+    
+    def clean_education(self):
+        education_str = self.cleaned_data.get('education', '[]')
+        try:
+            return json.loads(education_str) if education_str else []
+        except json.JSONDecodeError:
+            return []
+    
+    def clean_experience(self):
+        experience_str = self.cleaned_data.get('experience', '[]')
+        try:
+            return json.loads(experience_str) if experience_str else []
+        except json.JSONDecodeError:
+            return []
+    
+    def clean_projects(self):
+        projects_str = self.cleaned_data.get('projects', '[]')
+        try:
+            return json.loads(projects_str) if projects_str else []
+        except json.JSONDecodeError:
+            return []
+    
+    def clean_languages(self):
+        languages_str = self.cleaned_data.get('languages', '[]')
+        try:
+            return json.loads(languages_str) if languages_str else []
+        except json.JSONDecodeError:
+            return []
+    
+    def clean_certifications(self):
+        certifications_str = self.cleaned_data.get('certifications', '[]')
+        try:
+            return json.loads(certifications_str) if certifications_str else []
+        except json.JSONDecodeError:
+            return []
 

@@ -13,7 +13,7 @@ class Investissement(models.Model):
         related_name='investissements'
     )
 
-    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True,blank=True)
 
     montant = models.FloatField()
     date = models.DateField()

@@ -1,7 +1,7 @@
 {% load static %}
 <!-- LinkedIn Style Messaging Widget -->
 {% if request.user.is_authenticated %}
-<div class="messaging-widget minimized" id="messagingWidget">
+<div class="messaging-widget minimized" id="messagingWidget" style="margin-right: 75px;">
   <div class="messaging-widget-header" id="messagingWidgetHeader">
     <div class="messaging-user-info">
       <div class="messaging-avatar-wrapper">
@@ -577,7 +577,24 @@
   function toggleMessagingWidget() {
     const widget = document.getElementById('messagingWidget');
     if (widget) {
+      const wasMinimized = widget.classList.contains('minimized');
       widget.classList.toggle('minimized');
+
+      // Si on vient d'ouvrir le widget Messaging, fermer EduBot / EduVoice
+      if (wasMinimized && !widget.classList.contains('minimized')) {
+        try {
+          const edubot = document.getElementById('edubot-home-widget');
+          if (edubot && edubot.classList.contains('open') && typeof window.toggleEduBotWidget === 'function') {
+            window.toggleEduBotWidget();
+          }
+          const eduvoice = document.getElementById('eduvoice-panel');
+          if (eduvoice && eduvoice.classList.contains('open') && typeof window.toggleEduVoicePanel === 'function') {
+            window.toggleEduVoicePanel();
+          }
+        } catch (e) {
+          console.error("Erreur lors de la fermeture d’EduBot/EduVoice depuis Messaging :", e);
+        }
+      }
     }
   }
 
@@ -930,6 +947,20 @@
         const widget = document.getElementById('messagingWidget');
         if (widget && widget.classList.contains('minimized')) {
           widget.classList.remove('minimized');
+
+          // À l’ouverture via le header, fermer EduBot / EduVoice comme pour leurs FABs
+          try {
+            const edubot = document.getElementById('edubot-home-widget');
+            if (edubot && edubot.classList.contains('open') && typeof window.toggleEduBotWidget === 'function') {
+              window.toggleEduBotWidget();
+            }
+            const eduvoice = document.getElementById('eduvoice-panel');
+            if (eduvoice && eduvoice.classList.contains('open') && typeof window.toggleEduVoicePanel === 'function') {
+              window.toggleEduVoicePanel();
+            }
+          } catch (err) {
+            console.error("Erreur lors de la fermeture d’EduBot/EduVoice depuis l’en-tête Messaging :", err);
+          }
         }
       });
     }

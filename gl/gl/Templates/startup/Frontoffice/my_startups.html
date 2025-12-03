@@ -112,6 +112,8 @@
               <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
               {% if request.user.is_authenticated %}
                 <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+                <li><a href="{% url 'my_investissements' %}"><i class="bi bi-briefcase me-1"></i> My Investments</a></li>
+
               {% endif %}
             </ul>
           </li>
@@ -172,6 +174,7 @@
 
   <main class="main">
 
+    
     <!-- Page Title -->
      <div class="page-title dark-background" style="background-image: url(https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop) ;">
       <div class="container position-relative">

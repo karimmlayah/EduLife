@@ -386,17 +386,17 @@
       font-size: 1rem;
       font-weight: 600;
       color: #000;
-      margin: 0 0 4px 0;
+      margin: 0 0 2px 0;
     }
     .exp-company, .edu-school {
       font-size: 0.875rem;
       color: #666;
-      margin: 0 0 4px 0;
+      margin: 0 0 2px 0;
     }
     .exp-duration, .edu-duration {
       font-size: 0.75rem;
       color: #999;
-      margin: 0;
+      margin: 0 0 2px 0;
     }
     .item-actions {
       position: absolute;
@@ -1053,7 +1053,7 @@
       <div class="profile-card">
         <div class="profile-card-header">
           <h2 class="profile-card-title">Expérience</h2>
-          <button class="edit-btn" onclick="openModal('experience-modal')">
+          <button class="edit-btn" onclick="openExperienceAddModal()">
             <i class="bi bi-plus"></i> Ajouter
           </button>
         </div>
@@ -1061,8 +1061,20 @@
           {% if user_obj.experience %}
             {% for exp in user_obj.experience %}
             <div class="experience-item">
-              <h3 class="exp-title">{{ exp.position|default:exp.title|default:"Position" }}</h3>
-              <p class="exp-company">{{ exp.company|default:exp.organization|default:"Entreprise" }}</p>
+              <h3 class="exp-title">
+                {% if exp.position %}
+                  {{ exp.position }}
+                {% else %}
+                  Position
+                {% endif %}
+              </h3>
+              <p class="exp-company">
+                {% if exp.company %}
+                  {{ exp.company }}
+                {% else %}
+                  Entreprise
+                {% endif %}
+              </p>
               {% if exp.start_date or exp.end_date %}
               <p class="exp-duration">
                 {% if exp.start_date %}{{ exp.start_date }}{% endif %}
@@ -1073,6 +1085,26 @@
               {% if exp.description %}
               <p style="font-size: 0.875rem; color: #666; margin-top: 8px;">{{ exp.description }}</p>
               {% endif %}
+              <div class="item-actions">
+                <button type="button"
+                        class="item-action-btn"
+                        onclick="openExperienceEditModal({{ forloop.counter0 }}, '{{ exp.position|default:''|escapejs }}', '{{ exp.company|default:''|escapejs }}', '{{ exp.start_date|default_if_none:''|escapejs }}', '{{ exp.end_date|default_if_none:''|escapejs }}', '{{ exp.description|default_if_none:''|escapejs }}')">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <form method="post"
+                      action="{% url 'profile_update_public' %}"
+                      style="display:inline;"
+                      id="delete-experience-form-{{ forloop.counter0 }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete_experience">
+                  <input type="hidden" name="exp_index" value="{{ forloop.counter0 }}">
+                  <button type="button"
+                          class="item-action-btn"
+                          onclick="openDeleteConfirmModal('delete-experience-form-{{ forloop.counter0 }}', 'Supprimer cette expérience ?')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
             </div>
             {% endfor %}
           {% else %}
@@ -1085,7 +1117,7 @@
       <div class="profile-card">
         <div class="profile-card-header">
           <h2 class="profile-card-title">Formation</h2>
-          <button class="edit-btn" onclick="openModal('education-modal')">
+          <button class="edit-btn" onclick="openEducationAddModal()">
             <i class="bi bi-plus"></i> Ajouter
           </button>
         </div>
@@ -1093,18 +1125,55 @@
           {% if user_obj.education %}
             {% for edu in user_obj.education %}
             <div class="education-item">
-              <h3 class="edu-title">{{ edu.degree|default:edu.diploma|default:"Diplôme" }}</h3>
-              <p class="edu-school">{{ edu.school|default:edu.university|default:"École" }}</p>
-              {% if edu.year or edu.start_year or edu.end_year %}
+              <h3 class="edu-title">
+                {% if edu.degree %}
+                  {{ edu.degree }}
+                {% else %}
+                  Diplôme
+                {% endif %}
+              </h3>
+              <p class="edu-school">
+                {% if edu.school %}
+                  {{ edu.school }}
+                {% else %}
+                  École
+                {% endif %}
+              </p>
+              {% if edu.start_year or edu.end_year %}
               <p class="edu-duration">
                 {% if edu.start_year %}{{ edu.start_year }}{% endif %}
                 {% if edu.start_year and edu.end_year %} - {% endif %}
-                {% if edu.end_year %}{{ edu.end_year }}{% elif edu.year %}{{ edu.year }}{% endif %}
+                {% if edu.end_year %}{{ edu.end_year }}{% endif %}
               </p>
               {% endif %}
               {% if edu.field %}
               <p style="font-size: 0.875rem; color: #666; margin-top: 4px;">{{ edu.field }}</p>
               {% endif %}
+              {% if edu.image_url %}
+              <div style="margin-top: 6px;">
+                <img src="{{ edu.image_url }}" alt="{{ edu.school|default:'Formation' }}" style="max-width: 100%; border-radius: 6px;">
+              </div>
+              {% endif %}
+              <div class="item-actions">
+                <button type="button"
+                        class="item-action-btn"
+                        onclick="openEducationEditModal({{ forloop.counter0 }}, '{{ edu.degree|default:''|escapejs }}', '{{ edu.school|default:''|escapejs }}', '{{ edu.start_year|default_if_none:''|escapejs }}', '{{ edu.end_year|default_if_none:''|escapejs }}', '{{ edu.field|default_if_none:''|escapejs }}', '{{ edu.image_url|default_if_none:''|escapejs }}')">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <form method="post"
+                      action="{% url 'profile_update_public' %}"
+                      style="display:inline;"
+                      id="delete-education-form-{{ forloop.counter0 }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete_education">
+                  <input type="hidden" name="edu_index" value="{{ forloop.counter0 }}">
+                  <button type="button"
+                          class="item-action-btn"
+                          onclick="openDeleteConfirmModal('delete-education-form-{{ forloop.counter0 }}', 'Supprimer cette formation ?')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
             </div>
             {% endfor %}
           {% else %}
@@ -1231,31 +1300,33 @@
 <div id="experience-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 class="modal-title">Ajouter une expérience</h2>
+      <h2 class="modal-title" id="experience-modal-title">Ajouter une expérience</h2>
       <button class="close-modal" onclick="closeModal('experience-modal')">&times;</button>
     </div>
     <form method="post" action="{% url 'profile_update_public' %}" id="experience-form">
       {% csrf_token %}
+      <input type="hidden" name="action" id="experience-action" value="add_experience">
+      <input type="hidden" name="exp_index" id="experience-index">
       <div class="item-form">
         <div class="form-group">
           <label class="form-label">Poste</label>
-          <input type="text" name="exp_position" class="form-input" placeholder="Ex: Développeur Full Stack">
+          <input type="text" name="exp_position" class="form-input" placeholder="Ex: Développeur Full Stack" required>
         </div>
         <div class="form-group">
           <label class="form-label">Entreprise</label>
-          <input type="text" name="exp_company" class="form-input" placeholder="Ex: Tech Corp">
+          <input type="text" name="exp_company" class="form-input" placeholder="Ex: Tech Corp" required>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
               <label class="form-label">Date de début</label>
-              <input type="text" name="exp_start" class="form-input" placeholder="Ex: 2021-01">
+              <input type="month" name="exp_start" class="form-input">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
               <label class="form-label">Date de fin</label>
-              <input type="text" name="exp_end" class="form-input" placeholder="Ex: 2023-12 ou laisser vide si actuel">
+              <input type="month" name="exp_end" class="form-input">
             </div>
           </div>
         </div>
@@ -1276,37 +1347,43 @@
 <div id="education-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 class="modal-title">Ajouter une formation</h2>
+      <h2 class="modal-title" id="education-modal-title">Ajouter une formation</h2>
       <button class="close-modal" onclick="closeModal('education-modal')">&times;</button>
     </div>
-    <form method="post" action="{% url 'profile_update_public' %}" id="education-form">
+    <form method="post" action="{% url 'profile_update_public' %}" id="education-form" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="action" id="education-action" value="add_education">
+      <input type="hidden" name="edu_index" id="education-index">
       <div class="item-form">
         <div class="form-group">
           <label class="form-label">Diplôme</label>
-          <input type="text" name="edu_degree" class="form-input" placeholder="Ex: Master Informatique">
+          <input type="text" name="edu_degree" class="form-input" placeholder="Ex: Master Informatique" required>
         </div>
         <div class="form-group">
           <label class="form-label">École/Université</label>
-          <input type="text" name="edu_school" class="form-input" placeholder="Ex: Université XYZ">
+          <input type="text" name="edu_school" class="form-input" placeholder="Ex: Université XYZ" required>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label class="form-label">Année de début</label>
-              <input type="text" name="edu_start" class="form-input" placeholder="Ex: 2018">
+              <label class="form-label">Date de début</label>
+              <input type="date" name="edu_start" class="form-input" required>
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label class="form-label">Année de fin</label>
-              <input type="text" name="edu_end" class="form-input" placeholder="Ex: 2020">
+              <label class="form-label">Date de fin</label>
+              <input type="date" name="edu_end" class="form-input" required>
             </div>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Domaine</label>
           <input type="text" name="edu_field" class="form-input" placeholder="Ex: Informatique">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Image / Logo (optionnel)</label>
+          <input type="file" name="edu_image_file" class="form-input" accept="image/*">
         </div>
       </div>
       <div class="form-actions">
@@ -1341,6 +1418,25 @@
         <button type="submit" class="btn-primary">Enregistrer</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal de confirmation de suppression (réutilisable) -->
+<div id="delete-confirm-modal" class="modal">
+  <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-header">
+      <h2 class="modal-title">Confirmation</h2>
+      <button class="close-modal" onclick="closeModal('delete-confirm-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="delete-confirm-message" style="margin-bottom: 1rem; color: #111827;">
+        Êtes-vous sûr de vouloir supprimer cet élément ?
+      </p>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" onclick="closeModal('delete-confirm-modal')">Annuler</button>
+      <button type="button" class="btn-primary" onclick="confirmDeleteSubmit()">Supprimer</button>
+    </div>
   </div>
 </div>
 
@@ -1393,6 +1489,70 @@ function handleCoverPhotoChange(event) {
       }
     }
   }
+}
+
+// Ouvrir le modal d'ajout d'expérience (reset + mode ajout)
+function openExperienceAddModal() {
+  const form = document.getElementById('experience-form');
+  if (!form) return;
+  form.reset();
+  document.getElementById('experience-action').value = 'add_experience';
+  document.getElementById('experience-index').value = '';
+  const title = document.getElementById('experience-modal-title');
+  if (title) title.textContent = 'Ajouter une expérience';
+  openModal('experience-modal');
+}
+
+// Ouvrir le modal d'édition d'une expérience existante
+function openExperienceEditModal(index, position, company, startDate, endDate, description) {
+  const form = document.getElementById('experience-form');
+  if (!form) return;
+  form.reset();
+  document.getElementById('experience-action').value = 'update_experience';
+  document.getElementById('experience-index').value = index;
+  const title = document.getElementById('experience-modal-title');
+  if (title) title.textContent = 'Modifier une expérience';
+
+  form.querySelector('input[name="exp_position"]').value = position || '';
+  form.querySelector('input[name="exp_company"]').value = company || '';
+  form.querySelector('input[name="exp_start"]').value = startDate || '';
+  form.querySelector('input[name="exp_end"]').value = endDate || '';
+  form.querySelector('textarea[name="exp_description"]').value = description || '';
+
+  openModal('experience-modal');
+}
+
+// Ouvrir le modal d'ajout de formation
+function openEducationAddModal() {
+  const form = document.getElementById('education-form');
+  if (!form) return;
+  form.reset();
+  document.getElementById('education-action').value = 'add_education';
+  document.getElementById('education-index').value = '';
+  const title = document.getElementById('education-modal-title');
+  if (title) title.textContent = 'Ajouter une formation';
+  openModal('education-modal');
+}
+
+// Ouvrir le modal d'édition de formation
+function openEducationEditModal(index, degree, school, startYear, endYear, field, imageUrl) {
+  const form = document.getElementById('education-form');
+  if (!form) return;
+  form.reset();
+  document.getElementById('education-action').value = 'update_education';
+  document.getElementById('education-index').value = index;
+  const title = document.getElementById('education-modal-title');
+  if (title) title.textContent = 'Modifier une formation';
+
+  form.querySelector('input[name="edu_degree"]').value = degree || '';
+  form.querySelector('input[name="edu_school"]').value = school || '';
+  form.querySelector('input[name="edu_start"]').value = startYear || '';
+  form.querySelector('input[name="edu_end"]').value = endYear || '';
+  form.querySelector('input[name="edu_field"]').value = field || '';
+  const imgInput = form.querySelector('input[name="edu_image"]');
+  if (imgInput) imgInput.value = imageUrl || '';
+
+  openModal('education-modal');
 }
 
 function openModal(modalId) {
@@ -1467,10 +1627,17 @@ window.onclick = function(event) {
   }
 }
 
-// Handle skills form submission
+// Handle skills form submission avec validation simple
 document.getElementById('skills-form')?.addEventListener('submit', function(e) {
   const textarea = document.getElementById('skills-textarea');
-  const skills = textarea.value.split('\n').filter(s => s.trim()).map(s => s.trim());
+  const skills = textarea.value.split('\n').map(s => s.trim()).filter(s => s);
+
+  if (skills.length === 0) {
+    e.preventDefault();
+    alert('Veuillez saisir au moins une compétence.');
+    return;
+  }
+
   const skillsJson = JSON.stringify(skills);
   
   // Create hidden input with JSON
@@ -1484,11 +1651,110 @@ document.getElementById('skills-form')?.addEventListener('submit', function(e) {
   textarea.removeAttribute('name');
 });
 
-// Handle experience form submission - laisser le formulaire se soumettre normalement
-// La vue gérera l'ajout à la liste existante
+// Validation du formulaire d'expérience
+document.getElementById('experience-form')?.addEventListener('submit', function(e) {
+  const position = this.querySelector('input[name="exp_position"]')?.value.trim();
+  const company = this.querySelector('input[name="exp_company"]')?.value.trim();
+  const startDate = this.querySelector('input[name="exp_start"]')?.value.trim();
+  const endDate = this.querySelector('input[name="exp_end"]')?.value.trim();
 
-// Handle education form submission - laisser le formulaire se soumettre normalement
-// La vue gérera l'ajout à la liste existante
+  // Champs obligatoires de base
+  if (!position || !company) {
+    e.preventDefault();
+    alert('Veuillez renseigner au minimum le poste et l’entreprise pour l’expérience.');
+    return;
+  }
+
+  // Longueur minimale pour éviter les saisies trop courtes
+  if (position.length < 2 || company.length < 2) {
+    e.preventDefault();
+    alert('Merci de saisir un poste et une entreprise avec au moins 2 caractères.');
+    return;
+  }
+
+  // Validation simple du format des dates (AAAA ou AAAA-MM)
+  const datePatternYear = /^[0-9]{4}$/;
+  const datePatternYearMonth = /^[0-9]{4}-[0-1][0-9]$/;
+
+  const isValidDate = (val) => {
+    if (!val) return true;
+    return datePatternYear.test(val) || datePatternYearMonth.test(val);
+  };
+
+  if (!isValidDate(startDate) || !isValidDate(endDate)) {
+    e.preventDefault();
+    alert('Format de date invalide. Utilisez AAAA ou AAAA-MM (ex: 2023 ou 2023-09).');
+    return;
+  }
+
+  // Si les deux dates sont au format AAAA, vérifier la cohérence
+  if (datePatternYear.test(startDate) && datePatternYear.test(endDate)) {
+    if (parseInt(endDate, 10) < parseInt(startDate, 10)) {
+      e.preventDefault();
+      alert('La date de fin ne peut pas être antérieure à la date de début.');
+      return;
+    }
+  }
+});
+
+// Validation du formulaire de formation
+document.getElementById('education-form')?.addEventListener('submit', function(e) {
+  const degree = this.querySelector('input[name="edu_degree"]')?.value.trim();
+  const school = this.querySelector('input[name="edu_school"]')?.value.trim();
+  const startYear = this.querySelector('input[name="edu_start"]')?.value.trim();
+  const endYear = this.querySelector('input[name="edu_end"]')?.value.trim();
+
+  if (!degree || !school) {
+    e.preventDefault();
+    alert('Veuillez renseigner au minimum le diplôme et l’école pour la formation.');
+    return;
+  }
+
+  if (degree.length < 2 || school.length < 2) {
+    e.preventDefault();
+    alert('Merci de saisir un diplôme et une école avec au moins 2 caractères.');
+    return;
+  }
+
+  // Dates obligatoires (HTML required) + cohérence début/fin
+  if (!startYear || !endYear) {
+    e.preventDefault();
+    alert("Veuillez sélectionner une date de début et une date de fin pour la formation.");
+    return;
+  }
+
+  const start = Date.parse(startYear);
+  const end = Date.parse(endYear);
+  if (!isNaN(start) && !isNaN(end) && end < start) {
+    e.preventDefault();
+    alert("La date de fin ne peut pas être antérieure à la date de début.");
+    return;
+  }
+});
+
+// ------- Confirmation de suppression avec modal personnalisé -------
+let pendingDeleteFormId = null;
+
+function openDeleteConfirmModal(formId, message) {
+  pendingDeleteFormId = formId;
+  const msgEl = document.getElementById('delete-confirm-message');
+  if (msgEl && message) {
+    msgEl.textContent = message;
+  }
+  openModal('delete-confirm-modal');
+}
+
+function confirmDeleteSubmit() {
+  if (!pendingDeleteFormId) {
+    closeModal('delete-confirm-modal');
+    return;
+  }
+  const form = document.getElementById(pendingDeleteFormId);
+  if (form) {
+    form.submit();
+  }
+  pendingDeleteFormId = null;
+}
 </script>
     </div>
   </section>

@@ -1,3 +1,4 @@
+from urllib import request
 from .models import Event, Seat
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
@@ -148,7 +149,8 @@ def dashboard(request):
                     # Gestion de l'URL photo (accepte data URI sans limite stricte)
                     photo_url = request.POST.get("photo_url", "").strip()
                     event.photo_url = photo_url
-                    
+                    event.latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
+                    event.longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
                     # Validation personnalisée sans la validation d'URL par défaut
                     if event.photo_url:
                         if (not event.photo_url.startswith('http://') and 
@@ -181,6 +183,8 @@ def dashboard(request):
         location = request.POST.get("location", "").strip()
         total_seats = request.POST.get("total_seats")
         photo_url = request.POST.get("photo_url", "").strip()
+        latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
+        longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
 
         # Conversion des types
         try:
@@ -198,7 +202,9 @@ def dashboard(request):
             date=date_val,
             location=location,
             total_seats=total_seats,
-            photo_url=photo_url
+            photo_url=photo_url,
+            latitude = latitude,
+            longitude = longitude,
         )
 
         try:
@@ -284,6 +290,8 @@ def reserve_event(request, event_id):
         'event': event,
         'seats': seats,
         'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,   # ✅ AJOUT OBLIGATOIRE
+        'MAPBOX_ACCESS_TOKEN': settings.MAPBOX_ACCESS_TOKEN,  # 👈 obligatoire
+
     })
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -291,59 +299,97 @@ import json
 
 def create_checkout_session(request):
     if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
+        return JsonResponse({"error": "Bad request"}, status=400)
 
     data = json.loads(request.body)
+
     event_id = data.get("event_id")
-    selected_seats = data.get("seats")  # liste ["12", "13"]
-    total_price = data.get("total_price")
+    seats = data.get("seats", [])
+    total_price = data.get("total_price", 0)
 
-    event = get_object_or_404(Event, id=event_id)
+    # Sécurité : convertir en float
+    try:
+        total_price = float(total_price)
+    except:
+        return JsonResponse({"error": "Invalid price"}, status=400)
 
-    # ✅ Prix en centimes
-    amount_cents = int(float(total_price) * 100)
+    # Convertir en centimes
+    amount_cents = int(total_price * 100)
+
+    event = Event.objects.get(id=event_id)
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": "eur",
-                "product_data": {
-                    "name": f"Billets : {event.name}",
-                },
-                "unit_amount": amount_cents,
-            },
-            "quantity": 1,
-        }],
         mode="payment",
-        success_url=f"http://127.0.0.1:8000/Event/payment/success/?event={event.id}&seats={','.join(selected_seats)}",
-        cancel_url="http://127.0.0.1:8000/Event/payment/cancel/",
+
+        # Stripe collecte lui-même l’email
+        customer_creation="always",
+
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {"name": event.name},
+                    "unit_amount": amount_cents,
+                },
+                "quantity": 1,
+            }
+        ],
+
+        success_url=(
+    request.build_absolute_uri('/Event/payment/success/')
+    + f"?session_id={{CHECKOUT_SESSION_ID}}&event={event_id}&seats={','.join(seats)}"
+),
+        cancel_url=request.build_absolute_uri('/Event/?payment=cancel'),
     )
 
-    return JsonResponse({"id": session.id})
+    return JsonResponse({"sessionId": session.id})
+
 def payment_success(request):
+    import stripe
+
+    session_id = request.GET.get("session_id")
     event_id = request.GET.get("event")
     seats_raw = request.GET.get("seats")
+
+    # récupérer la session stripe
+    checkout_session = stripe.checkout.Session.retrieve(session_id)
+    customer_email = checkout_session.customer_details.email
+
+
     event = get_object_or_404(Event, id=event_id)
     seat_numbers = seats_raw.split(",")
 
     STATIC_USER_ID = request.user.id
 
-    # marquer sièges
+    # réserver les sièges
     for number in seat_numbers:
         seat = Seat.objects.get(event=event, number=int(number))
         seat.status = Seat.Status.RESERVED
         seat.id_user = STATIC_USER_ID
         seat.save(update_fields=["status", "id_user"])
 
-    # incrément atomique
+    # mettre à jour l'évènement
     Event.objects.filter(id=event.id).update(
-        reserved_seats=F('reserved_seats') + len(seat_numbers)
+        reserved_seats=F("reserved_seats") + len(seat_numbers)
     )
-    event.refresh_from_db(fields=["reserved_seats"])
+
+    # envoyer email
+    from django.core.mail import send_mail
+    
+    send_mail(
+        subject=f"Confirmation – {event.name}",
+        message=(
+            f"Votre réservation est confirmée.\n\n"
+            f"Sièges : {', '.join(seat_numbers)}\n"
+            f"Date : {event.date}\nLieu : {event.location}"
+        ),
+        from_email=None,
+        recipient_list=[customer_email],
+        fail_silently=False,
+    )
 
     return redirect("/Event/?payment=success")
-
 
 def payment_cancel(request):
     return redirect("/Event/?payment=cancel")

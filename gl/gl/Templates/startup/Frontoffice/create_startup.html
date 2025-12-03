@@ -196,14 +196,33 @@
       <div class="col-lg-8">
 
         <div class="ticket-form-wrapper">
-          <div class="event-info mb-5">
-            <h3>Startup Information</h3>
-            <div class="event-details">
-              <div class="event-meta">
-                <span><i class="bi bi-info-circle"></i> Fill in all required fields</span>
-                <span><i class="bi bi-shield-check"></i> Your startup will be reviewed</span>
-                <span><i class="bi bi-clock"></i> Approval takes 24-48 hours</span>
+          <div class="event-info mb-5 d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+              <h3>Startup Information</h3>
+              <div class="event-details">
+                <div class="event-meta">
+                  <span><i class="bi bi-info-circle"></i> Fill in all required fields</span>
+                  <span><i class="bi bi-shield-check"></i> Your startup will be reviewed</span>
+                  <span><i class="bi bi-clock"></i> Approval takes 24-48 hours</span>
+                </div>
               </div>
+            </div>
+            <div class="border rounded-3 p-3 bg-light" style="min-width:260px;max-width:320px;">
+              <h6 class="mb-2"><i class="bi bi-robot me-2"></i>Startup AI Assistant</h6>
+              <div id="chatbot-messages"
+                   style="max-height:220px;overflow-y:auto;font-size:0.9rem;background:#fff;border-radius:0.5rem;border:1px solid rgba(0,0,0,.05);padding:0.5rem;">
+                <div class="text-muted small">Ask me to create or delete your startups, or help you fill the form.</div>
+              </div>
+              <div class="mt-2 d-flex gap-1">
+                <input type="text"
+                       id="chatbot-input"
+                       class="form-control form-control-sm"
+                       placeholder="Ask something...">
+                <button type="button" id="chatbot-send" class="btn btn-primary btn-sm">
+                  <i class="bi bi-send"></i>
+                </button>
+              </div>
+              <small id="chatbot-status" class="text-muted small d-block mt-1"></small>
             </div>
           </div>
 
@@ -218,6 +237,32 @@
 
           <form method="POST" enctype="multipart/form-data" action="{% url 'create_startup' %}" class="ticket-form">
             {% csrf_token %}
+
+            <!-- AI Logo Generator -->
+            <div class="mb-4 p-3 rounded-3 border bg-light">
+              <h5 class="mb-2"><i class="bi bi-magic me-2"></i>AI Logo Generator</h5>
+              <p class="text-muted" style="font-size: 0.9rem;">
+                Describe the logo you want and we will generate a few options for you. You can then pick one
+                as your startup logo without uploading a file.
+              </p>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-9">
+                  <label for="logo_prompt" class="form-label mb-1">Logo description</label>
+                  <input type="text"
+                         id="logo_prompt"
+                         class="form-control"
+                         placeholder="e.g. Minimalist green logo for a healthy food startup">
+                </div>
+                <div class="col-md-3 d-grid">
+                  <button type="button" id="btn-generate-logo" class="btn btn-outline-primary">
+                    <i class="bi bi-stars me-1"></i> Generate Logos
+                  </button>
+                </div>
+              </div>
+              <div id="logo-generator-status" class="small text-muted mt-2"></div>
+              <input type="hidden" name="generated_logo_url" id="generated_logo_url">
+              <div id="logo-generator-results" class="row row-cols-2 row-cols-md-3 g-3 mt-3"></div>
+            </div>
 
             <!-- Startup Name -->
             <div class="row">
@@ -534,6 +579,193 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // ---------------- AI Logo Generator ----------------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const logoPromptInput = document.getElementById('logo_prompt');
+    const btnGenerateLogo = document.getElementById('btn-generate-logo');
+    const logoStatus = document.getElementById('logo-generator-status');
+    const logoResults = document.getElementById('logo-generator-results');
+    const generatedLogoField = document.getElementById('generated_logo_url');
+
+    function clearLogoSelection() {
+        if (!logoResults) return;
+        logoResults.querySelectorAll('.generated-logo-card').forEach(card => {
+            card.classList.remove('border-primary', 'shadow');
+        });
+    }
+
+    if (btnGenerateLogo && logoPromptInput && logoStatus && logoResults && generatedLogoField) {
+        btnGenerateLogo.addEventListener('click', async function () {
+            const prompt = logoPromptInput.value.trim();
+            if (!prompt) {
+                logoStatus.classList.remove('text-muted');
+                logoStatus.classList.add('text-danger');
+                logoStatus.textContent = 'Please enter a description for the logo.';
+                return;
+            }
+
+            logoStatus.classList.remove('text-danger');
+            logoStatus.classList.add('text-muted');
+            logoStatus.textContent = 'Generating logos... This may take a few seconds.';
+            logoResults.innerHTML = '';
+            generatedLogoField.value = '';
+
+            try {
+                const response = await fetch("{% url 'generate_logo' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    logoStatus.classList.remove('text-muted');
+                    logoStatus.classList.add('text-danger');
+                    logoStatus.textContent = data.error || 'Logo generation failed.';
+                    return;
+                }
+
+                logoStatus.classList.remove('text-danger');
+                logoStatus.classList.add('text-muted');
+                logoStatus.textContent = 'Click on a logo to select it as your startup logo.';
+
+                logoResults.innerHTML = '';
+                data.results.forEach((item, idx) => {
+                    if (!item.thumb && !item.origin) return;
+                    const col = document.createElement('div');
+                    col.className = 'col generated-logo-card';
+                    col.style.cursor = 'pointer';
+
+                    col.innerHTML = `
+                      <div class="card h-100 border-0">
+                        <div class="ratio ratio-1x1">
+                          <img src="${item.thumb || item.origin}" class="card-img-top" alt="Generated logo ${idx + 1}" style="object-fit: cover;">
+                        </div>
+                      </div>
+                    `;
+
+                    col.addEventListener('click', function () {
+                        clearLogoSelection();
+                        col.classList.add('border', 'border-primary', 'shadow');
+                        generatedLogoField.value = item.origin || item.thumb;
+                    });
+
+                    logoResults.appendChild(col);
+                });
+            } catch (err) {
+                console.error('Logo generation error:', err);
+                logoStatus.classList.remove('text-muted');
+                logoStatus.classList.add('text-danger');
+                logoStatus.textContent = 'Error while contacting logo generator service.';
+            }
+        });
+    }
+
+    // ---------------- Startup Chatbot ----------------
+    const chatMessages = document.getElementById('chatbot-messages');
+    const chatInput = document.getElementById('chatbot-input');
+    const chatSend = document.getElementById('chatbot-send');
+    const chatStatus = document.getElementById('chatbot-status');
+
+    function appendChatBubble(role, text) {
+        if (!chatMessages) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-1';
+        const bubble = document.createElement('div');
+        bubble.className = 'px-2 py-1 rounded-2';
+        bubble.style.whiteSpace = 'pre-wrap';
+        if (role === 'user') {
+            bubble.classList.add('bg-primary', 'text-white', 'ms-auto');
+            bubble.style.maxWidth = '85%';
+        } else {
+            bubble.classList.add('bg-secondary', 'bg-opacity-10');
+            bubble.style.maxWidth = '100%';
+        }
+        bubble.textContent = text;
+        wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendChat() {
+        if (!chatInput || !chatInput.value.trim()) return;
+        const text = chatInput.value.trim();
+        chatInput.value = '';
+        appendChatBubble('user', text);
+
+        if (chatStatus) {
+            chatStatus.classList.remove('text-danger');
+            chatStatus.classList.add('text-muted');
+            chatStatus.textContent = 'Thinking...';
+        }
+
+        try {
+            const response = await fetch("{% url 'startup_chatbot' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                if (chatStatus) {
+                    chatStatus.classList.remove('text-muted');
+                    chatStatus.classList.add('text-danger');
+                    chatStatus.textContent = data.error || 'Chatbot request failed.';
+                }
+                return;
+            }
+
+            const reply = data.message || 'Done.';
+            appendChatBubble('bot', reply);
+
+            if (chatStatus) {
+                chatStatus.classList.remove('text-danger');
+                chatStatus.classList.add('text-muted');
+                chatStatus.textContent = '';
+            }
+        } catch (err) {
+            console.error('Chatbot error:', err);
+            if (chatStatus) {
+                chatStatus.classList.remove('text-muted');
+                chatStatus.classList.add('text-danger');
+                chatStatus.textContent = 'Error while contacting chatbot service.';
+            }
+        }
+    }
+
+    if (chatSend && chatInput) {
+        chatSend.addEventListener('click', sendChat);
+        chatInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendChat();
+            }
+        });
+    }
 
 });
 </script>

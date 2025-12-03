@@ -171,6 +171,31 @@
     #sidenav-main .sidenav-footer { position: absolute; left: 12px; right: 12px; bottom: 16px; }
     .btn-logout { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
 
+    /* Bulle de notification EduBox */
+    .edubox-unread-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: linear-gradient(135deg, #f5365c, #fb6340);
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0 6px;
+      box-shadow: 0 2px 8px rgba(245, 54, 92, 0.4);
+      border: 2px solid white;
+      animation: pulse-badge 2s infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
     /* Styles spécifiques EduBot */
     .edubot-container {
       display: flex;
@@ -323,6 +348,15 @@
             <span class="nav-link-text ms-1">EduBot</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_edubox' %}" id="edubox-nav-link" style="position: relative;">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-email-83 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">EduBox</span>
+            <span id="edubox-unread-badge" class="edubox-unread-badge" style="display: none;">0</span>
+          </a>
+        </li>
       </ul>
     </div>
     <div class="sidenav-footer mx-3">
@@ -369,10 +403,6 @@
                 <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' %}active{% endif %}">
                   <i class="ni ni-calendar-grid-58 me-1"></i>
                   <span>Events</span>
-                </a>
-                <a href="{% url 'admin_edubot' %}" class="nav-link-top active">
-                  <i class="ni ni-chat-round me-1"></i>
-                  <span>EduBot</span>
                 </a>
               </div>
             </div>
@@ -510,6 +540,33 @@
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
       return '';
+    }
+
+    // Mettre à jour le compteur de messages non lus EduBox
+    async function updateEduBoxUnreadCount() {
+      try {
+        const resp = await fetch('/api/edubox/unread-count/', {
+          method: 'GET',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken') || ''
+          }
+        });
+        const data = await resp.json();
+        if (data.success) {
+          const badge = document.getElementById('edubox-unread-badge');
+          if (badge) {
+            const count = data.unread_count || 0;
+            if (count > 0) {
+              badge.textContent = count > 99 ? '99+' : count;
+              badge.style.display = 'flex';
+            } else {
+              badge.style.display = 'none';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour du compteur EduBox:', err);
+      }
     }
 
     // ==== Speech to Text (Web Speech API) ====
@@ -674,6 +731,12 @@
         });
       }
       setupFileInput();
+
+      // Mettre à jour le compteur EduBox au chargement et toutes les 30 secondes
+      if (document.getElementById('edubox-unread-badge')) {
+        updateEduBoxUnreadCount();
+        setInterval(updateEduBoxUnreadCount, 30000);
+      }
     });
   </script>
 </body>

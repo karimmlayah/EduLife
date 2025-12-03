@@ -102,17 +102,17 @@
                             <div class="d-flex justify-content-center">
 
                                 <!-- APPROVE -->
-                                <form method="POST" action="{% url 'approve_startup' s.id_startup %}" onsubmit="return confirmSubmit('Êtes-vous sûr de vouloir approuver cette startup ?', this);">
+                                <form method="POST" action="{% url 'approve_startup' s.id_startup %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm me-2">
+                                    <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm me-2">
                                         <i class="bi bi-check-lg"></i>
                                     </button>
                                 </form>
 
                                 <!-- REJECT -->
-                                <form method="POST" action="{% url 'reject_startup' s.id_startup %}" onsubmit="return confirmSubmit('Êtes-vous sûr de vouloir rejeter cette startup ?', this);">
+                                <form method="POST" action="{% url 'reject_startup' s.id_startup %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                                    <button class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </form>

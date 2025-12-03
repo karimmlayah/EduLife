@@ -1,0 +1,446 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Generate CV - EduLife</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  
+  <style>
+    .cv-form-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      color: #ff6b35;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #ff6b35;
+    }
+    .dynamic-list-item {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+    .btn-add-item {
+      background: #ff6b35;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .btn-add-item:hover {
+      background: #e55a2b;
+      color: white;
+    }
+    .btn-remove-item {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 6px;
+      float: right;
+    }
+    .btn-generate-pdf {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+    .btn-generate-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    }
+  </style>
+</head>
+
+<body class="buy-tickets-page">
+
+  <main class="main">
+
+    <section id="generate-cv" class="buy-tickets section">
+
+      <div class="container">
+
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+
+            <div class="ticket-form-wrapper">
+              
+              <div class="mb-4">
+                <a href="{% url 'internships' %}" class="btn btn-link text-decoration-none p-0" style="color: #333;">
+                  <i class="bi bi-arrow-left me-2"></i>Back to Internships
+                </a>
+              </div>
+              
+              <div class="event-info mb-5">
+                <h3><i class="bi bi-file-earmark-pdf me-2"></i>Generate Your CV</h3>
+                <p class="text-muted">Fill in your information below and generate a professional PDF CV</p>
+              </div>
+
+              <form method="post" action="{% url 'generate_cv' %}" id="cvForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Informations personnelles -->
+                <div class="cv-form-section">
+                  <h4 class="section-title">Personal Information</h4>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="{{ form.full_name.id_for_label }}" class="form-label">Full Name *</label>
+                      {{ form.full_name }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
+                      {{ form.email }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="{{ form.phone.id_for_label }}" class="form-label">Phone</label>
+                      {{ form.phone }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                      {{ form.address }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="{{ form.linkedin.id_for_label }}" class="form-label">LinkedIn</label>
+                      {{ form.linkedin }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="{{ form.github.id_for_label }}" class="form-label">GitHub</label>
+                      {{ form.github }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="{{ form.website.id_for_label }}" class="form-label">Website</label>
+                      {{ form.website }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Résumé professionnel -->
+                <div class="cv-form-section">
+                  <h4 class="section-title">Professional Summary</h4>
+                  {{ form.professional_summary }}
+                </div>
+
+                <!-- Compétences -->
+                <div class="cv-form-section">
+                  <h4 class="section-title">Skills</h4>
+                  <div id="skills-container">
+                    <div class="input-group mb-2">
+                      <input type="text" class="form-control skill-input" placeholder="Enter a skill (e.g., Python, JavaScript)">
+                      <button type="button" class="btn btn-outline-secondary" onclick="addSkill()">Add</button>
+                    </div>
+                    <div id="skills-list"></div>
+                  </div>
+                  {{ form.skills }}
+                </div>
+
+
+
+                <!-- Langues -->
+                <div class="cv-form-section">
+                  <h4 class="section-title">Languages</h4>
+                  <div id="languages-container">
+                    <div class="input-group mb-2">
+                      <input type="text" class="form-control language-input" placeholder="Enter a language (e.g., English, French)">
+                      <button type="button" class="btn btn-outline-secondary" onclick="addLanguage()">Add</button>
+                    </div>
+                    <div id="languages-list"></div>
+                  </div>
+                  {{ form.languages }}
+                </div>
+
+                <!-- Certifications -->
+                <div class="cv-form-section">
+                  <h4 class="section-title">Certifications</h4>
+                  <div id="certifications-container">
+                    <div id="certifications-list"></div>
+                    <button type="button" class="btn btn-add-item" onclick="addCertification()">
+                      <i class="bi bi-plus-circle me-2"></i>Add Certification
+                    </button>
+                  </div>
+                  {{ form.certifications }}
+                </div>
+
+                <!-- Bouton -->
+                <div class="d-flex justify-content-center mt-4">
+                  <button type="submit" name="generate_pdf" value="1" class="btn btn-generate-pdf" onclick="updateHiddenFields()">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Generate PDF CV
+                  </button>
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+  <script>
+    // Données initiales depuis le serveur
+    const initialData = {
+      skills: {{ skills_json|safe }},
+      languages: {{ languages_json|safe }},
+      certifications: {{ certifications_json|safe }}
+    };
+
+    // Initialiser les listes
+    function initLists() {
+      // Vider les listes d'abord pour éviter les doublons
+      document.getElementById('skills-list').innerHTML = '';
+      document.getElementById('languages-list').innerHTML = '';
+      document.getElementById('certifications-list').innerHTML = '';
+      
+      // Réinitialiser les compteurs
+      certCounter = 0;
+      
+      // Ajouter les données
+      if (initialData.skills && Array.isArray(initialData.skills)) {
+        initialData.skills.forEach(skill => addSkillToList(skill));
+      }
+      if (initialData.languages && Array.isArray(initialData.languages)) {
+        initialData.languages.forEach(lang => addLanguageToList(lang));
+      }
+      if (initialData.certifications && Array.isArray(initialData.certifications)) {
+        initialData.certifications.forEach(cert => addCertificationToList(cert));
+      }
+      updateHiddenFields();
+    }
+
+    // Skills
+    function addSkill() {
+      const input = document.querySelector('.skill-input');
+      const skill = input.value.trim();
+      if (skill) {
+        addSkillToList(skill);
+        input.value = '';
+        updateHiddenFields();
+      }
+    }
+
+    function addSkillToList(skill) {
+      const list = document.getElementById('skills-list');
+      const div = document.createElement('div');
+      div.className = 'd-inline-block me-2 mb-2';
+      div.innerHTML = `
+        <span class="badge bg-primary p-2">${skill} <button type="button" class="btn-close btn-close-white ms-2" onclick="removeSkill(this)" style="font-size: 0.7em;"></button></span>
+      `;
+      list.appendChild(div);
+    }
+
+    function removeSkill(btn) {
+      btn.closest('div').remove();
+      updateHiddenFields();
+    }
+
+
+
+    // Languages
+    function addLanguage() {
+      const input = document.querySelector('.language-input');
+      const lang = input.value.trim();
+      if (lang) {
+        addLanguageToList(lang);
+        input.value = '';
+        updateHiddenFields();
+      }
+    }
+
+    function addLanguageToList(lang) {
+      const list = document.getElementById('languages-list');
+      const div = document.createElement('div');
+      div.className = 'd-inline-block me-2 mb-2';
+      div.innerHTML = `
+        <span class="badge bg-success p-2">${lang} <button type="button" class="btn-close btn-close-white ms-2" onclick="removeLanguage(this)" style="font-size: 0.7em;"></button></span>
+      `;
+      list.appendChild(div);
+    }
+
+    function removeLanguage(btn) {
+      btn.closest('div').remove();
+      updateHiddenFields();
+    }
+
+    // Certifications
+    let certCounter = 0;
+    
+    function getNextCertId() {
+      return certCounter++;
+    }
+    
+    function addCertification(cert = null) {
+      const list = document.getElementById('certifications-list');
+      if (!list) return;
+      const id = getNextCertId();
+      const div = document.createElement('div');
+      div.className = 'dynamic-list-item';
+      div.id = `cert-${id}`;
+      div.innerHTML = `
+        <button type="button" class="btn-remove-item" onclick="removeCertification(${id})">Remove</button>
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <input type="text" class="form-control" placeholder="Certification Name" value="${cert?.name || ''}" onchange="updateHiddenFields()">
+          </div>
+          <div class="col-md-6 mb-2">
+            <input type="text" class="form-control" placeholder="Issuing Organization" value="${cert?.issuer || ''}" onchange="updateHiddenFields()">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label small text-muted">Date</label>
+            <input type="date" class="form-control" value="${cert?.date || ''}" onchange="updateHiddenFields()">
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+      updateHiddenFields();
+    }
+
+    function addCertificationToList(cert) {
+      // Vérifier que la certification n'existe pas déjà
+      const existingItems = document.querySelectorAll('#certifications-list .dynamic-list-item');
+      const isDuplicate = Array.from(existingItems).some(item => {
+        const inputs = item.querySelectorAll('input');
+        return inputs[0]?.value === cert?.name && inputs[1]?.value === cert?.issuer;
+      });
+      
+      if (!isDuplicate) {
+        addCertification(cert);
+      }
+    }
+
+    function removeCertification(id) {
+      const element = document.getElementById(`cert-${id}`);
+      if (element) {
+        element.remove();
+        updateHiddenFields();
+      }
+    }
+
+    // Mettre à jour les champs cachés
+    function updateHiddenFields() {
+      // Skills
+      const skills = Array.from(document.querySelectorAll('#skills-list .badge')).map(badge => {
+        return badge.textContent.trim().replace('×', '').trim();
+      });
+      document.getElementById('id_skills').value = JSON.stringify(skills);
+
+      // Experience, Education et Projects supprimés
+      document.getElementById('id_experience').value = JSON.stringify([]);
+      document.getElementById('id_education').value = JSON.stringify([]);
+      document.getElementById('id_projects').value = JSON.stringify([]);
+
+      // Languages
+      const languages = Array.from(document.querySelectorAll('#languages-list .badge')).map(badge => {
+        return badge.textContent.trim().replace('×', '').trim();
+      });
+      document.getElementById('id_languages').value = JSON.stringify(languages);
+
+      // Certifications
+      const certifications = [];
+      document.querySelectorAll('#certifications-list .dynamic-list-item').forEach(item => {
+        const inputs = item.querySelectorAll('input');
+        certifications.push({
+          name: inputs[0].value,
+          issuer: inputs[1].value,
+          date: inputs[2].value
+        });
+      });
+      document.getElementById('id_certifications').value = JSON.stringify(certifications);
+    }
+
+    // Entrée pour skills et languages
+    document.querySelector('.skill-input')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addSkill();
+      }
+    });
+
+    document.querySelector('.language-input')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addLanguage();
+      }
+    });
+
+    // Mettre à jour les champs cachés avant la soumission du formulaire
+    document.getElementById('cvForm').addEventListener('submit', function(e) {
+      updateHiddenFields();
+      // Laisser le formulaire se soumettre normalement
+      return true;
+    });
+    
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Initialiser au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+      initLists();
+    });
+  </script>
+
+  <!-- LinkedIn Style Messaging Widget -->
+  {% include 'User/includes/messaging_widget.html' %}
+
+</body>
+
+</html>
+

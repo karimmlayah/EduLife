@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Startup Approuvée</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background:#f5f5f5; padding: 20px;">
+
+<div style="max-width: 550px; margin:auto; background:white; border-radius:10px; padding:25px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+
+    <!-- LOGO -->
+    {% if logo_cid %}
+        <div style="text-align:center; margin-bottom:20px;">
+            <img src="cid:{{ logo_cid }}" alt="Logo"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+        </div>
+    {% endif %}
+
+    <h2 style="color:#333; text-align:center;">
+        Félicitations ! 🎉
+    </h2>
+
+    <p style="font-size:16px; color:#444;">
+        Votre startup <strong>{{ startup.nom_startup }}</strong> vient d’être 
+        approuvée par l’équipe d’administration.
+    </p>
+
+    <p style="font-size:15px; color:#555;">
+        Vous pouvez maintenant accéder à toutes les fonctionnalités, recevoir des investissements 
+        et commencer à attirer des investisseurs potentiels.
+    </p>
+
+    <div style="margin:20px 0; text-align:center;">
+        <a href="#" 
+           style="background:#4CAF50; color:white; padding:12px 22px; 
+                  border-radius:5px; text-decoration:none; font-weight:bold;">
+            Voir ma startup
+        </a>
+    </div>
+
+    <p style="font-size:13px; color:#999; text-align:center;">
+        Merci d’utiliser notre plateforme.<br>
+        — L’équipe Administration
+    </p>
+
+</div>
+
+</body>
+</html>

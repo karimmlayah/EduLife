@@ -269,10 +269,10 @@
         toast.className = 'toast-notification ' + type;
         
         const iconMap = {
-            'success': '<i class="bx bx-check-circle toast-icon"></i>',
-            'error': '<i class="bx bx-error-circle toast-icon"></i>',
-            'warning': '<i class="bx bx-error toast-icon"></i>',
-            'info': '<i class="bx bx-info-circle toast-icon"></i>'
+            'success': '<i class="bi bi-check-circle-fill toast-icon"></i>',
+            'error': '<i class="bi bi-x-circle-fill toast-icon"></i>',
+            'warning': '<i class="bi bi-exclamation-triangle-fill toast-icon"></i>',
+            'info': '<i class="bi bi-info-circle-fill toast-icon"></i>'
         };
         
         const icon = iconMap[type] || iconMap['info'];
@@ -379,24 +379,7 @@
     window.confirmSubmit = confirmSubmit;
     
     // Django Messages as Toast Notifications
-    {% if messages %}
-    document.addEventListener('DOMContentLoaded', function() {
-        const messages = [
-            {% for message in messages %}
-            {
-                text: '{{ message|escapejs }}',
-                level: '{{ message.tags|default:"info" }}'
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-        
-        messages.forEach(function(msg) {
-            const level = msg.level === 'error' ? 'error' : 
-                         msg.level === 'warning' ? 'warning' : 
-                         msg.level === 'success' ? 'success' : 'info';
-            showToast(msg.text, level);
-        });
-    });
-    {% endif %}
+    // Cette partie est gérée directement dans les templates qui incluent ce fichier
+    // pour éviter les conflits d'ordre d'exécution
 </script>
 

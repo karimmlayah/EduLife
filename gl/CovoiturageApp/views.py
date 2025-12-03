@@ -263,14 +263,9 @@ def offre_update(request, id):
                 offre.date_covoiturage = None
             
             offre.save()
-            messages.success(request, "L'offre a été modifiée avec succès.")
+            messages.success(request, f"L'offre de covoiturage {offre.depart} → {offre.destination} a été modifiée avec succès.")
             
-            # Rediriger selon la page d'origine
-            referer = request.META.get('HTTP_REFERER', '')
-            if 'mes_offres' in referer:
-                return redirect('mes_offres')
-            elif 'dashboard' in referer:
-                return redirect('dashboard')
+            # Toujours rediriger vers mes_offres
             return redirect('mes_offres')
         except Exception as e:
             messages.error(request, f"Erreur lors de la modification: {str(e)}")
@@ -292,24 +287,26 @@ def offre_delete(request, id):
 
     # Si l'utilisateur est ADMIN ou STAFF → SUPPRIMER DIRECT
     if user.is_staff or user.is_superuser:
+        # Sauvegarder les infos pour le message
+        depart = offre.depart
+        destination = offre.destination
         offre.delete()
-        messages.success(request, "L'offre a été supprimée avec succès.")
-        return redirect('dashboard')
+        messages.success(request, f"L'offre de covoiturage {depart} → {destination} a été supprimée avec succès.")
+        return redirect('mes_offres')
 
     # Sinon, vérifier que c'est le conducteur propriétaire
     if offre.conducteur != user:
         messages.error(request, "Vous n'avez pas le droit de supprimer cette offre.")
         return redirect('mes_offres')
 
-    offre.delete()
-    messages.success(request, "Votre offre a été supprimée avec succès.")
+    # Sauvegarder les infos pour le message
+    depart = offre.depart
+    destination = offre.destination
     
-    # Rediriger selon la page d'origine
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'mes_offres' in referer:
-        return redirect('mes_offres')
-    elif 'dashboard' in referer:
-        return redirect('dashboard')
+    offre.delete()
+    messages.success(request, f"L'offre de covoiturage {depart} → {destination} a été supprimée avec succès.")
+    
+    # Toujours rediriger vers mes_offres
     return redirect('mes_offres')
 
 

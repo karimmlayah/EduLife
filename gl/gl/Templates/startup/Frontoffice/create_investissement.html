@@ -241,6 +241,88 @@
 
             </form>
 
+            <!-- Currency Converter (helper, bottom of form) -->
+            <div class="mt-5 p-4 rounded-3 border bg-light">
+              <h5 class="mb-3"><i class="bi bi-cash-coin me-2"></i>Currency Converter</h5>
+              <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                This tool is just to help you understand the value of your investment in other currencies.
+                It does <strong>not</strong> change the amount actually submitted.
+              </p>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                  <label for="conv-amount" class="form-label mb-1">Amount</label>
+                  <input type="number"
+                         id="conv-amount"
+                         class="form-control"
+                         min="0"
+                         step="0.01"
+                         placeholder="e.g. 100">
+                </div>
+                <div class="col-md-3">
+                  <label for="conv-from" class="form-label mb-1">From</label>
+                  <select id="conv-from" class="form-select">
+                    <!-- Existing -->
+                    <option value="TND" selected>TND – Tunisian Dinar</option>
+  <option value="EUR">EUR – Euro</option>
+  <option value="USD">USD – US Dollar</option>
+  <option value="GBP">GBP – British Pound</option>
+
+  <!-- Major additional currencies -->
+  <option value="JPY">JPY – Japanese Yen</option>
+  <option value="CAD">CAD – Canadian Dollar</option>
+  <option value="AUD">AUD – Australian Dollar</option>
+  <option value="CHF">CHF – Swiss Franc</option>
+  <option value="CNY">CNY – Chinese Yuan</option>
+  <option value="SAR">SAR – Saudi Riyal</option>
+  <option value="AED">AED – UAE Dirham</option>
+  <option value="KWD">KWD – Kuwaiti Dinar</option>
+  <option value="QAR">QAR – Qatari Riyal</option>
+  <option value="BHD">BHD – Bahraini Dinar</option>
+  <option value="TRY">TRY – Turkish Lira</option>
+  <option value="MAD">MAD – Moroccan Dirham</option>
+  <option value="EGP">EGP – Egyptian Pound</option>
+  <option value="LYD">LYD – Libyan Dinar</option>
+  <option value="DZD">DZD – Algerian Dinar</option>
+
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="conv-to" class="form-label mb-1">To</label>
+                  <select id="conv-to" class="form-select">
+                    <!-- Existing -->
+  <option value="TND" selected>TND – Tunisian Dinar</option>
+  <option value="EUR">EUR – Euro</option>
+  <option value="USD">USD – US Dollar</option>
+  <option value="GBP">GBP – British Pound</option>
+
+  <!-- Major additional currencies -->
+  <option value="JPY">JPY – Japanese Yen</option>
+  <option value="CAD">CAD – Canadian Dollar</option>
+  <option value="AUD">AUD – Australian Dollar</option>
+  <option value="CHF">CHF – Swiss Franc</option>
+  <option value="CNY">CNY – Chinese Yuan</option>
+  <option value="SAR">SAR – Saudi Riyal</option>
+  <option value="AED">AED – UAE Dirham</option>
+  <option value="KWD">KWD – Kuwaiti Dinar</option>
+  <option value="QAR">QAR – Qatari Riyal</option>
+  <option value="BHD">BHD – Bahraini Dinar</option>
+  <option value="TRY">TRY – Turkish Lira</option>
+  <option value="MAD">MAD – Moroccan Dirham</option>
+  <option value="EGP">EGP – Egyptian Pound</option>
+  <option value="LYD">LYD – Libyan Dinar</option>
+  <option value="DZD">DZD – Algerian Dinar</option>
+
+                  </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button type="button" id="btn-convert" class="btn btn-outline-primary">
+                    Convert
+                  </button>
+                </div>
+              </div>
+              <small id="conv-result" class="d-block mt-3 text-muted"></small>
+            </div>
+
           </div>
 
         </div>
@@ -308,6 +390,74 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (stop) e.preventDefault();
     });
+
+    // ---------------- Currency Converter ----------------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const convAmount = document.getElementById("conv-amount");
+    const convFrom = document.getElementById("conv-from");
+    const convTo = document.getElementById("conv-to");
+    const btnConvert = document.getElementById("btn-convert");
+    const convResult = document.getElementById("conv-result");
+
+    if (btnConvert && convAmount && convFrom && convTo && convResult) {
+        btnConvert.addEventListener("click", async function () {
+            const amount = convAmount.value.trim();
+            const fromCurrency = convFrom.value;
+            const toCurrency = convTo.value;
+
+            convResult.classList.remove("text-danger");
+            convResult.classList.add("text-muted");
+            convResult.textContent = "Converting...";
+
+            try {
+                const response = await fetch("{% url 'convert_currency' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        from_currency: fromCurrency,
+                        to_currency: toCurrency
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    convResult.classList.remove("text-muted");
+                    convResult.classList.add("text-danger");
+                    convResult.textContent = data.error || "Conversion failed.";
+                    return;
+                }
+
+                convResult.classList.remove("text-danger");
+                convResult.classList.add("text-muted");
+                convResult.textContent = `${data.amount} ${data.from_currency} = ${data.converted_amount.toFixed(4)} ${data.to_currency}`;
+            } catch (err) {
+                console.error("Conversion error:", err);
+                convResult.classList.remove("text-muted");
+                convResult.classList.add("text-danger");
+                convResult.textContent = "Error while contacting conversion service.";
+            }
+        });
+    }
 
 });
 </script>

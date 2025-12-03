@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import timezone
-from UserApp.models import CustomUser, Post, Comment, Connection, Message
+from UserApp.models import CustomUser, Post, Comment, Connection, Message, AdminMessage
 from .models import Logement, LogementImage
 from .forms import LogementForm
 
@@ -319,6 +319,43 @@ def admin_edubot(request):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
         return redirect('index')
     return render(request, 'User/Backoffice/edubot.html')
+
+
+@login_required
+@user_passes_test(is_superuser_or_admin, login_url='/login/')
+def admin_edubox(request):
+    """
+    Interface de messagerie entre administrateurs (EduBox)
+    """
+    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+        return redirect('index')
+    
+    # Récupérer tous les messages (chat de groupe)
+    # D'abord filtrer, puis prendre le slice
+    admin_messages_queryset = AdminMessage.objects.filter(deleted=False).select_related('sender').order_by('sent_at')
+    
+    # Marquer les messages non lus comme lus (avant le slice)
+    unread_messages = admin_messages_queryset.exclude(read_by=request.user)
+    for msg in unread_messages:
+        msg.mark_as_read(request.user)
+    
+    # Maintenant prendre le slice pour l'affichage (les 100 derniers messages)
+    # On prend les 100 derniers, puis on les inverse pour afficher du plus ancien au plus récent
+    admin_messages_list = list(admin_messages_queryset[:100])
+    admin_messages = admin_messages_list  # Garder l'ordre chronologique (du plus ancien au plus récent)
+    
+    # Récupérer tous les admins pour afficher dans la liste
+    admins = CustomUser.objects.filter(
+        Q(is_superuser=True) | Q(role='ADMIN')
+    ).distinct()
+    
+    context = {
+        'admin_messages': admin_messages,
+        'admins': admins,
+    }
+    
+    return render(request, 'User/Backoffice/edubox.html', context)
 
 
 @login_required

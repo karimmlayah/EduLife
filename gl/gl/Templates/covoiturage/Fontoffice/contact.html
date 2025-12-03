@@ -324,6 +324,60 @@
       margin-top: 20px;
     }
     
+    /* Price calculator */
+    .price-calculator-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffe9d6 100%);
+      border: 1px solid rgba(248, 113, 37, 0.25);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .price-calculator-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ff6b35 0%, #fbbf24 100%);
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(248, 113, 37, 0.4);
+    }
+    .price-calculator-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .price-calculator-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #7c2d12;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .price-calculator-hint {
+      font-size: 0.8rem;
+      color: #92400e;
+      margin: 0;
+      flex-basis: 100%;
+    }
+    .price-calculator-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(248, 113, 37, 0.12);
+      color: #9a3412;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
     /* Form improvements */
     .contact-form-wrapper {
       backdrop-filter: blur(10px);
@@ -594,9 +648,6 @@
             <div class="user-dropdown" id="hdrUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
-              {% if request.user.is_superuser %}
-                <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
-              {% endif %}
               <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
               <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
             </div>
@@ -766,7 +817,27 @@
                       <div class="form-group">
                         <div class="input-with-icon">
                           <i class="bi bi-currency-exchange"></i>
-                          <input type="number" step="0.01" class="form-control" name="prix" placeholder="Prix par personne (DT)" required="">
+                          <input type="number" step="0.01" class="form-control" id="prix" name="prix" placeholder="Prix par personne (DT)" required="">
+                        </div>
+                        <!-- Calculateur de prix - UI améliorée -->
+                        <div class="price-calculator-box">
+                          <div class="price-calculator-icon">
+                            <i class="bi bi-calculator"></i>
+                          </div>
+                          <div class="price-calculator-content">
+                            <div class="price-calculator-title">
+                              <span>Calculateur de prix conseillé</span>
+                              <span class="price-calculator-badge">Optionnel</span>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    id="btn-calcul-prix">
+                              <i class="bi bi-magic"></i> Proposer un prix
+                            </button>
+                            <p class="price-calculator-hint" id="prix-suggestion-help">
+                              Estime automatiquement un prix par personne selon la distance et le nombre de passagers.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -950,6 +1021,45 @@
                         <small class="text-muted">
                           <i class="bi bi-chat-dots"></i> {{ item.nombre_avis }} avis
                         </small>
+
+                        {% if item.avis_list %}
+                        <div class="mt-3">
+                          {% for avis in item.avis_list %}
+                          <div class="border rounded-3 p-2 mb-2 bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-circle text-secondary"></i>
+                                {% with user=avis.reservation.passager %}
+                                  <strong style="font-size: 0.9rem;">
+                                    {{ user.first_name|default:user.username }}
+                                    {% if user.last_name %} {{ user.last_name }}{% endif %}
+                                  </strong>
+                                {% endwith %}
+                              </div>
+                              <div>
+                                {% for i in "12345" %}
+                                  {% if forloop.counter <= avis.note %}
+                                    <i class="bi bi-star-fill text-warning" style="font-size: 0.9rem;"></i>
+                                  {% else %}
+                                    <i class="bi bi-star text-muted" style="font-size: 0.9rem;"></i>
+                                  {% endif %}
+                                {% endfor %}
+                              </div>
+                            </div>
+                            {% if avis.commentaire %}
+                            <p class="mb-0" style="font-size: 0.85rem; color:#4b5563;">
+                              {{ avis.commentaire|truncatewords:20 }}
+                            </p>
+                            {% endif %}
+                          </div>
+                          {% endfor %}
+                          {% if item.nombre_avis > 3 %}
+                          <small class="text-muted d-block" style="font-size: 0.8rem;">
+                            + {{ item.nombre_avis|add:"-3" }} autre(s) avis
+                          </small>
+                          {% endif %}
+                        </div>
+                        {% endif %}
                       </div>
                       {% else %}
                       <div class="offer-rating-section" style="background: #f8f9fa; border-left-color: #6c757d;">
@@ -1753,6 +1863,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ============================================
+    // CALCULATEUR DE PRIX CONSEILLÉ
+    // ============================================
+    // Calcul de distance (en km) entre deux points (lat/lng) avec la formule de Haversine
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Rayon de la Terre en km
+      const toRad = angle => angle * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+    
+    // Calculer un prix conseillé en fonction de la distance et du nombre de places
+    function calculateSuggestedPrice() {
+      const departLatEl = document.getElementById('depart-lat');
+      const departLngEl = document.getElementById('depart-lng');
+      const destLatEl   = document.getElementById('destination-lat');
+      const destLngEl   = document.getElementById('destination-lng');
+      const placesEl    = document.querySelector('[name="nombre_places"]');
+      const prixEl      = document.getElementById('prix');
+      const helpEl      = document.getElementById('prix-suggestion-help');
+      
+      if (!departLatEl || !departLngEl || !destLatEl || !destLngEl || !placesEl || !prixEl) {
+        return;
+      }
+      
+      const departLat = parseFloat(departLatEl.value);
+      const departLng = parseFloat(departLngEl.value);
+      const destLat   = parseFloat(destLatEl.value);
+      const destLng   = parseFloat(destLngEl.value);
+      const places    = parseInt(placesEl.value || '1', 10);
+      
+      if (isNaN(departLat) || isNaN(departLng) || isNaN(destLat) || isNaN(destLng)) {
+        if (helpEl) {
+          helpEl.textContent = 'Veuillez sélectionner le départ et la destination sur la carte ou via la saisie pour pouvoir estimer le prix.';
+        }
+        return;
+      }
+      
+      const distanceKm = haversineDistance(departLat, departLng, destLat, destLng);
+      
+      // Tarif indicatif par km (DT/km)
+      // Sans climatisation : 1 DT / km  -> 10 km = 10 DT
+      // Avec climatisation : 1.3 DT / km -> 10 km = 13 DT
+      const climCheckbox = document.getElementById('climatisation');
+      const ratePerKm = climCheckbox && climCheckbox.checked ? 1.3 : 1.0;
+      
+      // Prix par personne = distance * tarif au km (on ne divise plus par le nombre de places)
+      let pricePerPerson = distanceKm * ratePerKm;
+      // Bornes min / max
+      if (pricePerPerson < 3) pricePerPerson = 3;
+      if (pricePerPerson > 200) pricePerPerson = 200;
+      
+      // Arrondir au 0.5 DT le plus proche
+      pricePerPerson = Math.round(pricePerPerson * 2) / 2;
+      
+      prixEl.value = pricePerPerson.toFixed(2);
+      prixEl.classList.remove('is-invalid');
+      prixEl.classList.add('is-valid');
+      if (helpEl) {
+        const baseText = climCheckbox && climCheckbox.checked
+          ? '1.3 DT/km (avec climatisation)'
+          : '1 DT/km (sans climatisation)';
+        helpEl.textContent = `Suggestion: environ ${pricePerPerson.toFixed(2)} DT par personne pour ~${distanceKm.toFixed(1)} km (base ${baseText} : 10 km ≈ ${climCheckbox && climCheckbox.checked ? '13' : '10'} DT). Vous pouvez ajuster librement.`;
+      }
+    }
+    
+    // ============================================
     // VALIDATION DU FORMULAIRE DE RÉSERVATION
     // ============================================
     
@@ -1862,9 +2044,17 @@ document.addEventListener('DOMContentLoaded', function() {
       // Configuration de la validation en temps réel
       setupOffreFormValidation();
       
+      // Bouton calculateur de prix conseillé
+      const btnCalcPrix = document.getElementById('btn-calcul-prix');
+      if (btnCalcPrix) {
+        btnCalcPrix.addEventListener('click', function() {
+          calculateSuggestedPrice();
+        });
+      }
+      
       const form = document.querySelector('.php-email-form');
       const submitBtn = document.getElementById('submit-offre');
-
+      
       if (form && submitBtn) {
         form.addEventListener('submit', function(e) {
           e.preventDefault(); // Empêcher la soumission normale

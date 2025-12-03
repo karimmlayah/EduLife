@@ -9,13 +9,17 @@ try:
     from .api_views import (
         CustomUserViewSet, ConnectionViewSet, PostViewSet,
         CommentViewSet, MessageViewSet, NotificationViewSet,
-        edubot_chat, edubot_public_chat,
+        edubot_chat, edubot_public_chat, edubox_send_message, edubox_get_messages,
+        edubox_update_message, edubox_delete_message, edubox_clear_all_messages,
+        edubox_unread_count,
     )
     DRF_AVAILABLE = True
 except ImportError:
     DRF_AVAILABLE = False
     from .api_views import (
-        api_user_list, api_user_detail, edubot_chat, edubot_public_chat
+        api_user_list, api_user_detail, edubot_chat, edubot_public_chat,
+        edubox_send_message, edubox_get_messages, edubox_update_message, edubox_delete_message,
+        edubox_clear_all_messages, edubox_unread_count
     )
 
 if DRF_AVAILABLE:
@@ -32,6 +36,12 @@ if DRF_AVAILABLE:
         path('', include(router.urls)),
         path('edubot/chat/', edubot_chat, name='edubot_chat'),
         path('edubot/public-chat/', edubot_public_chat, name='edubot_public_chat'),
+        path('edubox/send/', edubox_send_message, name='edubox_send_message'),
+        path('edubox/messages/', edubox_get_messages, name='edubox_get_messages'),
+        path('edubox/messages/<int:message_id>/update/', edubox_update_message, name='edubox_update_message'),
+        path('edubox/messages/<int:message_id>/delete/', edubox_delete_message, name='edubox_delete_message'),
+        path('edubox/clear-all/', edubox_clear_all_messages, name='edubox_clear_all_messages'),
+        path('edubox/unread-count/', edubox_unread_count, name='edubox_unread_count'),
     ]
 else:
     # Utiliser les vues JSON simples
@@ -40,5 +50,11 @@ else:
         path('users/<int:pk>/', api_user_detail, name='api_user_detail'),
         path('edubot/chat/', edubot_chat, name='edubot_chat'),
         path('edubot/public-chat/', edubot_public_chat, name='edubot_public_chat'),
+        path('edubox/send/', edubox_send_message, name='edubox_send_message'),
+        path('edubox/messages/', edubox_get_messages, name='edubox_get_messages'),
+        path('edubox/messages/<int:message_id>/update/', edubox_update_message, name='edubox_update_message'),
+        path('edubox/messages/<int:message_id>/delete/', edubox_delete_message, name='edubox_delete_message'),
+        path('edubox/clear-all/', edubox_clear_all_messages, name='edubox_clear_all_messages'),
+        path('edubox/unread-count/', edubox_unread_count, name='edubox_unread_count'),
     ]
 

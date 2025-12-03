@@ -52,7 +52,7 @@
 
 <body class="schedule-page">
 
-  <header id="header" class="header d-flex align-items-center fixed-top">
+    <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
       <a href="{% url 'index' %}" class="logo d-flex align-items-center">
@@ -100,6 +100,8 @@
               <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
               {% if request.user.is_authenticated %}
                 <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+                <li><a href="{% url 'my_investissements' %}"><i class="bi bi-briefcase me-1"></i> My Investments</a></li>
+
               {% endif %}
             </ul>
           </li>
@@ -157,21 +159,23 @@
 
     </div>
   </header>
+
   <main class="main">
 
-    <div class="page-title dark-background" style="background-image: url(https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1920&h=1080&fit=crop);">
+    <!-- Page Title -->
+     <div class="page-title dark-background" style="background-image: url(https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop) ;">
       <div class="container position-relative">
         <h1>My Investments</h1>
         <p>Track your investment portfolio and manage pending submissions.</p>
         <nav class="breadcrumbs">
           <ol>
-            <li><a href="">Home</a></li>
+            <li><a href="{% url 'index' %}">Home</a></li>
             <li class="current">My Investments</li>
           </ol>
         </nav>
       </div>
-    </div>
-
+    </div><!-- End Page Title -->
+    
     <section id="my-investments" class="schedule section light-background">
       <div class="container">
 
@@ -246,6 +250,11 @@
                         <i class="bi bi-lock"></i>
                       </button>
                     {% endif %}
+                    <a href="{% url 'generate_receipt' investissement.id_invest %}"
+   class="btn btn-sm btn-outline-primary">
+   <i class="bi bi-download"></i> Receipt
+</a>
+
                   </div>
                 </td>
               </tr>
