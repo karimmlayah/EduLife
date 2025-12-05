@@ -149,8 +149,11 @@ def dashboard(request):
                     # Gestion de l'URL photo (accepte data URI sans limite stricte)
                     photo_url = request.POST.get("photo_url", "").strip()
                     event.photo_url = photo_url
-                    event.latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
-                    event.longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
+                    # Gestion des coordonnées (gérer le cas où 'None' est envoyé comme chaîne)
+                    latitude_str = request.POST.get("latitude", "").strip()
+                    longitude_str = request.POST.get("longitude", "").strip()
+                    event.latitude = float(latitude_str) if latitude_str and latitude_str.lower() != 'none' else None
+                    event.longitude = float(longitude_str) if longitude_str and longitude_str.lower() != 'none' else None
                     # Validation personnalisée sans la validation d'URL par défaut
                     if event.photo_url:
                         if (not event.photo_url.startswith('http://') and 
@@ -183,8 +186,11 @@ def dashboard(request):
         location = request.POST.get("location", "").strip()
         total_seats = request.POST.get("total_seats")
         photo_url = request.POST.get("photo_url", "").strip()
-        latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
-        longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
+        # Gestion des coordonnées (gérer le cas où 'None' est envoyé comme chaîne)
+        latitude_str = request.POST.get("latitude", "").strip()
+        longitude_str = request.POST.get("longitude", "").strip()
+        latitude = float(latitude_str) if latitude_str and latitude_str.lower() != 'none' else None
+        longitude = float(longitude_str) if longitude_str and longitude_str.lower() != 'none' else None
 
         # Conversion des types
         try:
@@ -282,6 +288,8 @@ def seats_list(request):
 
 
     return redirect("dashboard")
+
+@login_required(login_url='/login/')
 def reserve_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     seats = event.seats.all().order_by('number')

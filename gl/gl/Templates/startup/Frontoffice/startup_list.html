@@ -104,15 +104,19 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_favoris' %}">My Favoris</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'generate_cv' %}"><i class="bi bi-file-earmark-pdf me-2"></i>Generate CV</a></li>
             </ul>
           </li>
           <li class="dropdown">
-            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' or request.resolver_match.url_name == 'my_investissements' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
               <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
               {% if request.user.is_authenticated %}
                 <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+                <li><a href="{% url 'my_investissements' %}"><i class="bi bi-wallet2 me-1"></i> My Investments</a></li>
               {% endif %}
             </ul>
           </li>

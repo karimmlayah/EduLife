@@ -709,12 +709,13 @@
             </ul>
           </li>
           <li class="dropdown">
-            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' or request.resolver_match.url_name == 'my_investissements' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
               <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
               {% if request.user.is_authenticated %}
                 <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
+                <li><a href="{% url 'my_investissements' %}"><i class="bi bi-wallet2 me-1"></i> My Investments</a></li>
               {% endif %}
             </ul>
           </li>
@@ -727,6 +728,20 @@
 
       {% if request.user.is_authenticated %}
         <div class="user-actions">
+          <!-- Notifications Icon -->
+          <a href="{% url 'notifications' %}" class="notifications-icon-link" title="Notifications">
+            <i class="bi bi-bell"></i>
+            {% if unread_notifications_count > 0 %}
+              <span class="notifications-badge">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <!-- Messages Icon -->
+          <a href="{% url 'messages' %}" class="messages-icon-link" title="Messages">
+            <i class="bi bi-chat-dots"></i>
+            {% if unread_messages_count > 0 %}
+              <span class="messages-badge">{{ unread_messages_count }}</span>
+            {% endif %}
+          </a>
           <!-- User Avatar Menu -->
           {% with user_id=request.user.id|default:0 %}
           <div class="user-menu" id="idxUserMenu">

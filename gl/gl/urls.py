@@ -41,6 +41,7 @@ from gl.views import (
     reservation_accept,
     reservation_reject,
     approver_offre,
+    annuler_approbation,
     rejeter_offre,
 )
 from gl import views as gl_views
@@ -373,56 +374,360 @@ def entretiens(request):
     return liste_entretiens(request)
 
 
-# --- CALENDAR DASHBOARD VIEWS (STUB IMPLEMENTATIONS) ---
+# --- CALENDAR DASHBOARD VIEWS ---
 
 def calendar(request):
     """
-    Simple placeholder view for the internship dashboard calendar.
-    Replace with real implementation when ready.
+    Vue pour afficher le calendrier des stages avec les entretiens et postulations acceptées.
     """
-    return HttpResponse("Calendar dashboard view not yet implemented.")
+    return render(request, 'stages/Backoffice/calendar.html')
 
 
+@csrf_exempt
 def calendar_api_events(request):
     """
-    Placeholder API returning an empty list of events.
+    API pour récupérer tous les événements du calendrier (entretiens et postulations acceptées).
+    Retourne les événements au format FullCalendar.
     """
-    return JsonResponse([], safe=False)
+    from entretien.models import Entretien
+    from postulation.models import Postulation
+    from django.utils import timezone
+    import json
+    
+    events = []
+    
+    # Récupérer tous les entretiens
+    entretiens = Entretien.objects.select_related('postulation__offre').all()
+    for entretien in entretiens:
+        # Construire les détails HTML pour l'affichage dans le modal
+        details_parts = []
+        details_parts.append(f"<p class='mb-2'><strong>Candidate:</strong> {entretien.postulation.email}</p>")
+        details_parts.append(f"<p class='mb-2'><strong>Offer:</strong> {entretien.postulation.offre.titre}</p>")
+        details_parts.append(f"<p class='mb-2'><strong>Status:</strong> {entretien.get_statut_display()}</p>")
+        if entretien.lien_meet:
+            details_parts.append(f"<p class='mb-2'><strong>Meeting Link:</strong> <a href='{entretien.lien_meet}' target='_blank'>{entretien.lien_meet}</a></p>")
+        if entretien.commentaire:
+            details_parts.append(f"<p class='mb-2'><strong>Comment:</strong> {entretien.commentaire}</p>")
+        
+        events.append({
+            'id': f'entretien_{entretien.id_entretien}',
+            'title': f'Interview: {entretien.postulation.email}',
+            'start': entretien.date_entretien.isoformat(),
+            'color': '#2dce89',  # Vert pour les entretiens
+            'type': 'Interview',
+            'extendedProps': {
+                'type': 'Interview',
+                'entretien_id': entretien.id_entretien,
+                'postulation_id': entretien.postulation.id_postulation,
+                'email': entretien.postulation.email,
+                'offre_titre': entretien.postulation.offre.titre,
+                'statut': entretien.statut,
+                'details': ''.join(details_parts)
+            }
+        })
+    
+    # Récupérer les postulations acceptées (pour information, affichées différemment)
+    postulations_acceptees = Postulation.objects.filter(
+        statut='acceptee'
+    ).exclude(
+        entretien__isnull=False  # Exclure celles qui ont déjà un entretien
+    ).select_related('offre')
+    
+    for postulation in postulations_acceptees:
+        # Afficher la date de postulation comme événement informatif
+        # Convertir DateField en datetime pour FullCalendar
+        from datetime import datetime
+        date_postulation_dt = datetime.combine(postulation.date_postulation, datetime.min.time())
+        
+        events.append({
+            'id': f'application_{postulation.id_postulation}',
+            'title': f'Accepted: {postulation.email}',
+            'start': date_postulation_dt.isoformat(),
+            'color': '#5e72e4',  # Bleu pour les applications acceptées
+            'type': 'Application',
+            'extendedProps': {
+                'type': 'Application',
+                'postulation_id': postulation.id_postulation,
+                'email': postulation.email,
+                'offre_titre': postulation.offre.titre,
+                'details': f"<p class='mb-2'><strong>Candidate:</strong> {postulation.email}</p><p class='mb-2'><strong>Offer:</strong> {postulation.offre.titre}</p><p class='mb-2'><strong>Status:</strong> Application accepted, interview pending</p>"
+            }
+        })
+    
+    return JsonResponse(events, safe=False)
 
 
+@csrf_exempt
 def calendar_api_accepted_applications(request):
     """
-    Placeholder API returning an empty list of accepted applications.
+    API pour récupérer les postulations acceptées sans entretien.
+    Utilisé pour remplir le select lors de la création d'un entretien.
     """
-    return JsonResponse([], safe=False)
+    from postulation.models import Postulation
+    
+    postulations = Postulation.objects.filter(
+        statut='acceptee'
+    ).exclude(
+        entretien__isnull=False  # Exclure celles qui ont déjà un entretien
+    ).select_related('offre').order_by('-date_postulation')
+    
+    applications = []
+    for postulation in postulations:
+        # Convertir DateField en string ISO pour la compatibilité
+        date_str = postulation.date_postulation.isoformat() if hasattr(postulation.date_postulation, 'isoformat') else str(postulation.date_postulation)
+        applications.append({
+            'id': postulation.id_postulation,
+            'email': postulation.email,
+            'offre_titre': postulation.offre.titre,
+            'date_postulation': date_str
+        })
+    
+    return JsonResponse(applications, safe=False)
 
 
+@csrf_exempt
 def calendar_api_create_event(request):
     """
-    Placeholder API for creating an event.
+    API pour créer un nouvel entretien.
     """
-    return JsonResponse({"detail": "Create event API not yet implemented."}, status=501)
+    from entretien.models import Entretien
+    from postulation.models import Postulation
+    from django.utils.dateparse import parse_datetime
+    from django.utils import timezone
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Vérifier que c'est bien un entretien
+        if data.get('type') != 'entretien':
+            return JsonResponse({"success": False, "error": "Invalid event type"}, status=400)
+        
+        # Récupérer la postulation
+        postulation_id = data.get('postulation_id')
+        if not postulation_id:
+            return JsonResponse({"success": False, "error": "postulation_id is required"}, status=400)
+        
+        postulation = Postulation.objects.get(id_postulation=postulation_id, statut='acceptee')
+        
+        # Vérifier qu'il n'y a pas déjà un entretien pour cette postulation
+        if hasattr(postulation, 'entretien'):
+            return JsonResponse({"success": False, "error": "An interview already exists for this application"}, status=400)
+        
+        # Parser la date
+        date_entretien_str = data.get('date_entretien')
+        if not date_entretien_str:
+            return JsonResponse({"success": False, "error": "date_entretien is required"}, status=400)
+        
+        # Convertir la date (format: "2024-01-15T14:30")
+        date_entretien = parse_datetime(date_entretien_str.replace('T', ' '))
+        if not date_entretien:
+            # Essayer un autre format
+            try:
+                from datetime import datetime
+                date_entretien = datetime.strptime(date_entretien_str, '%Y-%m-%dT%H:%M')
+            except:
+                return JsonResponse({"success": False, "error": "Invalid date format"}, status=400)
+        
+        # Vérifier que la date n'est pas dans le passé
+        if date_entretien < timezone.now():
+            return JsonResponse({"success": False, "error": "Interview date cannot be in the past"}, status=400)
+        
+        # Créer l'entretien
+        entretien = Entretien.objects.create(
+            postulation=postulation,
+            date_entretien=date_entretien,
+            lien_meet=data.get('lien_meet', '') or None,
+            commentaire=data.get('commentaire', '') or None,
+            statut='planifie'
+        )
+        
+        return JsonResponse({
+            "success": True,
+            "entretien_id": entretien.id_entretien,
+            "message": "Interview created successfully"
+        })
+        
+    except Postulation.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Application not found or not accepted"}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
+@csrf_exempt
 def calendar_api_update_event_date(request, event_id):
     """
-    Placeholder API for updating an event date.
+    API pour mettre à jour uniquement la date d'un entretien (utilisé lors du drag & drop).
     """
-    return JsonResponse({"detail": "Update event date API not yet implemented."}, status=501)
+    from entretien.models import Entretien
+    from django.utils.dateparse import parse_datetime
+    from django.utils import timezone
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Extraire l'ID de l'entretien depuis event_id (format: "entretien_123")
+        if not event_id.startswith('entretien_'):
+            return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+        
+        entretien_id = int(event_id.replace('entretien_', ''))
+        entretien = Entretien.objects.get(id_entretien=entretien_id)
+        
+        # Parser la nouvelle date
+        new_date_str = data.get('date')
+        if not new_date_str:
+            return JsonResponse({"success": False, "error": "date is required"}, status=400)
+        
+        new_date = parse_datetime(new_date_str)
+        if not new_date:
+            # Essayer avec timezone
+            from datetime import datetime
+            try:
+                new_date = datetime.fromisoformat(new_date_str.replace('Z', '+00:00'))
+            except:
+                return JsonResponse({"success": False, "error": "Invalid date format"}, status=400)
+        
+        # Vérifier que la date n'est pas dans le passé
+        if new_date < timezone.now():
+            return JsonResponse({"success": False, "error": "Interview date cannot be in the past"}, status=400)
+        
+        # Mettre à jour la date
+        entretien.date_entretien = new_date
+        entretien.save()
+        
+        return JsonResponse({
+            "success": True,
+            "message": "Interview date updated successfully"
+        })
+        
+    except Entretien.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Interview not found"}, status=404)
+    except ValueError:
+        return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
+@csrf_exempt
 def calendar_api_update_event(request, event_id):
     """
-    Placeholder API for updating an event.
+    API pour mettre à jour un entretien complet.
     """
-    return JsonResponse({"detail": "Update event API not yet implemented."}, status=501)
+    from entretien.models import Entretien
+    from postulation.models import Postulation
+    from django.utils.dateparse import parse_datetime
+    from django.utils import timezone
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Extraire l'ID de l'entretien depuis event_id (format: "entretien_123")
+        if not event_id.startswith('entretien_'):
+            return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+        
+        entretien_id = int(event_id.replace('entretien_', ''))
+        entretien = Entretien.objects.get(id_entretien=entretien_id)
+        
+        # Mettre à jour la date si fournie
+        if 'date_entretien' in data and data['date_entretien']:
+            date_entretien_str = data['date_entretien']
+            date_entretien = parse_datetime(date_entretien_str.replace('T', ' '))
+            if not date_entretien:
+                try:
+                    from datetime import datetime
+                    date_entretien = datetime.strptime(date_entretien_str, '%Y-%m-%dT%H:%M')
+                except:
+                    return JsonResponse({"success": False, "error": "Invalid date format"}, status=400)
+            
+            # Vérifier que la date n'est pas dans le passé
+            if date_entretien < timezone.now():
+                return JsonResponse({"success": False, "error": "Interview date cannot be in the past"}, status=400)
+            
+            entretien.date_entretien = date_entretien
+        
+        # Mettre à jour les autres champs
+        if 'lien_meet' in data:
+            entretien.lien_meet = data['lien_meet'] or None
+        if 'commentaire' in data:
+            entretien.commentaire = data['commentaire'] or None
+        
+        # Si une nouvelle postulation est fournie, vérifier qu'elle est acceptée
+        if 'postulation_id' in data and data['postulation_id']:
+            new_postulation_id = data['postulation_id']
+            if new_postulation_id != entretien.postulation.id_postulation:
+                new_postulation = Postulation.objects.get(id_postulation=new_postulation_id, statut='acceptee')
+                # Vérifier qu'il n'y a pas déjà un entretien pour cette nouvelle postulation
+                if hasattr(new_postulation, 'entretien') and new_postulation.entretien.id_entretien != entretien.id_entretien:
+                    return JsonResponse({"success": False, "error": "An interview already exists for this application"}, status=400)
+                entretien.postulation = new_postulation
+        
+        entretien.save()
+        
+        return JsonResponse({
+            "success": True,
+            "message": "Interview updated successfully"
+        })
+        
+    except Entretien.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Interview not found"}, status=404)
+    except Postulation.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Application not found or not accepted"}, status=404)
+    except ValueError:
+        return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
+@csrf_exempt
 def calendar_api_delete_event(request, event_id):
     """
-    Placeholder API for deleting an event.
+    API pour supprimer un entretien.
     """
-    return JsonResponse({"detail": "Delete event API not yet implemented."}, status=501)
+    from entretien.models import Entretien
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    try:
+        # Extraire l'ID de l'entretien depuis event_id (format: "entretien_123")
+        if not event_id.startswith('entretien_'):
+            return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+        
+        entretien_id = int(event_id.replace('entretien_', ''))
+        entretien = Entretien.objects.get(id_entretien=entretien_id)
+        
+        # Supprimer l'entretien
+        entretien.delete()
+        
+        return JsonResponse({
+            "success": True,
+            "message": "Interview deleted successfully"
+        })
+        
+    except Entretien.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Interview not found"}, status=404)
+    except ValueError:
+        return JsonResponse({"success": False, "error": "Invalid event ID"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 def my_applications(request):
     from postulation.models import Postulation
@@ -1019,6 +1324,7 @@ urlpatterns = [
     
     # --- APPROBATION DES OFFRES COVOITURAGE ---
     path('offres/covoiturage/approver/<int:id>/', approver_offre, name='approver_offre'),
+    path('offres/covoiturage/annuler/<int:id>/', annuler_approbation, name='annuler_approbation'),
     path('offres/covoiturage/rejeter/<int:id>/', rejeter_offre, name='rejeter_offre'),
 
     # --- PAGE ACCUEIL FRONT COVOITURAGE ---

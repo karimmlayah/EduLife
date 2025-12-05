@@ -269,10 +269,10 @@
         toast.className = 'toast-notification ' + type;
         
         const iconMap = {
-            'success': '<i class="bi bi-check-circle-fill toast-icon"></i>',
-            'error': '<i class="bi bi-x-circle-fill toast-icon"></i>',
-            'warning': '<i class="bi bi-exclamation-triangle-fill toast-icon"></i>',
-            'info': '<i class="bi bi-info-circle-fill toast-icon"></i>'
+            'success': '<i class="fas fa-check-circle toast-icon"></i>',
+            'error': '<i class="fas fa-times-circle toast-icon"></i>',
+            'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+            'info': '<i class="fas fa-info-circle toast-icon"></i>'
         };
         
         const icon = iconMap[type] || iconMap['info'];

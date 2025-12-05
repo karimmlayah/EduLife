@@ -214,22 +214,22 @@
                                         <div class="d-flex gap-2 justify-content-center">
                                             {% if not offre.approuve %}
                                                 <a href="{% url 'approver_offre' offre.id %}" 
-                                                   class="btn btn-success btn-sm" 
-                                                   onclick="if(confirm('Approuver cette offre de covoiturage ?')) { window.location.href = '{% url 'approver_offre' offre.id %}'; } return false;"
+                                                   class="btn btn-success btn-sm btn-action-approve" 
+                                                   data-url="{% url 'approver_offre' offre.id %}"
                                                    title="Approuver">
                                                     <i class="fas fa-check me-1"></i> Approuver
                                                 </a>
                                             {% else %}
-                                                <a href="{% url 'rejeter_offre' offre.id %}" 
-                                                   class="btn btn-warning btn-sm" 
-                                                   onclick="if(confirm('Annuler l\u0027approbation de cette offre ?')) { window.location.href = '{% url 'rejeter_offre' offre.id %}'; } return false;"
+                                                <a href="{% url 'annuler_approbation' offre.id %}" 
+                                                   class="btn btn-warning btn-sm btn-action-cancel" 
+                                                   data-url="{% url 'annuler_approbation' offre.id %}"
                                                    title="Annuler l'approbation">
                                                     <i class="fas fa-times me-1"></i> Annuler
                                                 </a>
                                             {% endif %}
                                             <a href="{% url 'offre_delete' offre.id %}" 
-                                               class="btn btn-danger btn-sm" 
-                                               onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')) { window.location.href = '{% url 'offre_delete' offre.id %}'; } return false;"
+                                               class="btn btn-danger btn-sm btn-action-delete" 
+                                               data-url="{% url 'offre_delete' offre.id %}"
                                                title="Supprimer">
                                                 <i class="fas fa-trash"></i>
                                             </a>
@@ -606,6 +606,9 @@
 .stat-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
 
+<!-- ====== TOAST NOTIFICATIONS ====== -->
+{% include 'includes/toast_notifications.html' %}
+
 <!-- ====== SCRIPTS ====== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -662,6 +665,173 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 100);
         });
     }
+    
+    // Gestion des boutons avec confirmation modal
+    // Bouton Approuver
+    document.querySelectorAll('.btn-action-approve').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const url = this.getAttribute('data-url') || this.href;
+            
+            // Utiliser le modal de confirmation moderne
+            if (typeof showConfirm === 'function') {
+                showConfirm(
+                    'Êtes-vous sûr de vouloir approuver cette offre de covoiturage ?',
+                    function() {
+                        window.location.href = url;
+                    }
+                );
+            } else {
+                // Fallback si showConfirm n'est pas disponible
+                if (confirm('Êtes-vous sûr de vouloir approuver cette offre de covoiturage ?')) {
+                    window.location.href = url;
+                }
+            }
+            
+            return false;
+        }, true);
+    });
+    
+    // Bouton Annuler (annulation de l'approbation)
+    document.querySelectorAll('.btn-action-cancel').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const url = this.getAttribute('data-url') || this.href;
+            
+            // Utiliser le modal de confirmation moderne
+            if (typeof showConfirm === 'function') {
+                showConfirm(
+                    'Êtes-vous sûr de vouloir annuler l\'approbation de cette offre ?\n\nL\'offre sera remise en attente et pourra être approuvée ou rejetée à nouveau.',
+                    function() {
+                        window.location.href = url;
+                    }
+                );
+            } else {
+                // Fallback si showConfirm n'est pas disponible
+                if (confirm('Êtes-vous sûr de vouloir annuler l\'approbation de cette offre ?\n\nL\'offre sera remise en attente et pourra être approuvée ou rejetée à nouveau.')) {
+                    window.location.href = url;
+                }
+            }
+            
+            return false;
+        }, true);
+    });
+    
+    // Bouton Supprimer
+    document.querySelectorAll('.btn-action-delete').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const url = this.getAttribute('data-url') || this.href;
+            
+            // Utiliser le modal de confirmation moderne
+            if (typeof showConfirm === 'function') {
+                showConfirm(
+                    'Êtes-vous sûr de vouloir supprimer définitivement cette offre de covoiturage ?\n\nCette action est irréversible.',
+                    function() {
+                        window.location.href = url;
+                    }
+                );
+            } else {
+                // Fallback si showConfirm n'est pas disponible
+                if (confirm('Êtes-vous sûr de vouloir supprimer définitivement cette offre de covoiturage ?\n\nCette action est irréversible.')) {
+                    window.location.href = url;
+                }
+            }
+            
+            return false;
+        }, true);
+    });
+    
+    // Convertir les messages Django en toast notifications
+    (function() {
+        let messagesDisplayed = false;
+        
+        function displayDjangoMessages() {
+            if (messagesDisplayed) return;
+            messagesDisplayed = true;
+            
+            {% if messages %}
+            {% for message in messages %}
+            (function() {
+                const msgText = '{{ message|escapejs }}';
+                const msgLevel = '{{ message.tags|default:"info" }}';
+                let toastType = 'info';
+                
+                if (msgLevel === 'error' || msgLevel === 'danger') {
+                    toastType = 'error';
+                } else if (msgLevel === 'warning') {
+                    toastType = 'warning';
+                } else if (msgLevel === 'success') {
+                    toastType = 'success';
+                }
+                
+                // Utiliser showToast si disponible
+                if (typeof window.showToast !== 'undefined') {
+                    window.showToast(msgText, toastType);
+                } else {
+                    // Fallback : créer le toast directement
+                    const container = document.getElementById('toast-container');
+                    if (!container) {
+                        const newContainer = document.createElement('div');
+                        newContainer.id = 'toast-container';
+                        newContainer.className = 'toast-container';
+                        document.body.appendChild(newContainer);
+                        return displayDjangoMessages();
+                    }
+                    
+                    const toast = document.createElement('div');
+                    toast.className = 'toast-notification ' + toastType;
+                    
+                    const iconMap = {
+                        'success': '<i class="fas fa-check-circle toast-icon"></i>',
+                        'error': '<i class="fas fa-times-circle toast-icon"></i>',
+                        'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+                        'info': '<i class="fas fa-info-circle toast-icon"></i>'
+                    };
+                    
+                    const icon = iconMap[toastType] || iconMap['info'];
+                    
+                    toast.innerHTML = `
+                        ${icon}
+                        <span class="toast-content">${msgText}</span>
+                        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                    `;
+                    
+                    container.appendChild(toast);
+                    
+                    setTimeout(function() {
+                        toast.classList.add('hiding');
+                        setTimeout(function() {
+                            if (toast.parentElement) {
+                                toast.remove();
+                            }
+                        }, 300);
+                    }, 5000);
+                }
+            })();
+            {% endfor %}
+            {% endif %}
+        }
+        
+        // Exécuter après le chargement
+        if (document.readyState === 'complete') {
+            setTimeout(displayDjangoMessages, 300);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(displayDjangoMessages, 300);
+            });
+        }
+    })();
+    
 });
 </script>
 

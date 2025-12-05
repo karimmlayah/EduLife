@@ -4,18 +4,6 @@
 
 <div class="container-fluid py-4">
     
-    <!-- Messages Django -->
-    {% if messages %}
-    <div class="mb-4">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
     
     <!-- ====== HEADER SECTION ====== -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -144,10 +132,12 @@
                             <tbody>
                                 {% for offre in offres_en_attente %}
                                 <tr>
-                                    <td>
-                                        <strong>{{ offre.depart }}</strong><br>
-                                        <i class="fas fa-arrow-down text-xs text-secondary"></i><br>
-                                        <strong>{{ offre.destination }}</strong>
+                                    <td class="trajet-cell-dashboard">
+                                        <div class="trajet-text-dashboard">
+                                            <strong class="trajet-address-dashboard" title="{{ offre.depart }}">{{ offre.depart }}</strong><br>
+                                            <i class="fas fa-arrow-down text-xs text-secondary"></i><br>
+                                            <strong class="trajet-address-dashboard" title="{{ offre.destination }}">{{ offre.destination }}</strong>
+                                        </div>
                                     </td>
                                     <td>{{ offre.conducteur.username }}</td>
                                     <td>
@@ -162,14 +152,14 @@
                                     <td class="text-center">
                                         <div class="d-flex gap-2 justify-content-center">
                                             <a href="{% url 'approver_offre' offre.id %}" 
-                                               class="btn btn-success btn-sm" 
-                                               onclick="if(confirm('Approuver cette offre ?')) { window.location.href = '{% url 'approver_offre' offre.id %}'; } return false;"
+                                               class="btn btn-success btn-sm btn-action-approve" 
+                                               data-url="{% url 'approver_offre' offre.id %}"
                                                title="Approuver">
                                                 <i class="fas fa-check me-1"></i> Approuver
                                             </a>
                                             <a href="{% url 'rejeter_offre' offre.id %}" 
-                                               class="btn btn-danger btn-sm" 
-                                               onclick="if(confirm('Rejeter cette offre ?')) { window.location.href = '{% url 'rejeter_offre' offre.id %}'; } return false;"
+                                               class="btn btn-danger btn-sm btn-action-reject" 
+                                               data-url="{% url 'rejeter_offre' offre.id %}"
                                                title="Rejeter">
                                                 <i class="fas fa-times me-1"></i> Rejeter
                                             </a>
@@ -599,6 +589,89 @@
 .stat-card:nth-child(2) { animation-delay: 0.2s; }
 .stat-card:nth-child(3) { animation-delay: 0.3s; }
 .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Table des offres en attente - Colonne Trajet */
+.card.border-warning .table th:first-child,
+.card.border-warning .table td:first-child {
+    max-width: 250px;
+    width: 250px;
+}
+
+.trajet-cell-dashboard {
+    max-width: 250px;
+    width: 250px;
+}
+
+.trajet-text-dashboard {
+    display: flex;
+    flex-direction: column;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.trajet-address-dashboard {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    line-height: 1.4;
+}
+
+.trajet-text-dashboard:hover .trajet-address-dashboard {
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+/* Responsive pour la table des offres en attente */
+@media (max-width: 1200px) {
+    .card.border-warning .table th:first-child,
+    .card.border-warning .table td:first-child {
+        max-width: 200px;
+        width: 200px;
+    }
+    
+    .trajet-cell-dashboard {
+        max-width: 200px;
+        width: 200px;
+    }
+}
+
+@media (max-width: 992px) {
+    .card.border-warning .table th:first-child,
+    .card.border-warning .table td:first-child {
+        max-width: 180px;
+        width: 180px;
+    }
+    
+    .trajet-cell-dashboard {
+        max-width: 180px;
+        width: 180px;
+    }
+    
+    .trajet-address-dashboard {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card.border-warning .table th:first-child,
+    .card.border-warning .table td:first-child {
+        max-width: 150px;
+        width: 150px;
+    }
+    
+    .trajet-cell-dashboard {
+        max-width: 150px;
+        width: 150px;
+    }
+    
+    .trajet-address-dashboard {
+        font-size: 0.75rem;
+    }
+}
 </style>
 
 <!-- ====== CHART.JS ====== -->
@@ -731,6 +804,149 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+// Gestion des boutons avec confirmation modal
+document.addEventListener("DOMContentLoaded", function() {
+    // Bouton Approuver
+    document.querySelectorAll('.btn-action-approve').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const url = this.getAttribute('data-url') || this.href;
+            
+            // Utiliser le modal de confirmation moderne
+            if (typeof showConfirm === 'function') {
+                showConfirm(
+                    'Êtes-vous sûr de vouloir approuver cette offre de covoiturage ?',
+                    function() {
+                        window.location.href = url;
+                    }
+                );
+            } else {
+                // Fallback si showConfirm n'est pas disponible
+                if (confirm('Êtes-vous sûr de vouloir approuver cette offre de covoiturage ?')) {
+                    window.location.href = url;
+                }
+            }
+            
+            return false;
+        }, true);
+    });
+    
+    // Bouton Rejeter
+    document.querySelectorAll('.btn-action-reject').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const url = this.getAttribute('data-url') || this.href;
+            
+            // Utiliser le modal de confirmation moderne
+            if (typeof showConfirm === 'function') {
+                showConfirm(
+                    'Êtes-vous sûr de vouloir rejeter et supprimer cette offre de covoiturage ?',
+                    function() {
+                        window.location.href = url;
+                    }
+                );
+            } else {
+                // Fallback si showConfirm n'est pas disponible
+                if (confirm('Êtes-vous sûr de vouloir rejeter et supprimer cette offre de covoiturage ?')) {
+                    window.location.href = url;
+                }
+            }
+            
+            return false;
+        }, true);
+    });
+    
+    // Convertir les messages Django en toast notifications
+    (function() {
+        let messagesDisplayed = false;
+        
+        function displayDjangoMessages() {
+            if (messagesDisplayed) return;
+            messagesDisplayed = true;
+            
+            {% if messages %}
+            {% for message in messages %}
+            (function() {
+                const msgText = '{{ message|escapejs }}';
+                const msgLevel = '{{ message.tags|default:"info" }}';
+                let toastType = 'info';
+                
+                if (msgLevel === 'error' || msgLevel === 'danger') {
+                    toastType = 'error';
+                } else if (msgLevel === 'warning') {
+                    toastType = 'warning';
+                } else if (msgLevel === 'success') {
+                    toastType = 'success';
+                }
+                
+                // Utiliser showToast si disponible
+                if (typeof window.showToast !== 'undefined') {
+                    window.showToast(msgText, toastType);
+                } else {
+                    // Fallback : créer le toast directement
+                    const container = document.getElementById('toast-container');
+                    if (!container) {
+                        const newContainer = document.createElement('div');
+                        newContainer.id = 'toast-container';
+                        newContainer.className = 'toast-container';
+                        document.body.appendChild(newContainer);
+                        return displayDjangoMessages();
+                    }
+                    
+                    const toast = document.createElement('div');
+                    toast.className = 'toast-notification ' + toastType;
+                    
+                    const iconMap = {
+                        'success': '<i class="fas fa-check-circle toast-icon"></i>',
+                        'error': '<i class="fas fa-times-circle toast-icon"></i>',
+                        'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+                        'info': '<i class="fas fa-info-circle toast-icon"></i>'
+                    };
+                    
+                    const icon = iconMap[toastType] || iconMap['info'];
+                    
+                    toast.innerHTML = `
+                        ${icon}
+                        <span class="toast-content">${msgText}</span>
+                        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                    `;
+                    
+                    container.appendChild(toast);
+                    
+                    setTimeout(function() {
+                        toast.classList.add('hiding');
+                        setTimeout(function() {
+                            if (toast.parentElement) {
+                                toast.remove();
+                            }
+                        }, 300);
+                    }, 5000);
+                }
+            })();
+            {% endfor %}
+            {% endif %}
+        }
+        
+        // Exécuter après le chargement
+        if (document.readyState === 'complete') {
+            setTimeout(displayDjangoMessages, 300);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(displayDjangoMessages, 300);
+            });
+        }
+    })();
+});
 </script>
+
+<!-- ====== TOAST NOTIFICATIONS ====== -->
+{% include 'includes/toast_notifications.html' %}
 
 {% endblock %}

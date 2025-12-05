@@ -261,8 +261,11 @@ textarea.form-control {
             {{ event.description|truncatewords:25 }}
           </div>
           <div class="event-footer">
-              <a href="{% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
-
+              {% if user.is_authenticated %}
+                  <a href="{% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
+              {% else %}
+                  <a href="{% url 'login' %}?next={% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
+              {% endif %}
           </div>
         </div>
       </div>
@@ -722,8 +725,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const start = (currentPage - 1) * eventsPerPage;
     const end = start + eventsPerPage;
 
+    // CORRECTION ICI : Masquer TOUS les événements d'abord
     eventItems.forEach(item => item.style.display = "none");
-    visibleEvents.slice(start, end).forEach(item => item.style.display = "block");
+    
+    // CORRECTION ICI : Afficher seulement ceux de la page courante
+    if (visibleEvents.length > 0) {
+      visibleEvents.slice(start, end).forEach(item => item.style.display = "block");
+    }
+
+    // CORRECTION ICI : Afficher message si aucun événement
+    const noEventsMsg = eventsContainer.querySelector(".no-events-message");
+    if (visibleEvents.length === 0) {
+      if (!noEventsMsg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "col-12 text-center no-events-message";
+        msgDiv.innerHTML = '<p class="text-muted">Aucun événement trouvé pour cette catégorie.</p>';
+        eventsContainer.appendChild(msgDiv);
+      }
+    } else if (noEventsMsg) {
+      noEventsMsg.remove();
+    }
 
     if (totalPages > 1) {
       paginationControls.style.display = "flex";
@@ -769,80 +790,41 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("featured-events").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // Feedback Form
-  document.getElementById('feedbackForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    Swal.fire({
-      icon: 'success',
-      title: 'Thank you!',
-      text: 'Your feedback has been received.',
-      confirmButtonColor: '#f87500'
-    });
-    this.reset();
-  });
-
   // Démarrer
   window.addEventListener("load", init);
 </script>
-<script>
+
+<script>  
 document.addEventListener("DOMContentLoaded", function() {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("payment");
 
     if (paymentStatus === "success") {
-        showNotification(
-            "Paiement réussi ✅",
-            "Votre réservation est confirmée ! 🎉",
-            "success"
-        );
+        if (typeof showToast === 'function') {
+            showToast("Paiement réussi ✅ - Votre réservation est confirmée ! 🎉", "success");
+        } else {
+            // Fallback si showToast n'est pas encore disponible
+            setTimeout(function() {
+                if (typeof showToast === 'function') {
+                    showToast("Paiement réussi ✅ - Votre réservation est confirmée ! 🎉", "success");
+                }
+            }, 500);
+        }
     }
 
     if (paymentStatus === "cancel") {
-        showNotification(
-            "Paiement annulé ❌",
-            "Votre réservation n’a pas été finalisée.",
-            "error"
-        );
+        if (typeof showToast === 'function') {
+            showToast("Paiement annulé ❌ - Votre réservation n'a pas été finalisée.", "error");
+        } else {
+            // Fallback si showToast n'est pas encore disponible
+            setTimeout(function() {
+                if (typeof showToast === 'function') {
+                    showToast("Paiement annulé ❌ - Votre réservation n'a pas été finalisée.", "error");
+                }
+            }, 500);
+        }
     }
 });
-
-function showNotification(title, message, type) {
-    const bg = type === "success" ? "#28a745" : "#dc3545";
-
-    const box = document.createElement("div");
-    box.style.position = "fixed";
-    box.style.top = "20px";
-    box.style.right = "20px";
-    box.style.padding = "20px 25px";
-    box.style.borderRadius = "10px";
-    box.style.color = "#fff";
-    box.style.zIndex = "9999";
-    box.style.fontSize = "1.1rem";
-    box.style.fontWeight = "600";
-    box.style.background = bg;
-    box.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
-    box.style.opacity = "0";
-    box.style.transform = "translateY(-20px)";
-    box.style.transition = "all .4s ease";
-
-    box.innerHTML = `
-        <div style="font-size:1.4rem; margin-bottom:5px;">${title}</div>
-        <div style="opacity:.9;">${message}</div>
-    `;
-
-    document.body.appendChild(box);
-
-    setTimeout(() => {
-        box.style.opacity = "1";
-        box.style.transform = "translateY(0)";
-    }, 50);
-
-    setTimeout(() => {
-        box.style.opacity = "0";
-        box.style.transform = "translateY(-20px)";
-        setTimeout(() => box.remove(), 400);
-    }, 3500);
-}
 </script>
 
 {% endblock %}

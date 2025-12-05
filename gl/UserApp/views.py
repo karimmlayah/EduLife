@@ -288,6 +288,10 @@ def login_view(request):
                         # Rediriger les superusers et admins vers le dashboard
                         if user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'):
                             return redirect('/admin/')
+                        # Vérifier s'il y a un paramètre 'next' pour rediriger vers la page demandée
+                        next_url = request.GET.get('next') or request.POST.get('next')
+                        if next_url:
+                            return redirect(next_url)
                         return redirect('index')
                     else:
                         # Si l'utilisateur n'est pas actif, afficher le formulaire avec erreur

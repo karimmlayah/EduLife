@@ -285,28 +285,35 @@ def offre_delete(request, id):
     else:
         user = get_static_user()
 
+    # Sauvegarder les infos pour le message
+    depart = offre.depart
+    destination = offre.destination
+    
+    # Vérifier d'où vient la requête pour rediriger correctement
+    referer = request.META.get('HTTP_REFERER', '')
+    is_from_admin = 'offres/covoiturage' in referer or 'offres_list' in referer
+
     # Si l'utilisateur est ADMIN ou STAFF → SUPPRIMER DIRECT
     if user.is_staff or user.is_superuser:
-        # Sauvegarder les infos pour le message
-        depart = offre.depart
-        destination = offre.destination
         offre.delete()
         messages.success(request, f"L'offre de covoiturage {depart} → {destination} a été supprimée avec succès.")
+        if is_from_admin:
+            return redirect('offres_list')
         return redirect('mes_offres')
 
     # Sinon, vérifier que c'est le conducteur propriétaire
     if offre.conducteur != user:
         messages.error(request, "Vous n'avez pas le droit de supprimer cette offre.")
+        if is_from_admin:
+            return redirect('offres_list')
         return redirect('mes_offres')
 
-    # Sauvegarder les infos pour le message
-    depart = offre.depart
-    destination = offre.destination
-    
     offre.delete()
     messages.success(request, f"L'offre de covoiturage {depart} → {destination} a été supprimée avec succès.")
     
-    # Toujours rediriger vers mes_offres
+    # Rediriger selon la page d'origine
+    if is_from_admin:
+        return redirect('offres_list')
     return redirect('mes_offres')
 
 

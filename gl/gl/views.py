@@ -192,26 +192,102 @@ class CustomLogoutView(LogoutView):
 
 # --- APPROUVER UNE OFFRE ---
 def approver_offre(request, id):
-    offre = get_object_or_404(Offre, id=id)
-    offre.approuve = True
-    offre.save()
-    messages.success(request, f"L'offre de {offre.depart} → {offre.destination} a été approuvée.")
-    # Rediriger vers la page d'origine ou la liste des offres
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'offres/covoiturage' in referer or 'offres_list' in referer:
+    """
+    Approuver une offre de covoiturage.
+    Met approuve à True et redirige vers la page appropriée.
+    """
+    try:
+        # Récupérer l'offre
+        offre = get_object_or_404(Offre, id=id)
+        
+        # Mettre à jour le statut d'approbation
+        offre.approuve = True
+        offre.save(update_fields=['approuve'])
+        
+        # Message de succès
+        messages.success(request, f"L'offre de {offre.depart} → {offre.destination} a été approuvée.")
+        
+        # Rediriger vers la page d'origine ou la liste des offres
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'dashboard/covoiturage' in referer:
+            return redirect('dashboard_covoiturage')
+        elif 'offres/covoiturage' in referer or 'offres_list' in referer:
+            return redirect('offres_list')
+        # Par défaut, rediriger vers le dashboard covoiturage
+        return redirect('dashboard_covoiturage')
+        
+    except Exception as e:
+        # Gérer les erreurs
+        messages.error(request, f"Une erreur s'est produite lors de l'approbation de l'offre : {str(e)}")
+        # Rediriger vers le dashboard en cas d'erreur
+        return redirect('dashboard_covoiturage')
+
+
+# --- ANNULER L'APPROBATION D'UNE OFFRE ---
+def annuler_approbation(request, id):
+    """
+    Annuler l'approbation d'une offre de covoiturage.
+    Remet approuve à False et redirige vers la page appropriée.
+    """
+    try:
+        # Récupérer l'offre
+        offre = get_object_or_404(Offre, id=id)
+        
+        # Mettre à jour le statut d'approbation
+        offre.approuve = False
+        offre.save(update_fields=['approuve'])
+        
+        # Message de succès
+        messages.warning(request, f"L'approbation de l'offre {offre.depart} → {offre.destination} a été annulée. L'offre est maintenant en attente.")
+        
+        # Rediriger vers la page d'origine ou la liste des offres
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'dashboard/covoiturage' in referer:
+            return redirect('dashboard_covoiturage')
+        elif 'offres/covoiturage' in referer or 'offres_list' in referer:
+            return redirect('offres_list')
+        # Par défaut, rediriger vers la liste des offres
         return redirect('offres_list')
-    return redirect('dashboard')
+        
+    except Exception as e:
+        # Gérer les erreurs
+        messages.error(request, f"Une erreur s'est produite lors de l'annulation de l'approbation : {str(e)}")
+        # Rediriger vers la liste des offres en cas d'erreur
+        return redirect('offres_list')
 
 
 # --- REJETER UNE OFFRE ---
 def rejeter_offre(request, id):
-    offre = get_object_or_404(Offre, id=id)
-    offre.approuve = False
-    offre.save()
-    messages.warning(request, f"L'offre de {offre.depart} → {offre.destination} a été rejetée.")
-    # Rediriger vers la page d'origine ou la liste des offres
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'offres/covoiturage' in referer or 'offres_list' in referer:
-        return redirect('offres_list')
-    return redirect('dashboard')
+    """
+    Rejeter et supprimer une offre de covoiturage.
+    Supprime l'offre du tableau après rejet.
+    """
+    try:
+        # Récupérer l'offre
+        offre = get_object_or_404(Offre, id=id)
+        
+        # Sauvegarder les informations pour le message
+        depart = offre.depart
+        destination = offre.destination
+        
+        # Supprimer l'offre
+        offre.delete()
+        
+        # Message de succès
+        messages.success(request, f"L'offre de {depart} → {destination} a été rejetée et supprimée.")
+        
+        # Rediriger vers la page d'origine ou la liste des offres
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'dashboard/covoiturage' in referer:
+            return redirect('dashboard_covoiturage')
+        elif 'offres/covoiturage' in referer or 'offres_list' in referer:
+            return redirect('offres_list')
+        # Par défaut, rediriger vers le dashboard covoiturage
+        return redirect('dashboard_covoiturage')
+        
+    except Exception as e:
+        # Gérer les erreurs
+        messages.error(request, f"Une erreur s'est produite lors du rejet de l'offre : {str(e)}")
+        # Rediriger vers le dashboard en cas d'erreur
+        return redirect('dashboard_covoiturage')
 

@@ -625,25 +625,29 @@ def marketplace_messages(request):
                 if user_logements:
                     logement = user_logements
             
-            # Si on a trouvé un logement, créer la conversation
-            if logement:
-                conversations_dict[conv_key] = {
-                    'logement': logement,
-                    'other_user': other_user,
-                    'last_message': message,
-                    'unread_count': 0,
-                }
-            else:
-                # Mettre à jour le dernier message si celui-ci est plus récent
-                existing = conversations_dict[conv_key]
-                if message.sent_at > existing['last_message'].sent_at:
-                    existing['last_message'] = message
-                    # Mettre à jour le logement si le nouveau message a un logement plus récent
-                    if message.logement:
-                        # Vérifier si ce logement est plus récent ou plus pertinent
-                        existing_logement = existing['logement']
-                        if not existing_logement or (message.logement.created_at > existing_logement.created_at):
-                            existing['logement'] = message.logement
+            # Créer la conversation même si aucun logement n'est trouvé
+            conversations_dict[conv_key] = {
+                'logement': logement,
+                'other_user': other_user,
+                'last_message': message,
+                'unread_count': 0,
+            }
+        else:
+            # Mettre à jour la conversation existante
+            existing = conversations_dict[conv_key]
+            if message.sent_at > existing['last_message'].sent_at:
+                existing['last_message'] = message
+                # Mettre à jour le logement si le nouveau message a un logement plus récent
+                if message.logement:
+                    # Vérifier si ce logement est plus récent ou plus pertinent
+                    existing_logement = existing['logement']
+                    if not existing_logement or (message.logement.created_at > existing_logement.created_at):
+                        existing['logement'] = message.logement
+                # Si pas de logement dans le message mais qu'on n'en a pas encore, chercher un logement du propriétaire
+                elif not existing['logement']:
+                    user_logements = Logement.objects.filter(owner=other_user, approved=True).first()
+                    if user_logements:
+                        existing['logement'] = user_logements
     
     # Calculer les messages non lus pour chaque conversation
     for conv_key, conv in conversations_dict.items():
@@ -659,8 +663,8 @@ def marketplace_messages(request):
         
         conv['unread_count'] = unread_count
     
-    # Convertir le dictionnaire en liste
-    conversations = list(conversations_dict.values())
+    # Convertir le dictionnaire en liste et filtrer les conversations sans logement
+    conversations = [conv for conv in conversations_dict.values() if conv['logement'] is not None]
     
     # Trier par date du dernier message
     conversations.sort(key=lambda x: x['last_message'].sent_at if x['last_message'] else timezone.now(), reverse=True)

@@ -328,13 +328,13 @@
   .chat-windows-container {
     position: fixed;
     bottom: 0;
-    right: 384px; /* 24px (widget margin) + 360px (widget width) */
-    z-index: 999;
+    right: 500px; /* Plus d'espace à gauche du widget */
+    z-index: 1001; /* Au-dessus du widget (z-index: 1000) */
     display: flex;
     gap: 12px;
     align-items: flex-end;
     flex-direction: row-reverse;
-    max-width: calc(100vw - 400px);
+    max-width: calc(100vw - 520px);
   }
 
   .chat-window {
@@ -549,8 +549,8 @@
 
   @media (max-width: 1200px) {
     .chat-windows-container {
-      right: 384px;
-      max-width: calc(100vw - 400px);
+      right: 500px;
+      max-width: calc(100vw - 520px);
     }
     .chat-window {
       width: 280px;
