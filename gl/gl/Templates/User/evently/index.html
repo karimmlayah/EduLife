@@ -2773,6 +2773,27 @@
           </div>
         </div>
       </div>
+      <!-- Suggestions rapides -->
+      <div class="edubot-home-suggestions" id="edubot-home-suggestions">
+        <div class="edubot-home-suggestions-title">
+          <i class="bi bi-lightbulb"></i>
+          <span>Suggestions</span>
+        </div>
+        <div class="edubot-home-suggestions-buttons">
+          <button type="button" class="edubot-home-suggestion-btn" onclick="sendHomeSuggestion('Comment chercher un logement ?')">
+            🏠 Logements
+          </button>
+          <button type="button" class="edubot-home-suggestion-btn" onclick="sendHomeSuggestion('Comment postuler à un stage ?')">
+            💼 Stages
+          </button>
+          <button type="button" class="edubot-home-suggestion-btn" onclick="sendHomeSuggestion('Comment créer une startup ?')">
+            🚀 Startups
+          </button>
+          <button type="button" class="edubot-home-suggestion-btn" onclick="sendHomeSuggestion('Qu\'est-ce qu\'EduLife ?')">
+            ℹ️ À propos
+          </button>
+        </div>
+      </div>
       <form id="edubot-home-form" class="edubot-home-input-row" onsubmit="sendEduBotHomeMessage(event)">
         <button type="button" id="edubot-home-mic-btn" class="edubot-home-icon-btn" title="Parler au micro">
           <i class="bi bi-mic"></i>
@@ -3231,6 +3252,48 @@
     .edubot-home-tts-inline:hover {
       color: #e5e7eb;
     }
+    /* Suggestions pour EduBot Home */
+    .edubot-home-suggestions {
+      padding: 8px;
+      background: rgba(15,23,42,.7);
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,.3);
+      margin-bottom: 6px;
+    }
+    .edubot-home-suggestions-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .edubot-home-suggestions-title i {
+      font-size: 0.9rem;
+    }
+    .edubot-home-suggestions-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .edubot-home-suggestion-btn {
+      background: rgba(249, 115, 22, 0.15);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      color: #f97316;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .edubot-home-suggestion-btn:hover {
+      background: #f97316;
+      color: #111827;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+    }
   </style>
 
   <script>
@@ -3302,6 +3365,19 @@
             console.error("Erreur lors de la fermeture de Messaging depuis EduVoice :", e);
           }
           voicePanel.classList.add('open');
+        }
+      };
+
+      // Fonction pour envoyer une suggestion
+      window.sendHomeSuggestion = function(text) {
+        if (input) {
+          input.value = text;
+          input.focus();
+          // Déclencher l'envoi automatiquement
+          if (form) {
+            const event = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(event);
+          }
         }
       };
 

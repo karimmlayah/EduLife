@@ -307,6 +307,189 @@
       margin-bottom: 8px;
       font-size: 0.9rem;
     }
+    .edubot-msg-bot > div:nth-child(2) {
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+    .edubot-msg-bot > div:nth-child(2) h4 {
+      margin: 0 0 12px 0;
+      padding: 0;
+    }
+    .edubot-msg-bot > div:nth-child(2) img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Boutons de suggestions et actions rapides */
+    .edubot-suggestions {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    .edubot-suggestions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .edubot-suggestions-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edubot-suggestions-toggle {
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .edubot-suggestions-toggle:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .edubot-suggestions-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .edubot-suggestions-content.collapsed {
+      display: none;
+    }
+    .edubot-suggestion-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      color: #111827;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edubot-suggestion-btn:hover {
+      background: #f87500;
+      border-color: #f87500;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(248, 117, 0, 0.2);
+    }
+    .edubot-suggestion-btn i {
+      font-size: 1rem;
+    }
+    .edubot-actions-summary {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: linear-gradient(135deg, #f87500, #ff9500);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      transition: all 0.3s;
+      font-size: 1.5rem;
+    }
+    .edubot-actions-summary:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(248, 117, 0, 0.5);
+    }
+    .edubot-actions-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .edubot-actions-modal.active {
+      display: flex;
+    }
+    .edubot-actions-modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .edubot-actions-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    .edubot-actions-modal-close:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+    .edubot-actions-modal h3 {
+      margin: 0 0 16px 0;
+      color: #111827;
+      font-size: 1.5rem;
+    }
+    .edubot-actions-category {
+      margin-bottom: 20px;
+    }
+    .edubot-actions-category h4 {
+      margin: 0 0 8px 0;
+      color: #f87500;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edubot-actions-category ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #4b5563;
+    }
+    .edubot-actions-category li {
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    .edubot-actions-category code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #f87500;
+    }
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
@@ -504,6 +687,48 @@
               <div class="edubot-container">
                 <div id="edubot-messages" class="edubot-messages"></div>
                 <div class="edubot-input-area">
+                  <!-- Section de suggestions -->
+                  <div class="edubot-suggestions" id="edubot-suggestions">
+                    <div class="edubot-suggestions-header">
+                      <div class="edubot-suggestions-title">
+                        <i class="ni ni-light-bulb"></i>
+                        <span>Suggestions rapides</span>
+                      </div>
+                      <button type="button" class="edubot-suggestions-toggle" id="edubot-suggestions-toggle">
+                        <i class="ni ni-bold-down" id="edubot-suggestions-icon"></i>
+                      </button>
+                    </div>
+                    <div class="edubot-suggestions-content" id="edubot-suggestions-content">
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('liste les utilisateurs')">
+                        <i class="ni ni-single-02"></i>
+                        <span>Liste les utilisateurs</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('liste les admins')">
+                        <i class="ni ni-badge"></i>
+                        <span>Liste les admins</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('liste les utilisateurs bannis')">
+                        <i class="ni ni-fat-remove"></i>
+                        <span>Utilisateurs bannis</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('cherche')">
+                        <i class="ni ni-zoom-split"></i>
+                        <span>Rechercher un utilisateur</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('c\'est quoi le rôle admin ?')">
+                        <i class="ni ni-settings"></i>
+                        <span>Qu'est-ce qu'un admin ?</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('comment bannir un utilisateur ?')">
+                        <i class="ni ni-fat-remove"></i>
+                        <span>Comment bannir ?</span>
+                      </button>
+                      <button type="button" class="edubot-suggestion-btn" onclick="sendSuggestion('comment changer le rôle ?')">
+                        <i class="ni ni-settings-gear-65"></i>
+                        <span>Comment changer le rôle ?</span>
+                      </button>
+                    </div>
+                  </div>
                   <form id="edubot-form" onsubmit="sendEduBotMessage(event)">
                     <div class="edubot-input-row">
                       <button type="button" class="edubot-action-btn" id="edubot-mic-btn" title="Parler à EduBot">
@@ -528,6 +753,82 @@
       </div>
     </div>
   </main>
+
+  <!-- Bouton flottant pour voir toutes les actions -->
+  <button type="button" class="edubot-actions-summary" id="edubot-actions-summary-btn" title="Voir toutes les actions possibles">
+    <i class="ni ni-app"></i>
+  </button>
+
+  <!-- Modal pour afficher toutes les actions -->
+  <div class="edubot-actions-modal" id="edubot-actions-modal">
+    <div class="edubot-actions-modal-content">
+      <button type="button" class="edubot-actions-modal-close" id="edubot-actions-modal-close">
+        <i class="ni ni-fat-remove"></i>
+      </button>
+      <h3>📋 Toutes les actions disponibles</h3>
+      
+      <div class="edubot-actions-category">
+        <h4><i class="ni ni-single-02"></i> Lister les utilisateurs</h4>
+        <ul>
+          <li><code>liste les utilisateurs</code> - Liste tous les utilisateurs (rôle UTILISATEUR)</li>
+          <li><code>liste les admins</code> - Liste tous les administrateurs</li>
+          <li><code>liste les utilisateurs bannis</code> - Liste les utilisateurs bannis</li>
+          <li><code>liste les utilisateurs actifs</code> - Liste les utilisateurs actifs</li>
+        </ul>
+      </div>
+
+      <div class="edubot-actions-category">
+        <h4><i class="ni ni-zoom-split"></i> Rechercher des utilisateurs</h4>
+        <ul>
+          <li><code>cherche [nom/prénom]</code> - Recherche par nom ou prénom</li>
+          <li><code>cherche [email]</code> - Recherche par email (ex: jean@example.com)</li>
+          <li><code>cherche [téléphone]</code> - Recherche par numéro de téléphone</li>
+          <li><code>cherche les admins à Paris</code> - Recherche avancée avec filtres</li>
+          <li><code>trouve les utilisateurs bannis</code> - Recherche avec filtre de statut</li>
+        </ul>
+      </div>
+
+      <div class="edubot-actions-category">
+        <h4><i class="ni ni-settings-gear-65"></i> Modifier le rôle</h4>
+        <ul>
+          <li><code>changer le rôle de l'utilisateur [ID] en admin</code></li>
+          <li><code>mettre l'utilisateur [ID] en admin</code></li>
+          <li><code>promouvoir l'utilisateur [ID] en admin</code></li>
+          <li><code>changer le rôle de l'utilisateur [ID] en utilisateur</code></li>
+          <li><code>mettre l'utilisateur [ID] en utilisateur</code></li>
+        </ul>
+      </div>
+
+      <div class="edubot-actions-category">
+        <h4><i class="ni ni-fat-remove"></i> Bannir / Débannir</h4>
+        <ul>
+          <li><code>bannir l'utilisateur [ID]</code> - Bannir un utilisateur</li>
+          <li><code>ban l'utilisateur [ID]</code> - Bannir (version courte)</li>
+          <li><code>bloquer l'utilisateur [ID]</code> - Bloquer un utilisateur</li>
+          <li><code>débannir l'utilisateur [ID]</code> - Débannir un utilisateur</li>
+          <li><code>débloquer l'utilisateur [ID]</code> - Débloquer un utilisateur</li>
+          <li><code>réactiver l'utilisateur [ID]</code> - Réactiver un utilisateur</li>
+          <li><code>activer l'utilisateur [ID]</code> - Activer un utilisateur</li>
+          <li><code>restaurer l'utilisateur [ID]</code> - Restaurer un utilisateur</li>
+        </ul>
+      </div>
+
+      <div class="edubot-actions-category">
+        <h4><i class="ni ni-chat-round"></i> Questions générales</h4>
+        <ul>
+          <li><code>c'est quoi le rôle admin ?</code> - Information sur les rôles</li>
+          <li><code>comment bannir un utilisateur ?</code> - Guide pour bannir</li>
+          <li><code>comment changer le rôle ?</code> - Guide pour changer le rôle</li>
+          <li><code>quelles sont les fonctionnalités disponibles ?</code> - Liste des fonctionnalités</li>
+          <li>Et toutes autres questions sur la plateforme !</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.9rem;">
+        <strong>💡 Astuce :</strong> Vous pouvez aussi taper directement un email, un numéro de téléphone ou un nom pour rechercher automatiquement un utilisateur.
+      </div>
+    </div>
+  </div>
 
   <script src="{% static 'User/argon/assets/js/core/popper.min.js' %}"></script>
   <script src="{% static 'User/argon/assets/js/core/bootstrap.min.js' %}"></script>
@@ -677,28 +978,97 @@
           },
           body: JSON.stringify({ message: text })
         });
-        const data = await resp.json();
+        
+        let data;
+        try {
+          data = await resp.json();
+        } catch (parseErr) {
+          throw new Error('Réponse invalide du serveur. Status: ' + resp.status);
+        }
+        
         container.removeChild(loadingDiv);
+
+        if (!resp.ok) {
+          // Gérer les erreurs HTTP
+          const errorMsg = data.error || data.message || 'Erreur ' + resp.status + ': ' + resp.statusText;
+          const errDiv = document.createElement('div');
+          errDiv.className = 'edubot-msg edubot-msg-bot';
+          errDiv.innerHTML = '<div>EduBot</div><div style="color: #f87171;">' + errorMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+          container.appendChild(errDiv);
+          container.scrollTop = container.scrollHeight;
+          return;
+        }
 
         const botDiv = document.createElement('div');
         botDiv.className = 'edubot-msg edubot-msg-bot';
         const reply = (data.reply || data.error || 'Erreur');
-        const safeReply = reply.replace(/</g,'&lt;');
+        const isHtml = data.is_html || false;
+        
+        // Si c'est du HTML, l'afficher directement, sinon échapper
+        let replyContent = '';
+        if (isHtml) {
+          replyContent = reply; // HTML brut
+        } else {
+          replyContent = reply.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+        
         botDiv.innerHTML =
           '<div>EduBot</div>' +
-          '<div>'+ safeReply +'</div>' +
-          '<button type="button" class="edubot-tts-btn" onclick="speakText(`'+ safeReply +'`)">' +
+          '<div style="' + (isHtml ? '' : 'white-space: pre-wrap; word-wrap: break-word;') + '">'+ replyContent +'</div>' +
+          (!isHtml ? '<button type="button" class="edubot-tts-btn" onclick="speakText(\''+ reply.replace(/'/g, "\\'").replace(/"/g, '&quot;') +'\')">' +
           '<i class="ni ni-sound-wave"></i> Lire la réponse' +
-          '</button>';
+          '</button>' : '');
         container.appendChild(botDiv);
         container.scrollTop = container.scrollHeight;
       } catch (err) {
         container.removeChild(loadingDiv);
         const errDiv = document.createElement('div');
-        errDiv.className = 'edubot-msg';
-        errDiv.style.color = '#f87171';
-        errDiv.textContent = 'Erreur lors de la réponse d’EduBot.';
+        errDiv.className = 'edubot-msg edubot-msg-bot';
+        errDiv.innerHTML = '<div>EduBot</div><div style="color: #f87171;">Erreur: ' + (err.message || 'Erreur lors de la réponse d\'EduBot.') + '</div>';
         container.appendChild(errDiv);
+        container.scrollTop = container.scrollHeight;
+        console.error('Erreur EduBot:', err);
+      }
+    }
+
+    // Fonction pour envoyer une suggestion
+    function sendSuggestion(text) {
+      const input = document.getElementById('edubot-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+        // Déclencher l'envoi automatiquement
+        const form = document.getElementById('edubot-form');
+        if (form) {
+          const event = new Event('submit', { bubbles: true, cancelable: true });
+          form.dispatchEvent(event);
+        }
+      }
+    }
+
+    // Toggle des suggestions
+    function toggleSuggestions() {
+      const content = document.getElementById('edubot-suggestions-content');
+      const icon = document.getElementById('edubot-suggestions-icon');
+      if (content && icon) {
+        content.classList.toggle('collapsed');
+        icon.classList.toggle('ni-bold-down');
+        icon.classList.toggle('ni-bold-up');
+      }
+    }
+
+    // Gérer le modal des actions
+    function showActionsModal() {
+      const modal = document.getElementById('edubot-actions-modal');
+      if (modal) {
+        modal.classList.add('active');
+      }
+    }
+
+    function hideActionsModal() {
+      const modal = document.getElementById('edubot-actions-modal');
+      if (modal) {
+        modal.classList.remove('active');
       }
     }
 
@@ -737,6 +1107,41 @@
         updateEduBoxUnreadCount();
         setInterval(updateEduBoxUnreadCount, 30000);
       }
+
+      // Gérer le toggle des suggestions
+      const suggestionsToggle = document.getElementById('edubot-suggestions-toggle');
+      if (suggestionsToggle) {
+        suggestionsToggle.addEventListener('click', toggleSuggestions);
+      }
+
+      // Gérer le bouton d'actions summary
+      const actionsSummaryBtn = document.getElementById('edubot-actions-summary-btn');
+      if (actionsSummaryBtn) {
+        actionsSummaryBtn.addEventListener('click', showActionsModal);
+      }
+
+      // Gérer la fermeture du modal
+      const modalClose = document.getElementById('edubot-actions-modal-close');
+      if (modalClose) {
+        modalClose.addEventListener('click', hideActionsModal);
+      }
+
+      // Fermer le modal en cliquant en dehors
+      const modal = document.getElementById('edubot-actions-modal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            hideActionsModal();
+          }
+        });
+      }
+
+      // Fermer le modal avec Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          hideActionsModal();
+        }
+      });
     });
   </script>
 </body>

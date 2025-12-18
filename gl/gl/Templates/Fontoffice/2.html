@@ -222,6 +222,7 @@ textarea.form-control {
 .feedback-card, .event-card, .partner-box { animation: fadeInUp 0.8s ease; }
 </style>
 
+
 <!-- ========================= ÉVÉNEMENTS AVEC PAGINATION ========================== -->
 <section id="featured-events" class="featured-speakers section" style="background: var(--light-bg);">
   <div class="container section-title text-center">
@@ -256,16 +257,14 @@ textarea.form-control {
             <h3 class="event-name">{{ event.name }}</h3>
             <div class="event-date">{{ event.date }}</div>
             <div class="event-location">{{ event.location }}</div>
+            <div class="event-seat">{{ event.total_seats }}</div>
           </div>
           <div class="event-description">
             {{ event.description|truncatewords:25 }}
           </div>
           <div class="event-footer">
-              {% if user.is_authenticated %}
-                  <a href="{% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
-              {% else %}
-                  <a href="{% url 'login' %}?next={% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
-              {% endif %}
+              <a href="{% url 'reserve_event' event.id %}" class="btn btn-primary">Réserver</a>
+
           </div>
         </div>
       </div>
@@ -291,7 +290,11 @@ textarea.form-control {
     </div>
   </div>
 </section>
-
+<div class="container text-center mb-4">
+  <a href="{% url 'agent_reservation' %}" class="btn-main">
+    🧠 Réserver avec l'Agent IA
+  </a>
+</div>
 <!-- ========================= PARTENAIRES ========================== -->
 <section id="partners" class="py-5">
   <div class="container">
@@ -698,54 +701,55 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- ========================= SCRIPT PRINCIPAL (FILTRE + PAGINATION) ========================== -->
+<!-- ========================= SCRIPT PRINCIPAL (FILTRE + PAGINATION) ========================== -->
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Configuration de la pagination
   const eventsPerPage = 6;
   let currentPage = 1;
-  let filteredEvents = [];
-
+  
   const eventItems = document.querySelectorAll(".event-item");
-  const eventsContainer = document.getElementById("events-container");
   const filterBtns = document.querySelectorAll(".filter-btn");
   const prevBtn = document.getElementById("prev-btn");
   const nextBtn = document.getElementById("next-btn");
   const paginationControls = document.getElementById("pagination-controls");
+  const currentPageSpan = document.getElementById("current-page");
+  const totalPagesSpan = document.getElementById("total-pages");
 
-  function init() {
-    filteredEvents = Array.from(eventItems);
-    applyFilterAndPagination();
-  }
+  // Initialiser
+  applyFilterAndPagination();
 
   function applyFilterAndPagination() {
     const activeFilter = document.querySelector(".filter-btn.active")?.getAttribute("data-filter") || "all";
-    let visibleEvents = activeFilter === "all" 
-      ? filteredEvents 
-      : filteredEvents.filter(item => item.getAttribute("data-category") === activeFilter);
+    
+    // Filtrer les événements visibles
+    const visibleEvents = Array.from(eventItems).filter(item => {
+      if (activeFilter === "all") return true;
+      return item.getAttribute("data-category") === activeFilter;
+    });
 
-    const totalPages = Math.ceil(visibleEvents.length / eventsPerPage);
+    // Calculer le nombre total de pages
+    const totalPages = Math.max(1, Math.ceil(visibleEvents.length / eventsPerPage));
+    
+    // Calculer l'index de début et de fin
     const start = (currentPage - 1) * eventsPerPage;
     const end = start + eventsPerPage;
 
-    // CORRECTION ICI : Masquer TOUS les événements d'abord
+    // Masquer tous les événements d'abord
     eventItems.forEach(item => item.style.display = "none");
     
-    // CORRECTION ICI : Afficher seulement ceux de la page courante
-    if (visibleEvents.length > 0) {
-      visibleEvents.slice(start, end).forEach(item => item.style.display = "block");
-    }
-
-    // CORRECTION ICI : Afficher message si aucun événement
-    const noEventsMsg = eventsContainer.querySelector(".no-events-message");
-    if (visibleEvents.length === 0) {
-      if (!noEventsMsg) {
-        const msgDiv = document.createElement("div");
-        msgDiv.className = "col-12 text-center no-events-message";
-        msgDiv.innerHTML = '<p class="text-muted">Aucun événement trouvé pour cette catégorie.</p>';
-        eventsContainer.appendChild(msgDiv);
+    // Afficher seulement les événements de la page courante
+    visibleEvents.forEach((item, index) => {
+      if (index >= start && index < end) {
+        item.style.display = "block";
       }
-    } else if (noEventsMsg) {
-      noEventsMsg.remove();
-    }
+    });
 
+    // Mettre à jour les informations de pagination
+    currentPageSpan.textContent = currentPage;
+    totalPagesSpan.textContent = totalPages;
+
+    // Gérer l'affichage des contrôles de pagination
     if (totalPages > 1) {
       paginationControls.style.display = "flex";
       prevBtn.disabled = currentPage === 1;
@@ -753,78 +757,176 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       paginationControls.style.display = "none";
     }
+
+    // Si aucun événement n'est visible
+    if (visibleEvents.length === 0) {
+      // Créer un message d'absence d'événements
+      const container = document.getElementById("events-container");
+      container.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted">Aucun événement trouvé pour cette catégorie.</p>
+        </div>
+      `;
+      paginationControls.style.display = "none";
+    }
   }
 
+  // Filtres
   filterBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       filterBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      currentPage = 1;
+      currentPage = 1; // Réinitialiser à la première page
       applyFilterAndPagination();
     });
   });
 
+  // Bouton précédent
   prevBtn.addEventListener("click", () => {
     if (currentPage > 1) {
       currentPage--;
       applyFilterAndPagination();
-      scrollToEvents();
     }
   });
 
+  // Bouton suivant
   nextBtn.addEventListener("click", () => {
     const activeFilter = document.querySelector(".filter-btn.active")?.getAttribute("data-filter") || "all";
-    const visibleEvents = activeFilter === "all" 
-      ? Array.from(eventItems) 
-      : Array.from(eventItems).filter(item => item.getAttribute("data-category") === activeFilter);
+    const visibleEvents = Array.from(eventItems).filter(item => {
+      if (activeFilter === "all") return true;
+      return item.getAttribute("data-category") === activeFilter;
+    });
     
-    const totalPages = Math.ceil(visibleEvents.length / eventsPerPage);
+    const totalPages = Math.max(1, Math.ceil(visibleEvents.length / eventsPerPage));
+    
     if (currentPage < totalPages) {
       currentPage++;
       applyFilterAndPagination();
-      scrollToEvents();
     }
   });
 
-  function scrollToEvents() {
-    document.getElementById("featured-events").scrollIntoView({ behavior: "smooth", block: "start" });
+  // Vérifier les paramètres d'URL pour les notifications de paiement
+  const params = new URLSearchParams(window.location.search);
+  const paymentStatus = params.get("payment");
+
+  if (paymentStatus === "success") {
+    showNotification(
+      "Paiement réussi ✅",
+      "Votre réservation est confirmée ! 🎉",
+      "success"
+    );
+    // Nettoyer l'URL
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // Démarrer
-  window.addEventListener("load", init);
-</script>
+  if (paymentStatus === "cancel") {
+    showNotification(
+      "Paiement annulé ❌",
+      "Votre réservation n'a pas été finalisée.",
+      "error"
+    );
+    // Nettoyer l'URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 
-<script>  
+  function showNotification(title, message, type) {
+    const bg = type === "success" ? "#28a745" : "#dc3545";
+
+    const box = document.createElement("div");
+    box.style.position = "fixed";
+    box.style.top = "20px";
+    box.style.right = "20px";
+    box.style.padding = "20px 25px";
+    box.style.borderRadius = "10px";
+    box.style.color = "#fff";
+    box.style.zIndex = "9999";
+    box.style.fontSize = "1.1rem";
+    box.style.fontWeight = "600";
+    box.style.background = bg;
+    box.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+    box.style.opacity = "0";
+    box.style.transform = "translateY(-20px)";
+    box.style.transition = "all .4s ease";
+
+    box.innerHTML = `
+      <div style="font-size:1.4rem; margin-bottom:5px;">${title}</div>
+      <div style="opacity:.9;">${message}</div>
+    `;
+
+    document.body.appendChild(box);
+
+    setTimeout(() => {
+      box.style.opacity = "1";
+      box.style.transform = "translateY(0)";
+    }, 50);
+
+    setTimeout(() => {
+      box.style.opacity = "0";
+      box.style.transform = "translateY(-20px)";
+      setTimeout(() => box.remove(), 400);
+    }, 3500);
+  }
+});
+</script>
+<script>
 document.addEventListener("DOMContentLoaded", function() {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("payment");
 
     if (paymentStatus === "success") {
-        if (typeof showToast === 'function') {
-            showToast("Paiement réussi ✅ - Votre réservation est confirmée ! 🎉", "success");
-        } else {
-            // Fallback si showToast n'est pas encore disponible
-            setTimeout(function() {
-                if (typeof showToast === 'function') {
-                    showToast("Paiement réussi ✅ - Votre réservation est confirmée ! 🎉", "success");
-                }
-            }, 500);
-        }
+        showNotification(
+            "Paiement réussi ✅",
+            "Votre réservation est confirmée ! 🎉",
+            "success"
+        );
     }
 
     if (paymentStatus === "cancel") {
-        if (typeof showToast === 'function') {
-            showToast("Paiement annulé ❌ - Votre réservation n'a pas été finalisée.", "error");
-        } else {
-            // Fallback si showToast n'est pas encore disponible
-            setTimeout(function() {
-                if (typeof showToast === 'function') {
-                    showToast("Paiement annulé ❌ - Votre réservation n'a pas été finalisée.", "error");
-                }
-            }, 500);
-        }
+        showNotification(
+            "Paiement annulé ❌",
+            "Votre réservation n’a pas été finalisée.",
+            "error"
+        );
     }
 });
+
+function showNotification(title, message, type) {
+    const bg = type === "success" ? "#28a745" : "#dc3545";
+
+    const box = document.createElement("div");
+    box.style.position = "fixed";
+    box.style.top = "20px";
+    box.style.right = "20px";
+    box.style.padding = "20px 25px";
+    box.style.borderRadius = "10px";
+    box.style.color = "#fff";
+    box.style.zIndex = "9999";
+    box.style.fontSize = "1.1rem";
+    box.style.fontWeight = "600";
+    box.style.background = bg;
+    box.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+    box.style.opacity = "0";
+    box.style.transform = "translateY(-20px)";
+    box.style.transition = "all .4s ease";
+
+    box.innerHTML = `
+        <div style="font-size:1.4rem; margin-bottom:5px;">${title}</div>
+        <div style="opacity:.9;">${message}</div>
+    `;
+
+    document.body.appendChild(box);
+
+    setTimeout(() => {
+        box.style.opacity = "1";
+        box.style.transform = "translateY(0)";
+    }, 50);
+
+    setTimeout(() => {
+        box.style.opacity = "0";
+        box.style.transform = "translateY(-20px)";
+        setTimeout(() => box.remove(), 400);
+    }, 3500);
+}
 </script>
 
 {% endblock %}

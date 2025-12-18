@@ -285,13 +285,375 @@ def api_user_detail(request, pk):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
+def _format_user_for_display(user):
+    """Formate un utilisateur pour l'affichage dans le chat"""
+    avatar_html = ""
+    if hasattr(user, 'avatar') and user.avatar:
+        try:
+            avatar_html = f'<img src="{user.avatar.url}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">'
+        except (ValueError, AttributeError):
+            pass
+    
+    name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username or "Utilisateur"
+    email = user.email or "N/A"
+    phone = user.phone or "N/A"
+    role = getattr(user, 'role', 'UTILISATEUR') or 'UTILISATEUR'
+    city = getattr(user, 'city', None) or "N/A"
+    is_active = "✅ Actif" if user.is_active else "❌ Banni/Inactif"
+    is_verified = "✓ Vérifié" if getattr(user, 'is_verified', False) else "✗ Non vérifié"
+    date_joined = user.date_joined.strftime("%d/%m/%Y") if hasattr(user, 'date_joined') and user.date_joined else "N/A"
+    
+    # Échapper les caractères HTML pour éviter les injections
+    def escape_html(text):
+        if text is None:
+            return "N/A"
+        return str(text).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    
+    name = escape_html(name)
+    email = escape_html(email)
+    phone = escape_html(phone)
+    role = escape_html(role)
+    city = escape_html(city)
+    
+    return f"""
+    <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: #f9fafb;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            {avatar_html}
+            <div>
+                <strong style="color: #111827; font-size: 1rem;">{name}</strong>
+                <div style="color: #6b7280; font-size: 0.85rem;">ID: {user.id} | {email}</div>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.85rem; color: #4b5563;">
+            <div><strong>Téléphone:</strong> {phone}</div>
+            <div><strong>Rôle:</strong> {role}</div>
+            <div><strong>Ville:</strong> {city}</div>
+            <div><strong>Inscription:</strong> {date_joined}</div>
+            <div><strong>Statut:</strong> {is_active}</div>
+            <div><strong>Email:</strong> {is_verified}</div>
+        </div>
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 0.8rem; color: #6b7280;">
+            💡 <strong>Commandes disponibles:</strong> "changer le rôle de l'utilisateur {user.id} en admin", "bannir l'utilisateur {user.id}", "débannir l'utilisateur {user.id}"
+        </div>
+    </div>
+    """
+
+
+def _search_users(query: str, limit: int = 20, role_filter=None, active_filter=None):
+    """
+    Recherche avancée des utilisateurs par n'importe quelle information
+    Supporte aussi les filtres par rôle et statut actif/inactif
+    """
+    if not query or not query.strip():
+        queryset = CustomUser.objects.all()
+    else:
+        query = query.strip()
+        queryset = CustomUser.objects.filter(
+            Q(username__icontains=query) |
+            Q(email__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(city__icontains=query) |
+            Q(country__icontains=query) |
+            Q(address__icontains=query) |
+            Q(headline__icontains=query) |
+            Q(bio__icontains=query) |
+            Q(location__icontains=query)
+        ).distinct()
+    
+    # Appliquer les filtres supplémentaires
+    if role_filter:
+        queryset = queryset.filter(role=role_filter)
+    if active_filter is not None:
+        queryset = queryset.filter(is_active=active_filter)
+    
+    return queryset[:limit]
+
+
+def _list_all_users(limit: int = 50, role_filter=None, active_filter=None):
+    """
+    Liste tous les utilisateurs (limité) avec filtres optionnels
+    """
+    queryset = CustomUser.objects.all()
+    if role_filter:
+        queryset = queryset.filter(role=role_filter)
+    if active_filter is not None:
+        queryset = queryset.filter(is_active=active_filter)
+    return queryset.order_by('-date_joined')[:limit]
+
+
+def _change_user_role(user_id: int, new_role: str):
+    """
+    Change le rôle d'un utilisateur
+    Retourne (success, message)
+    """
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        if new_role not in ['ADMIN', 'UTILISATEUR']:
+            return False, f"Rôle invalide: {new_role}. Les rôles valides sont ADMIN et UTILISATEUR."
+        old_role = user.role
+        user.role = new_role
+        user.save()
+        return True, f"Rôle de {user.username} ({user.email}) changé de {old_role} à {new_role}."
+    except CustomUser.DoesNotExist:
+        return False, f"Utilisateur avec l'ID {user_id} introuvable."
+    except Exception as e:
+        return False, f"Erreur lors du changement de rôle: {str(e)}"
+
+
+def _ban_user(user_id: int, ban: bool, reason: str = None):
+    """
+    Bannit ou débannit un utilisateur
+    Retourne (success, message)
+    """
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        user.is_active = not ban
+        if ban:
+            user.ban_reason = reason or "Banni par un administrateur via EduBot"
+            user.banned_at = timezone.now()
+        else:
+            user.ban_reason = None
+            user.banned_at = None
+        user.save()
+        action = "banni" if ban else "débanni"
+        return True, f"Utilisateur {user.username} ({user.email}) {action} avec succès."
+    except CustomUser.DoesNotExist:
+        return False, f"Utilisateur avec l'ID {user_id} introuvable."
+    except Exception as e:
+        return False, f"Erreur lors du bannissement: {str(e)}"
+
+
+def _detect_user_intent(message: str):
+    """
+    Détecte l'intention de l'utilisateur concernant les utilisateurs
+    Retourne (intent, query, role_filter, active_filter) où intent peut être 'list', 'search', 'change_role', 'ban', ou None
+    """
+    message_lower = message.lower().strip()
+    
+    # D'abord, détecter les salutations et questions conversationnelles simples
+    # Si c'est juste une salutation ou une question générale, ne pas déclencher les outils
+    greetings = ['salut', 'bonjour', 'bonsoir', 'bonne nuit', 'hello', 'hi', 'hey', 'coucou']
+    simple_questions = ['comment ça va', 'ça va', 'comment allez-vous', 'comment vas-tu', 
+                       'qui es-tu', 'qui êtes-vous', 'c\'est quoi', 'qu\'est-ce que', 
+                       'aide-moi', 'aide moi', 'help', 'aider']
+    
+    # Si le message est exactement une salutation ou contient juste une salutation simple
+    if message_lower in greetings:
+        return (None, None, None, None, None, None)
+    
+    # Si le message commence par une salutation et est court (max 3 mots)
+    words = message_lower.split()
+    if len(words) <= 3 and any(greeting in message_lower for greeting in greetings):
+        return (None, None, None, None, None, None)
+    
+    # Si c'est une question simple sans mots-clés d'action, passer à l'IA
+    if any(sq in message_lower for sq in simple_questions) and not any(kw in message_lower for kw in ['liste', 'cherche', 'trouve', 'recherche', 'bannir', 'changer', 'modifier']):
+        return (None, None, None, None, None, None)
+    
+    # Détecter les actions sur un utilisateur spécifique (par ID)
+    import re
+    
+    # Chercher "changer rôle" ou "modifier rôle" avec un ID
+    # Patterns plus flexibles: "changer rôle utilisateur 5", "mettre l'utilisateur 5 en admin", "utilisateur 5 admin", etc.
+    role_change_patterns = [
+        r'(changer|modifier|changer le|modifier le|mettre|donner|passer|promouvoir|r[ée]trograder).*r[oô]le.*(?:utilisateur|user|id).*?(\d+)',
+        r'(changer|modifier|changer le|modifier le|mettre|donner|passer|promouvoir|r[ée]trograder).*r[oô]le.*?(\d+)',
+        r'(?:utilisateur|user|id).*?(\d+).*(?:en|à|vers|devient).*(admin|utilisateur)',
+        r'(?:utilisateur|user|id).*?(\d+).*r[oô]le.*(admin|utilisateur)',
+        r'r[oô]le.*(?:utilisateur|user|id).*?(\d+).*(?:en|à|vers).*(admin|utilisateur)',
+        r'(\d+).*(?:en|à|vers|devient).*(admin|utilisateur).*r[oô]le',
+        r'(?:promouvoir|r[ée]trograder).*(\d+)',
+    ]
+    for pattern in role_change_patterns:
+        match = re.search(pattern, message_lower)
+        if match:
+            # Extraire l'ID (généralement le dernier groupe numérique)
+            user_id = None
+            for group in match.groups():
+                if group and group.isdigit():
+                    user_id = int(group)
+                    break
+            if user_id:
+                # Détecter quel rôle
+                if 'admin' in message_lower or (match.lastindex > 1 and 'admin' in match.group(match.lastindex).lower()):
+                    return ('change_role', None, 'ADMIN', None, user_id, None)
+                elif 'utilisateur' in message_lower or 'user' in message_lower:
+                    return ('change_role', None, 'UTILISATEUR', None, user_id, None)
+                # Si on trouve "admin" ou "utilisateur" dans les groupes
+                for i in range(1, len(match.groups()) + 1):
+                    group_val = match.group(i)
+                    if group_val and group_val.lower() in ['admin', 'utilisateur']:
+                        role = 'ADMIN' if group_val.lower() == 'admin' else 'UTILISATEUR'
+                        return ('change_role', None, role, None, user_id, None)
+    
+    # Chercher "bannir" ou "débannir" avec un ID
+    # Patterns plus flexibles avec plusieurs variantes pour débannir
+    # Mots pour bannir
+    ban_keywords = ['bannir', 'ban', 'bloquer', 'suspendre', 'désactiver', 'désactiver le compte', 'désactiver compte']
+    # Mots pour débannir (beaucoup plus de variantes)
+    unban_keywords = ['débannir', 'debannir', 'dé-bannir', 'de-bannir', 'unban', 'débloquer', 'débloquer le compte', 
+                     'débloquer compte', 'réactiver', 'reactiver', 'ré-activer', 're-activer', 'activer', 
+                     'activer le compte', 'activer compte', 'restaurer', 'restaurer le compte', 'restaurer compte',
+                     'réhabiliter', 'rehabiliter', 'ré-habiliter', 're-habiliter', 'rétablir', 'retablir',
+                     'remettre', 'remettre en service', 'remettre actif', 'rendre actif', 'rendre disponible']
+    
+    # Patterns pour bannir
+    ban_patterns = [
+        r'(' + '|'.join(ban_keywords) + r').*(?:utilisateur|user|id|compte).*?(\d+)',
+        r'(' + '|'.join(ban_keywords) + r').*?(\d+)',
+        r'(?:utilisateur|user|id|compte).*?(\d+).*(' + '|'.join(ban_keywords) + r')',
+        r'(\d+).*(' + '|'.join(ban_keywords) + r')',
+    ]
+    
+    # Patterns pour débannir
+    unban_patterns = [
+        r'(' + '|'.join(unban_keywords) + r').*(?:utilisateur|user|id|compte).*?(\d+)',
+        r'(' + '|'.join(unban_keywords) + r').*?(\d+)',
+        r'(?:utilisateur|user|id|compte).*?(\d+).*(' + '|'.join(unban_keywords) + r')',
+        r'(\d+).*(' + '|'.join(unban_keywords) + r')',
+    ]
+    
+    # Vérifier d'abord les patterns de débannissement (plus spécifiques)
+    for pattern in unban_patterns:
+        match = re.search(pattern, message_lower)
+        if match:
+            user_id = None
+            for group in match.groups():
+                if group and group.isdigit():
+                    user_id = int(group)
+                    break
+            if user_id:
+                return ('ban', None, None, None, user_id, False)  # False = débannir
+    
+    # Ensuite vérifier les patterns de bannissement
+    for pattern in ban_patterns:
+        match = re.search(pattern, message_lower)
+        if match:
+            user_id = None
+            for group in match.groups():
+                if group and group.isdigit():
+                    user_id = int(group)
+                    break
+            if user_id:
+                return ('ban', None, None, None, user_id, True)  # True = bannir
+    
+    # Extraire les filtres de rôle et statut AVANT de détecter l'intention
+    role_filter = None
+    # Détecter "admin" ou "admins" pour le filtre de rôle
+    if 'admin' in message_lower and ('utilisateur' not in message_lower or message_lower.index('admin') < message_lower.index('utilisateur')):
+        role_filter = 'ADMIN'
+    # Détecter "utilisateur" ou "utilisateurs" (sans "admin") pour le filtre de rôle UTILISATEUR
+    elif ('utilisateur' in message_lower or 'users' in message_lower) and 'admin' not in message_lower:
+        role_filter = 'UTILISATEUR'
+    # Si on dit explicitement "rôle admin" ou "rôle utilisateur"
+    elif 'rôle' in message_lower or 'role' in message_lower:
+        if 'admin' in message_lower:
+            role_filter = 'ADMIN'
+        elif 'utilisateur' in message_lower or 'user' in message_lower:
+            role_filter = 'UTILISATEUR'
+    
+    active_filter = None
+    if 'banni' in message_lower or 'inactif' in message_lower or 'désactivé' in message_lower:
+        active_filter = False
+    elif 'actif' in message_lower and 'inactif' not in message_lower:
+        active_filter = True
+    
+    # Mots-clés pour lister tous les utilisateurs
+    list_keywords = [
+        'liste', 'list', 'affiche', 'montre', 'voir', 'tous les utilisateurs',
+        'utilisateurs', 'users', 'tous les users', 'tous utilisateurs',
+        'afficher les utilisateurs', 'montrer les utilisateurs'
+    ]
+    
+    # Vérifier si c'est une demande de liste EN PREMIER (avant la recherche)
+    for keyword in list_keywords:
+        if keyword in message_lower:
+            # Si on dit "liste les utilisateurs" sans mentionner "admin", filtrer par rôle UTILISATEUR
+            if role_filter is None and ('utilisateur' in message_lower or 'users' in message_lower) and 'admin' not in message_lower:
+                role_filter = 'UTILISATEUR'
+            return ('list', None, role_filter, active_filter, None, None)
+    
+    # Mots-clés pour rechercher (sans "utilisateur" et "user" pour éviter les conflits avec "liste les utilisateurs")
+    search_keywords = [
+        'cherche', 'recherche', 'trouve', 'find', 'search', 'chercher',
+        'par', 'avec', 'qui a', 'qui contient'
+    ]
+    
+    # Vérifier si c'est une recherche (après avoir vérifié la liste)
+    # Seulement si on a un mot-clé explicite de recherche
+    for keyword in search_keywords:
+        if keyword in message_lower:
+            # Extraire la requête de recherche
+            parts = message_lower.split(keyword, 1)
+            if len(parts) > 1:
+                query = parts[1].strip()
+                # Nettoyer la requête (enlever les mots vides et les filtres)
+                stop_words = ['un', 'une', 'des', 'le', 'la', 'les', 'de', 'du', 'l\'', 'd\'', 'qui', 'a', 'contient', 'rôle', 'role', 'banni', 'actif', 'inactif', 'par', 'avec']
+                # Ne pas enlever "admin" ou "utilisateur" s'ils font partie de la requête de recherche
+                query_parts = query.split()
+                cleaned_parts = []
+                for part in query_parts:
+                    if part not in stop_words:
+                        cleaned_parts.append(part)
+                    # Si c'est "admin" ou "utilisateur" mais qu'on cherche vraiment ces mots, les garder
+                    elif part in ['admin', 'utilisateur', 'user'] and keyword in ['cherche', 'recherche', 'trouve', 'find', 'search', 'chercher']:
+                        cleaned_parts.append(part)
+                query = ' '.join(cleaned_parts)
+                if query:
+                    return ('search', query, role_filter, active_filter, None, None)
+            # Si pas de query mais mot-clé de recherche présent, c'est une recherche
+            return ('search', None, role_filter, active_filter, None, None)
+    
+    # Détecter les recherches directes (sans mot-clé "cherche")
+    # Si le message contient un email (@), un numéro de téléphone, ou semble être un nom/prénom
+    # Détecter un email
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if re.search(email_pattern, message):
+        email_match = re.search(email_pattern, message)
+        return ('search', email_match.group(0), role_filter, active_filter, None, None)
+    
+    # Détecter un numéro de téléphone (séquence de chiffres avec ou sans espaces/tirets)
+    phone_pattern = r'\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{2,4}[-.\s]?\d{2,9}\b'
+    phone_match = re.search(phone_pattern, message)
+    if phone_match and len(re.sub(r'[-.\s()+]', '', phone_match.group(0))) >= 8:
+        return ('search', phone_match.group(0), role_filter, active_filter, None, None)
+    
+    # Si le message ne contient pas de mots-clés de liste et semble être une recherche (nom, prénom, etc.)
+    # et ne contient pas de commandes d'action (changer, bannir, etc.)
+    action_keywords = ['changer', 'modifier', 'bannir', 'ban', 'débannir', 'promouvoir', 'rétrograder']
+    
+    # Exclure les salutations et questions conversationnelles simples
+    greetings_and_simple = ['salut', 'bonjour', 'bonsoir', 'hello', 'hi', 'hey', 'coucou', 
+                            'comment ça va', 'ça va', 'comment allez-vous', 'comment vas-tu',
+                            'qui es-tu', 'qui êtes-vous', 'aide-moi', 'aide moi', 'help']
+    
+    # Si c'est juste une salutation ou question simple, ne pas déclencher les outils
+    if message_lower in greetings_and_simple or any(greeting in message_lower for greeting in greetings_and_simple if len(message_lower.split()) <= 3):
+        return (None, None, None, None, None, None)
+    
+    # Détecter les recherches automatiques (nom, prénom) seulement si pas de mots-clés de liste
+    if not any(kw in message_lower for kw in action_keywords) and not any(kw in message_lower for kw in list_keywords):
+        # Si c'est un message court (probablement un nom, prénom, ou autre info de recherche)
+        # Mais exclure les salutations
+        words = message_lower.split()
+        if len(words) <= 5 and not any(word.isdigit() and len(word) > 3 for word in words):
+            # Vérifier que ce n'est pas une salutation
+            if not any(greeting in message_lower for greeting in greetings_and_simple):
+                # Probablement une recherche par nom/prénom ou autre info
+                return ('search', message.strip(), role_filter, active_filter, None, None)
+    
+    return (None, None, None, None, None, None)
+
+
 def _edubot_core_answer(user_message: str, system_prompt: str):
     """
     Fonction interne qui envoie la requête à l'API IA et renvoie (reply, error, status_code)
     """
     api_key = getattr(settings, "EDUBOT_API_KEY", "")
     api_base = getattr(settings, "EDUBOT_API_BASE", "https://api.openai.com/v1")
-    model = getattr(settings, "EDUBOT_MODEL", "gpt-4.1-mini")
+    model = getattr(settings, "EDUBOT_MODEL", "gpt-3.5-turbo")
 
     if not api_key:
         return None, "Clé API EduBot non configurée", 500
@@ -317,21 +679,12 @@ def _edubot_core_answer(user_message: str, system_prompt: str):
         )
         # Gérer explicitement certains codes d'erreur HTTP courants
         if resp.status_code == 401:
-            return JsonResponse(
-                {"error": "EduBot n'est pas autorisé (401). Vérifiez la clé API ou le compte."},
-                status=502,
-            )
+            return None, "EduBot n'est pas autorisé (401). Vérifiez la clé API ou le compte.", 502
         if resp.status_code == 402:
             # Cas actuel : Payment Required sur OpenRouter
-            return JsonResponse(
-                {"error": "EduBot n'est pas disponible : crédit ou facturation requis sur l'API (402 Payment Required)."},
-                status=502,
-            )
+            return None, "EduBot n'est pas disponible : crédit ou facturation requis sur l'API (402 Payment Required).", 502
         if resp.status_code == 429:
-            return JsonResponse(
-                {"error": "EduBot a atteint la limite de requêtes (429). Réessayez plus tard."},
-                status=502,
-            )
+            return None, "EduBot a atteint la limite de requêtes (429). Réessayez plus tard.", 502
         resp.raise_for_status()
         data = resp.json()
         reply = data["choices"][0]["message"]["content"]
@@ -350,6 +703,7 @@ def edubot_chat(request):
     """
     Endpoint pour le chatbot EduBot réservé au backoffice (admins).
     Nécessite d'être connecté.
+    Supporte les outils de recherche et liste des utilisateurs.
     """
     try:
         payload = json.loads(request.body.decode("utf-8"))
@@ -360,10 +714,223 @@ def edubot_chat(request):
     if not user_message:
         return JsonResponse({"error": "Message vide"}, status=400)
 
+    # Détecter l'intention concernant les utilisateurs
+    try:
+        intent_result = _detect_user_intent(user_message)
+        intent = intent_result[0] if len(intent_result) > 0 else None
+        query = intent_result[1] if len(intent_result) > 1 else None
+        role_filter = intent_result[2] if len(intent_result) > 2 else None
+        active_filter = intent_result[3] if len(intent_result) > 3 else None
+        user_id = intent_result[4] if len(intent_result) > 4 else None
+        is_ban = intent_result[5] if len(intent_result) > 5 else None
+    except Exception as e:
+        # En cas d'erreur dans la détection, continuer avec l'IA normale
+        intent = None
+        query = None
+        role_filter = None
+        active_filter = None
+        user_id = None
+        is_ban = None
+    
+    # Gérer le changement de rôle
+    if intent == 'change_role' and user_id:
+        new_role = role_filter
+        success, message = _change_user_role(user_id, new_role)
+        if success:
+            # Recharger l'utilisateur pour afficher les nouvelles infos
+            try:
+                user = CustomUser.objects.get(id=user_id)
+                user_html = _format_user_for_display(user)
+                reply = f"""
+                <div style="margin-bottom: 12px;">
+                    <div style="color: #10b981; font-weight: 600; margin-bottom: 8px;">✅ {message}</div>
+                    <h4 style="color: #111827; margin-bottom: 12px; font-size: 1.1rem;">Utilisateur mis à jour:</h4>
+                    {user_html}
+                </div>
+                """
+                return JsonResponse({"reply": reply, "is_html": True})
+            except:
+                return JsonResponse({"reply": f"✅ {message}"})
+        else:
+            return JsonResponse({"reply": f"❌ {message}"})
+    
+    # Gérer le bannissement
+    if intent == 'ban' and user_id is not None:
+        success, message = _ban_user(user_id, is_ban)
+        if success:
+            # Recharger l'utilisateur pour afficher les nouvelles infos
+            try:
+                user = CustomUser.objects.get(id=user_id)
+                user_html = _format_user_for_display(user)
+                reply = f"""
+                <div style="margin-bottom: 12px;">
+                    <div style="color: #10b981; font-weight: 600; margin-bottom: 8px;">✅ {message}</div>
+                    <h4 style="color: #111827; margin-bottom: 12px; font-size: 1.1rem;">Utilisateur mis à jour:</h4>
+                    {user_html}
+                </div>
+                """
+                return JsonResponse({"reply": reply, "is_html": True})
+            except:
+                return JsonResponse({"reply": f"✅ {message}"})
+        else:
+            return JsonResponse({"reply": f"❌ {message}"})
+    
+    # Si c'est une demande de liste ou recherche d'utilisateurs
+    context_info = ""  # Information de contexte pour l'IA
+    
+    if intent == 'list':
+        users = _list_all_users(limit=50, role_filter=role_filter, active_filter=active_filter)
+        if users.exists():
+            users_html = "".join([_format_user_for_display(user) for user in users])
+            total_count = CustomUser.objects.count()
+            filter_text = ""
+            if role_filter:
+                filter_text += f" avec rôle {role_filter}"
+            if active_filter is not None:
+                filter_text += f" {'actifs' if active_filter else 'bannis/inactifs'}"
+            reply = f"""
+            <div style="margin-bottom: 12px;">
+                <h4 style="color: #111827; margin-bottom: 12px; font-size: 1.1rem;">
+                    📋 Liste des utilisateurs{filter_text} ({users.count()} sur {total_count} affichés)
+                </h4>
+                {users_html}
+            </div>
+            """
+            return JsonResponse({"reply": reply, "is_html": True})
+        else:
+            # Si aucun résultat, informer l'IA du contexte
+            filter_desc = ""
+            if role_filter:
+                filter_desc += f" avec le rôle {role_filter}"
+            if active_filter is not None:
+                filter_desc += f" {'actifs' if active_filter else 'bannis/inactifs'}"
+            context_info = f"L'utilisateur a demandé à lister les utilisateurs{filter_desc}, mais aucun utilisateur n'a été trouvé dans la base de données. Réponds de manière conversationnelle et propose des alternatives."
+    
+    elif intent == 'search':
+        if query or role_filter or active_filter is not None:
+            users = _search_users(query or "", limit=20, role_filter=role_filter, active_filter=active_filter)
+            if users.exists():
+                users_html = "".join([_format_user_for_display(user) for user in users])
+                filter_text = f' pour "{query}"' if query else ""
+                if role_filter:
+                    filter_text += f" avec rôle {role_filter}"
+                if active_filter is not None:
+                    filter_text += f" {'actifs' if active_filter else 'bannis/inactifs'}"
+                reply = f"""
+                <div style="margin-bottom: 12px;">
+                    <h4 style="color: #111827; margin-bottom: 12px; font-size: 1.1rem;">
+                        🔍 Résultats de recherche{filter_text} ({users.count()} résultat(s))
+                    </h4>
+                    {users_html}
+                </div>
+                """
+                return JsonResponse({"reply": reply, "is_html": True})
+            else:
+                # Si aucun résultat, informer l'IA du contexte
+                search_desc = f' pour "{query}"' if query else ""
+                if role_filter:
+                    search_desc += f" avec le rôle {role_filter}"
+                if active_filter is not None:
+                    search_desc += f" {'actifs' if active_filter else 'bannis/inactifs'}"
+                context_info = f"L'utilisateur a recherché des utilisateurs{search_desc}, mais aucun résultat n'a été trouvé. Réponds de manière conversationnelle, explique pourquoi il n'y a pas de résultats et propose des alternatives ou des suggestions."
+        else:
+            # Si recherche mais pas de query, informer l'IA
+            context_info = "L'utilisateur a mentionné une recherche mais n'a pas fourni de critère de recherche. Réponds de manière conversationnelle et demande ce qu'il souhaite rechercher."
+    
+    # Sinon, utiliser l'IA normale
+    # Construire le prompt avec le contexte si disponible
+    context_section = ""
+    if context_info:
+        context_section = f"\n\n=== CONTEXTE ACTUEL ===\n{context_info}\n\n"
+    
+    # Détecter si l'intention n'est pas claire et suggérer des actions
+    suggest_section = ""
+    if intent is None and user_message and len(user_message.split()) > 2:
+        # Si le message contient des mots liés aux actions mais pas de format clair
+        action_related_words = ['utilisateur', 'user', 'bannir', 'ban', 'débannir', 'rôle', 'role', 'admin', 
+                               'cherche', 'trouve', 'liste', 'affiche', 'modifier', 'changer']
+        message_lower_check = user_message.lower()
+        if any(word in message_lower_check for word in action_related_words):
+            suggest_section = "IMPORTANT : L'utilisateur semble vouloir faire une action mais la demande n'est pas claire. Suggère-lui les actions possibles de manière amicale et propose des exemples de commandes.\n\n"
+    
     admin_prompt = (
-        "Tu es EduBot, un assistant IA pour le dashboard admin EduLife. "
-        "Tu aides les administrateurs à gérer les utilisateurs, logements, stages, startups, etc. "
-        "Réponds de façon claire, courte et en français."
+        "Tu es EduBot, un assistant IA intelligent et conversationnel pour le dashboard admin EduLife. "
+        "Tu aides les administrateurs à gérer la plateforme, répondre à leurs questions et exécuter des actions. "
+        "Réponds de façon claire, concise, amicale, naturelle et conversationnelle en français. "
+        "Sois toujours serviable, poli et professionnel. "
+        "\n\n"
+        + context_section
+        + suggest_section
+        + "=== OUTILS DISPONIBLES POUR LES UTILISATEURS ===\n"
+        "\n"
+        "1. LISTER LES UTILISATEURS :\n"
+        "   Commandes : 'liste les utilisateurs', 'affiche tous les utilisateurs', 'montre les users'\n"
+        "   - 'liste les utilisateurs' → liste uniquement les UTILISATEUR (pas les admins)\n"
+        "   - 'liste les admins' → liste uniquement les ADMIN\n"
+        "   - 'liste les utilisateurs bannis' ou 'liste les utilisateurs actifs' → filtre par statut\n"
+        "\n"
+        "2. RECHERCHER DES UTILISATEURS :\n"
+        "   Commandes : 'cherche [critère]', 'trouve [critère]', 'recherche [critère]'\n"
+        "   - Recherche par email : tapez directement l'email (ex: 'jean@example.com')\n"
+        "   - Recherche par téléphone : tapez directement le numéro (ex: '0612345678')\n"
+        "   - Recherche par nom/prénom : tapez directement le nom (ex: 'Jean Dupont')\n"
+        "   - Recherche avancée : 'cherche les admins à Paris', 'trouve les utilisateurs bannis'\n"
+        "   La recherche fonctionne sur : nom, prénom, email, téléphone, ville, pays, adresse, titre professionnel, bio, localisation.\n"
+        "\n"
+        "3. MODIFIER LE RÔLE D'UN UTILISATEUR :\n"
+        "   Formats acceptés : 'changer le rôle de l'utilisateur [ID] en admin', 'mettre l'utilisateur [ID] en utilisateur'\n"
+        "   Exemples : 'changer le rôle de l'utilisateur 5 en admin', 'promouvoir l'utilisateur 10'\n"
+        "\n"
+        "4. BANNIR/DÉBANNIR UN UTILISATEUR :\n"
+        "   Formats acceptés pour BANNIR : 'bannir l'utilisateur [ID]', 'ban l'utilisateur [ID]', 'bloquer l'utilisateur [ID]', 'suspendre l'utilisateur [ID]', 'désactiver l'utilisateur [ID]'\n"
+        "   Formats acceptés pour DÉBANNIR (beaucoup de variantes) :\n"
+        "   - 'débannir l'utilisateur [ID]' ou 'debannir l'utilisateur [ID]'\n"
+        "   - 'débloquer l'utilisateur [ID]' ou 'débloquer le compte [ID]'\n"
+        "   - 'réactiver l'utilisateur [ID]' ou 'reactiver l'utilisateur [ID]'\n"
+        "   - 'activer l'utilisateur [ID]' ou 'activer le compte [ID]'\n"
+        "   - 'restaurer l'utilisateur [ID]' ou 'restaurer le compte [ID]'\n"
+        "   - 'réhabiliter l'utilisateur [ID]' ou 'rehabiliter l'utilisateur [ID]'\n"
+        "   - 'rétablir l'utilisateur [ID]' ou 'retablir l'utilisateur [ID]'\n"
+        "   - 'remettre en service l'utilisateur [ID]' ou 'remettre actif l'utilisateur [ID]'\n"
+        "   - 'rendre actif l'utilisateur [ID]' ou 'rendre disponible l'utilisateur [ID]'\n"
+        "   Exemples : 'bannir l'utilisateur 5', 'débannir l'utilisateur 10', 'débloquer l'utilisateur 15', 'réactiver le compte 20'\n"
+        "\n"
+        "=== INFORMATIONS SUR LA PLATEFORME ===\n"
+        "\n"
+        "RÔLES :\n"
+        "- UTILISATEUR : Rôle par défaut, accès standard à la plateforme (logements, stages, startups, covoiturage, événements).\n"
+        "- ADMIN : Rôle administrateur, accès au backoffice pour gérer les utilisateurs, logements, stages, startups, etc.\n"
+        "\n"
+        "FONCTIONNALITÉS DE LA PLATEFORME :\n"
+        "- Logements : Recherche et réservation de logements étudiants\n"
+        "- Stages : Offres de stage et postulations\n"
+        "- Startups : Création et gestion de startups, investissements\n"
+        "- Covoiturage : Partage de trajets entre utilisateurs\n"
+        "- Événements : Organisation et participation à des événements\n"
+        "- Réseau social : Connexions, posts, messages entre utilisateurs\n"
+        "\n"
+        "=== GUIDE D'UTILISATION ===\n"
+        "\n"
+        "QUAND L'UTILISATEUR DEMANDE :\n"
+        "- À voir/lister des utilisateurs → Utilise les commandes de liste\n"
+        "- À rechercher un utilisateur → Utilise les commandes de recherche ou recherche directe\n"
+        "- À modifier un rôle → Exécute la commande avec l'ID de l'utilisateur\n"
+        "- À bannir/débannir → Exécute la commande avec l'ID de l'utilisateur\n"
+        "- Des questions générales → Réponds avec tes connaissances sur la plateforme\n"
+        "- Comment faire quelque chose → Guide l'utilisateur étape par étape\n"
+        "- Des informations sur les fonctionnalités → Explique clairement\n"
+        "\n"
+        "SOIS PROACTIF ET UTILE :\n"
+        "- Si l'utilisateur dit 'je veux bannir Jean', cherche d'abord Jean, puis exécute la commande\n"
+        "- Si l'utilisateur pose une question, réponds de manière complète et utile\n"
+        "- Si l'utilisateur demande de l'aide, propose des solutions concrètes\n"
+        "- Reste toujours poli, professionnel et serviable\n"
+        "\n"
+        "RÉPONDS À TOUTES LES QUESTIONS :\n"
+        "- Questions sur les rôles, fonctionnalités, utilisateurs, logements, stages, startups, etc.\n"
+        "- Questions sur comment utiliser la plateforme\n"
+        "- Questions générales sur EduLife\n"
+        "- Toute autre question pertinente\n"
     )
     reply, error, status = _edubot_core_answer(user_message, admin_prompt)
     if error:
@@ -389,8 +956,107 @@ def edubot_public_chat(request):
         return JsonResponse({"error": "Message vide"}, status=400)
 
     public_prompt = (
-        "Tu es EduBot, l'assistant IA d'EduLife pour les étudiants et utilisateurs du site. "
-        "Réponds simplement, clairement et en français, sans parler de dashboard ou de backoffice."
+        "Tu es EduBot, l'assistant IA intelligent et conversationnel d'EduLife, une plateforme complète pour les étudiants. "
+        "Réponds de façon claire, amicale, naturelle et conversationnelle en français. "
+        "Sois toujours serviable, poli et professionnel. "
+        "\n\n"
+        "=== INFORMATIONS COMPLÈTES SUR LE SITE EDULIFE ===\n"
+        "\n"
+        "EduLife est une plateforme complète qui offre plusieurs services aux étudiants :\n"
+        "\n"
+        "1. LOGEMENTS (/Logement/) :\n"
+        "   - Recherche et réservation de logements étudiants\n"
+        "   - Colocation et recherche de binôme\n"
+        "   - Marketplace de logements avec filtres avancés\n"
+        "   - Prédiction de prix avec IA basée sur la localisation, surface, nombre de pièces\n"
+        "   - Publication d'annonces de logements\n"
+        "   - Gestion des réservations\n"
+        "\n"
+        "2. STAGES (/internships/ ou /dashboard/internship/) :\n"
+        "   - Consultation des offres de stage\n"
+        "   - Postulations et candidatures\n"
+        "   - Suivi des entretiens avec calendrier\n"
+        "   - Génération de CV avec IA\n"
+        "   - Gestion des favoris\n"
+        "\n"
+        "3. STARTUPS (/startup/) :\n"
+        "   - Création et gestion de startups\n"
+        "   - Recherche d'investissements\n"
+        "   - Recherche de membres pour rejoindre une startup\n"
+        "   - Génération de logos avec IA\n"
+        "   - Validation et approbation des startups par les admins\n"
+        "\n"
+        "4. ÉVÉNEMENTS (/Event/) :\n"
+        "   - Organisation et participation à des événements\n"
+        "   - Réservation de places\n"
+        "   - Calendrier des événements\n"
+        "   - Création d'événements\n"
+        "\n"
+        "5. COVOITURAGE (/covoiturage/) :\n"
+        "   - Partage de trajets entre étudiants\n"
+        "   - Offres et demandes de covoiturage\n"
+        "   - Réservations de places\n"
+        "   - Gestion des trajets\n"
+        "\n"
+        "6. RÉSEAU SOCIAL :\n"
+        "   - Fil d'actualité avec posts et commentaires\n"
+        "   - Connexions et amis\n"
+        "   - Messages privés entre utilisateurs\n"
+        "   - Notifications en temps réel\n"
+        "   - Profils utilisateurs avec avatars\n"
+        "\n"
+        "=== COMMENT GUIDER LES UTILISATEURS ===\n"
+        "\n"
+        "QUAND L'UTILISATEUR DEMANDE :\n"
+        "- À accéder à une fonctionnalité → Donne des instructions étape par étape pour y accéder\n"
+        "- Comment utiliser une fonctionnalité → Explique le processus complet avec des étapes numérotées\n"
+        "- Des informations sur une fonctionnalité → Décris en détail ce qu'elle fait et comment l'utiliser\n"
+        "- À créer un compte → Explique comment s'inscrire (bouton Inscription/Connexion en haut)\n"
+        "- À se connecter → Explique comment se connecter (bouton Connexion en haut)\n"
+        "\n"
+        "EXEMPLES DE GUIDES ÉTAPE PAR ÉTAPE :\n"
+        "- Pour chercher un logement :\n"
+        "  1. Clique sur 'Logements' dans le menu de navigation\n"
+        "  2. Utilise les filtres (ville, prix, type, etc.)\n"
+        "  3. Clique sur un logement pour voir les détails\n"
+        "  4. Clique sur 'Réserver' si tu es connecté\n"
+        "\n"
+        "- Pour postuler à un stage :\n"
+        "  1. Va dans la section 'Stages' ou 'Internship'\n"
+        "  2. Parcours les offres disponibles\n"
+        "  3. Clique sur une offre pour voir les détails\n"
+        "  4. Clique sur 'Postuler' et remplis le formulaire\n"
+        "\n"
+        "- Pour créer une startup :\n"
+        "  1. Va dans la section 'Startup'\n"
+        "  2. Clique sur 'Créer une startup'\n"
+        "  3. Remplis le formulaire avec les informations\n"
+        "  4. Soumets pour validation par les admins\n"
+        "\n"
+        "=== QUESTIONS DE SUGGESTION ===\n"
+        "\n"
+        "Si l'utilisateur ne sait pas quoi demander, suggère-lui des questions utiles comme :\n"
+        "- 'Comment chercher un logement ?'\n"
+        "- 'Comment postuler à un stage ?'\n"
+        "- 'Comment créer une startup ?'\n"
+        "- 'Qu'est-ce qu'EduLife ?'\n"
+        "- 'Comment fonctionne le covoiturage ?'\n"
+        "- 'Comment créer un événement ?'\n"
+        "- 'Comment utiliser le réseau social ?'\n"
+        "\n"
+        "SOIS PROACTIF ET UTILE :\n"
+        "- Si l'utilisateur demande 'je veux chercher un logement', guide-le étape par étape\n"
+        "- Si l'utilisateur pose une question, réponds de manière complète avec des instructions détaillées\n"
+        "- Si l'utilisateur demande de l'aide, propose des solutions concrètes avec des étapes\n"
+        "- Reste toujours amical, naturel et conversationnel\n"
+        "- Donne toujours des instructions claires et numérotées quand c'est pertinent\n"
+        "\n"
+        "RÉPONDS À TOUTES LES QUESTIONS :\n"
+        "- Questions sur les fonctionnalités (logements, stages, startups, événements, covoiturage)\n"
+        "- Questions sur comment utiliser la plateforme\n"
+        "- Questions générales sur EduLife\n"
+        "- Salutations et conversations courantes\n"
+        "- Toute autre question pertinente\n"
     )
     reply, error, status = _edubot_core_answer(user_message, public_prompt)
     if error:

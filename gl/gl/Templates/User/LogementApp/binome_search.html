@@ -501,7 +501,7 @@
                 </div>
                 <div class="binome-request-info-item binome-request-budget">
                   <i class="bi bi-cash-stack"></i>
-                  <span>{{ request.budget_max|floatformat:0 }} DZD/mois</span>
+                  <span>{{ request.budget_max|floatformat:0 }} DT/mois</span>
                 </div>
                 {% if request.logement %}
                   <div class="binome-request-info-item">
@@ -562,7 +562,7 @@
                   </div>
                   <div class="binome-request-info-item binome-request-budget">
                     <i class="bi bi-cash-stack"></i>
-                    <span>{{ request.budget_max|floatformat:0 }} DZD/mois</span>
+                    <span>{{ request.budget_max|floatformat:0 }} DT/mois</span>
                   </div>
                   <div class="binome-request-info-item">
                     <span class="badge badge-sm bg-gradient-{% if request.status == 'PENDING' %}warning{% elif request.status == 'ACCEPTED' %}success{% elif request.status == 'REJECTED' %}danger{% else %}info{% endif %}" style="border-radius:12px;">

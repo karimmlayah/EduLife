@@ -410,7 +410,7 @@
           {% endif %}
           <div class="logement-messages-header-info">
             <h3>{{ logement.title }}</h3>
-            <p>{{ logement.address }}, {{ logement.city }} • {{ logement.price|floatformat:0 }} DZD</p>
+            <p>{{ logement.address }}, {{ logement.city }} • {{ logement.price|floatformat:0 }} DT</p>
              {% if other_user %}
                <p style="margin: 0.25rem 0 0 0; color: #6b7280; font-size: 0.9rem;">
                  Conversation avec: <strong>{{ other_user.get_full_name|default:other_user.username }}</strong>

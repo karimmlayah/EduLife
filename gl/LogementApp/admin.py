@@ -27,7 +27,7 @@ class LogementAdmin(admin.ModelAdmin):
             'fields': ('price', 'surface', 'rooms', 'bathrooms')
         }),
         ('Médias', {
-            'fields': ('image', 'model_3d')
+            'fields': ('image', 'video', 'model_3d')
         }),
         ('Statut', {
             'fields': ('available', 'approved')

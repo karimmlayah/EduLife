@@ -460,7 +460,7 @@
               {{ logement.address }}, {{ logement.city }}
             </div>
             <div class="logement-card-info">
-              <div class="logement-card-price">{{ logement.price|floatformat:0 }} DZD</div>
+              <div class="logement-card-price">{{ logement.price|floatformat:0 }} DT</div>
               <div class="logement-card-details">
                 <span><i class="bi bi-rulers"></i> {{ logement.surface }} m²</span>
                 <span><i class="bi bi-door-open"></i> {{ logement.rooms }} pièces</span>
@@ -493,5 +493,107 @@
       {% endif %}
     </div>
   </section>
+
+  <!-- Script pour convertir les messages Django en toast notifications -->
+  <script>
+    (function() {
+      let messagesDisplayed = false;
+      
+      function displayDjangoMessages() {
+        if (messagesDisplayed) return;
+        messagesDisplayed = true;
+        
+        {% if messages %}
+        {% for message in messages %}
+        (function() {
+          const msgText = '{{ message|escapejs }}';
+          const msgLevel = '{{ message.tags|default:"info" }}';
+          let toastType = 'info';
+          
+          if (msgLevel === 'error' || msgLevel === 'danger') {
+            toastType = 'error';
+          } else if (msgLevel === 'warning') {
+            toastType = 'warning';
+          } else if (msgLevel === 'success') {
+            toastType = 'success';
+          }
+          
+          // Fonction pour créer le toast
+          function createToast(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+              const newContainer = document.createElement('div');
+              newContainer.id = 'toast-container';
+              newContainer.className = 'toast-container';
+              document.body.appendChild(newContainer);
+              return createToast(message, type);
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification ' + type;
+            
+            const iconMap = {
+              'success': '<i class="fas fa-check-circle toast-icon"></i>',
+              'error': '<i class="fas fa-times-circle toast-icon"></i>',
+              'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+              'info': '<i class="fas fa-info-circle toast-icon"></i>'
+            };
+            
+            const icon = iconMap[type] || iconMap['info'];
+            
+            toast.innerHTML = `
+              ${icon}
+              <span class="toast-content">${message}</span>
+              <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(function() {
+              toast.classList.add('hiding');
+              setTimeout(function() {
+                if (toast.parentElement) {
+                  toast.remove();
+                }
+              }, 300);
+            }, 6000); // 6 secondes pour les messages de succès
+          }
+          
+          // Utiliser showToast si disponible, sinon créer directement
+          if (typeof window.showToast !== 'undefined') {
+            window.showToast(msgText, toastType);
+          } else {
+            createToast(msgText, toastType);
+          }
+        })();
+        {% endfor %}
+        {% endif %}
+      }
+      
+      // Exécuter après le chargement - plusieurs tentatives pour s'assurer que ça fonctionne
+      function tryDisplayMessages() {
+        if (document.getElementById('toast-container') || document.querySelector('.toast-container')) {
+          displayDjangoMessages();
+        } else {
+          // Attendre un peu plus si le container n'existe pas encore
+          setTimeout(tryDisplayMessages, 100);
+        }
+      }
+      
+      // Essayer immédiatement si la page est déjà chargée
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(tryDisplayMessages, 300);
+        setTimeout(tryDisplayMessages, 800);
+      } else {
+        window.addEventListener('DOMContentLoaded', function() {
+          setTimeout(tryDisplayMessages, 300);
+          setTimeout(tryDisplayMessages, 800);
+        });
+        window.addEventListener('load', function() {
+          setTimeout(tryDisplayMessages, 300);
+        });
+      }
+    })();
+  </script>
 {% endblock %}
 

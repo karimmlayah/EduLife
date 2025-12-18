@@ -1,8 +1,30 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+import os
+import uuid
 
 User = get_user_model()
+
+
+def video_upload_to(instance, filename):
+    """
+    Génère un nom de fichier court pour les vidéos (max 100 caractères)
+    Format: logements/videos/{hash}.{ext}
+    Le chemin complet sera: logements/videos/ + 8 caractères + . + extension (max 4) = ~25 caractères
+    """
+    # Obtenir l'extension du fichier (limiter à 4 caractères pour sécurité)
+    ext = filename.split('.')[-1].lower()[:4] if '.' in filename else 'mp4'
+    
+    # Générer un nom de fichier unique et court avec UUID
+    # Utiliser seulement les 8 premiers caractères pour garder le nom court
+    hash_str = str(uuid.uuid4()).replace('-', '')[:16]
+    
+    # Format: logements/videos/{hash}.{ext}
+    # Le chemin complet sera: logements/videos/ (20) + 16 (hash) + 1 (.) + 4 (ext) = 41 caractères max
+    filename = f"{hash_str}.{ext}"
+    
+    return os.path.join('logements', 'videos', filename)
 
 # Create your models here.
 class Logement(models.Model):
@@ -78,12 +100,13 @@ class Logement(models.Model):
         default=False,
         verbose_name="WiFi disponible"
     )
-    video = models.URLField(
-        max_length=500,
+    video = models.FileField(
+        upload_to=video_upload_to,
         blank=True,
         null=True,
-        verbose_name="Vidéo (URL optionnelle)",
-        help_text="Lien vers une vidéo YouTube, Vimeo, etc."
+        max_length=100,
+        verbose_name="Vidéo (fichier optionnel)",
+        help_text="Fichier vidéo (MP4, WebM, OGG, etc.)"
     )
     latitude = models.DecimalField(
         max_digits=9,
@@ -129,6 +152,34 @@ class Logement(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.city}"
+
+
+class TemporaryImage(models.Model):
+    """
+    Modèle pour stocker temporairement les images pendant la création avec IA
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='temporary_images',
+        verbose_name="Utilisateur"
+    )
+    image = models.ImageField(
+        upload_to='logements/temp/',
+        verbose_name="Image temporaire"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date de création"
+    )
+    
+    class Meta:
+        verbose_name = "Image temporaire"
+        verbose_name_plural = "Images temporaires"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Image temporaire de {self.user.username}"
 
 
 class LogementImage(models.Model):
@@ -200,7 +251,7 @@ class BinomeRequest(models.Model):
     budget_max = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        verbose_name="Budget maximum (DZD)",
+        verbose_name="Budget maximum (DT)",
         help_text="Budget maximum par mois"
     )
     status = models.CharField(

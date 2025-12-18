@@ -261,7 +261,7 @@
         <div class="binome-info">
           <h3>{{ binome_request.title }}</h3>
           <p><i class="bi bi-geo-alt"></i> {{ binome_request.city }}</p>
-          <p><i class="bi bi-cash-stack"></i> Budget maximum : {{ binome_request.budget_max|floatformat:0 }} DZD/mois</p>
+          <p><i class="bi bi-cash-stack"></i> Budget maximum : {{ binome_request.budget_max|floatformat:0 }} DT/mois</p>
           {% if binome_request.logement %}
             <p><i class="bi bi-house"></i> Logement spécifique : {{ binome_request.logement.title }}</p>
           {% endif %}

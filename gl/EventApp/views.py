@@ -15,6 +15,11 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.db.models import F
+import re
+import tempfile
+import os
+import whisper
+
 
 # Décorateur pour vérifier si l'utilisateur est superuser ou admin
 def is_superuser_or_admin(user):
@@ -149,11 +154,8 @@ def dashboard(request):
                     # Gestion de l'URL photo (accepte data URI sans limite stricte)
                     photo_url = request.POST.get("photo_url", "").strip()
                     event.photo_url = photo_url
-                    # Gestion des coordonnées (gérer le cas où 'None' est envoyé comme chaîne)
-                    latitude_str = request.POST.get("latitude", "").strip()
-                    longitude_str = request.POST.get("longitude", "").strip()
-                    event.latitude = float(latitude_str) if latitude_str and latitude_str.lower() != 'none' else None
-                    event.longitude = float(longitude_str) if longitude_str and longitude_str.lower() != 'none' else None
+                    event.latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
+                    event.longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
                     # Validation personnalisée sans la validation d'URL par défaut
                     if event.photo_url:
                         if (not event.photo_url.startswith('http://') and 
@@ -186,11 +188,8 @@ def dashboard(request):
         location = request.POST.get("location", "").strip()
         total_seats = request.POST.get("total_seats")
         photo_url = request.POST.get("photo_url", "").strip()
-        # Gestion des coordonnées (gérer le cas où 'None' est envoyé comme chaîne)
-        latitude_str = request.POST.get("latitude", "").strip()
-        longitude_str = request.POST.get("longitude", "").strip()
-        latitude = float(latitude_str) if latitude_str and latitude_str.lower() != 'none' else None
-        longitude = float(longitude_str) if longitude_str and longitude_str.lower() != 'none' else None
+        latitude = float(request.POST.get("latitude")) if request.POST.get("latitude") else None
+        longitude = float(request.POST.get("longitude")) if request.POST.get("longitude") else None
 
         # Conversion des types
         try:
@@ -288,8 +287,6 @@ def seats_list(request):
 
 
     return redirect("dashboard")
-
-@login_required(login_url='/login/')
 def reserve_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     seats = event.seats.all().order_by('number')
@@ -433,4 +430,252 @@ def liberer_place(request, seat_id):
 
     # Si la chaise n'était pas réservée, rien à décrémenter
     return JsonResponse({"success": False, "message": "La chaise n'était pas réservée."})
- 
+import re  # tout en haut du fichier, si pas déjà importé
+from django.shortcuts import render
+from django.contrib import messages
+
+# ... tes autres imports et tes autres vues ...
+# ====================
+# 1. TRANSCRIPTION VOCALE
+# ====================
+import difflib
+# Charger le modèle Whisper une seule fois
+whisper_model = whisper.load_model("base")
+
+def speech_to_text(audio_file):
+    """Convertit un fichier audio en texte avec Whisper"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+        for chunk in audio_file.chunks():
+            tmp.write(chunk)
+        tmp_path = tmp.name
+
+    try:
+        result = whisper_model.transcribe(tmp_path, language="fr")
+        transcribed_text = result["text"]
+    except Exception as e:
+        transcribed_text = f"Erreur de transcription: {str(e)}"
+    finally:
+        os.remove(tmp_path)
+    
+    return transcribed_text
+
+# ====================
+# 2. EXTRACTION DES INFORMATIONS
+# ====================
+
+def extract_reservation_info(text):
+    """Extrait le nom de l'événement et les numéros de place d'un texte"""
+    text = text.lower().strip()
+    
+    # Extraire tous les numéros écrits en chiffres
+    seats = re.findall(r"\b\d+\b", text)
+    
+    # Détection du nom d'événement
+    event_name = None
+    
+    # Différents patterns pour trouver le nom d'événement
+    patterns = [
+        r"(?:de\s+l['’]événement|événement|event)\s+([^.?!,;:]+)",  # "de l'événement [nom]"
+        r"du\s+([^.?!,;:]+)",      # "du [nom]"
+        r"de\s+([^.?!,;:]+)",      # "de [nom]"
+        r"pour\s+([^.?!,;:]+)",    # "pour [nom]"
+        r"dans\s+([^.?!,;:]+)",    # "dans [nom]"
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            event_name = match.group(1).strip()
+            break
+    
+    # Nettoyage du nom d'événement
+    if event_name:
+        # Enlever les articles et mots parasites
+        stop_words = ["l'", "la", "le", "les", "un", "une", "des", "du", "de", "d'"]
+        for word in stop_words:
+            if event_name.startswith(word):
+                event_name = event_name[len(word):].strip()
+        
+        # Enlever la ponctuation
+        event_name = re.sub(r'[^\w\s]', '', event_name)
+        event_name = event_name.strip()
+        
+        # Capitaliser
+        if event_name:
+            event_name = event_name.title()
+    
+    return {
+        "event_name": event_name,
+        "seats": seats
+    }
+
+# ====================
+# 3. RECHERCHE APPROXIMATIVE
+# ====================
+
+def calculate_similarity(str1, str2):
+    """Calcule la similarité entre deux chaînes (0.0 à 1.0)"""
+    return difflib.SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
+
+def find_best_event_match(search_term, threshold=0.6):
+    """Trouve le meilleur événement correspondant avec recherche approximative"""
+    if not search_term:
+        return None
+    
+    all_events = Event.objects.all()
+    event_names = [event.name.lower() for event in all_events]
+    
+    # Chercher la meilleure correspondance
+    matches = difflib.get_close_matches(search_term.lower(), event_names, n=1, cutoff=threshold)
+    
+    if matches:
+        best_match_name = matches[0]
+        for event in all_events:
+            if event.name.lower() == best_match_name:
+                return event
+    
+    return None
+
+def find_event_by_variations(event_name):
+    """Cherche un événement avec différentes variations du nom"""
+    if not event_name:
+        return None
+    
+    # Variations courantes pour "marathons"
+    if "marat" in event_name.lower():
+        variations = ["marathons", "marathon", "marathan", "maratan"]
+        for variation in variations:
+            try:
+                event = Event.objects.get(name__iexact=variation)
+                return event
+            except Event.DoesNotExist:
+                events_with_variation = Event.objects.filter(name__icontains=variation)
+                if events_with_variation.exists():
+                    return events_with_variation.first()
+    return None
+
+# ====================
+# 4. VUE PRINCIPALE DE RÉSERVATION VOCALE
+# ====================
+
+def agent_reservation_view(request):
+    """Vue principale pour la réservation vocale"""
+    report = None
+    transcribed_text = None
+    
+    if request.method == "POST":
+        # Récupérer l'audio ou le texte
+        audio_file = request.FILES.get("audio")
+        sentence = request.POST.get("sentence", "").strip()
+        
+        # Si audio fourni, le transcrire
+        if audio_file:
+            transcribed_text = speech_to_text(audio_file)
+            sentence = transcribed_text
+        
+        # Vérifier qu'on a du texte à analyser
+        if not sentence:
+            messages.error(request, "Veuillez parler ou écrire une phrase.")
+            return render(request, "Fontoffice/agent_reservation.html", {"report": None})
+        
+        # Extraire les informations
+        info = extract_reservation_info(sentence)
+        event_name = info["event_name"]
+        seat_numbers_str = info["seats"]
+        
+        # Vérifier qu'on a des numéros de place
+        if not seat_numbers_str:
+            report = f"Je n'ai pas compris les numéros de places.\n🎤 Texte analysé: '{sentence}'"
+            return render(request, "Fontoffice/agent_reservation.html", {"report": report})
+        
+        # ===== RECHERCHE DE L'ÉVÉNEMENT =====
+        event = None
+        
+        # 1. Recherche exacte
+        if event_name:
+            try:
+                event = Event.objects.get(name__iexact=event_name)
+            except Event.DoesNotExist:
+                # 2. Recherche partielle
+                possible_events = Event.objects.filter(name__icontains=event_name)
+                if possible_events.count() == 1:
+                    event = possible_events.first()
+                elif possible_events.count() > 1:
+                    event = possible_events.first()
+        
+        # 3. Recherche approximative
+        if not event and event_name:
+            event = find_best_event_match(event_name, threshold=0.6)
+        
+        # 4. Recherche par variations (ex: "maratant" -> "marathons")
+        if not event and event_name:
+            event = find_event_by_variations(event_name)
+        
+        # 5. Si toujours pas trouvé
+        if not event:
+            all_events = Event.objects.all()[:10]
+            event_list = [f"• {e.name}" for e in all_events]
+            
+            report = (
+                f"Je n'ai pas trouvé d'événement pour : '{event_name}'\n\n"
+                f"🎤 Texte original: '{sentence}'\n\n"
+                f"📅 Événements disponibles:\n" + "\n".join(event_list) + "\n\n"
+                f"💡 Essayez de dire le nom exact de l'événement comme ci-dessus."
+            )
+            return render(request, "Fontoffice/agent_reservation.html", {"report": report})
+        
+        # ===== VÉRIFICATION DES PLACES =====
+        seats_int = [int(x) for x in seat_numbers_str]
+        
+        # Vérifier si les places existent
+        hors_limite = [s for s in seats_int if s < 1 or s > event.total_seats]
+        if hors_limite:
+            report = f"Les places suivantes n'existent pas (1-{event.total_seats}) : {hors_limite}"
+            return render(request, "Fontoffice/agent_reservation.html", {"report": report})
+        
+        # Vérifier si les places sont déjà réservées
+        taken_seats = set(
+            Seat.objects.filter(
+                event=event,
+                status=Seat.Status.RESERVED
+            ).values_list("number", flat=True)
+        )
+        
+        deja_prises = [s for s in seats_int if s in taken_seats]
+        if deja_prises:
+            report = f"Les places suivantes sont déjà réservées : {deja_prises}"
+            return render(request, "Fontoffice/agent_reservation.html", {"report": report})
+        
+        # ===== EFFECTUER LA RÉSERVATION =====
+        STATIC_USER_ID = request.user.id
+        reserved_seats = []
+        
+        for s in seats_int:
+            seat = Seat.objects.get(event=event, number=s)
+            seat.status = Seat.Status.RESERVED
+            seat.id_user = STATIC_USER_ID
+            seat.save(update_fields=["status", "id_user"])
+            reserved_seats.append(s)
+        
+        # Mettre à jour le compteur de places réservées
+        Event.objects.filter(id=event.id).update(
+            reserved_seats=F("reserved_seats") + len(seats_int)
+        )
+        
+        # Calculer le prix total
+        total_price = len(seats_int) * float(event.price)
+        
+        # Préparer le rapport de confirmation
+        report = (
+            f"✅ RÉSERVATION CONFIRMÉE\n\n"
+            f"🎤 Texte compris : {sentence}\n"
+            f"🔍 Recherche originale : '{event_name}'\n"
+            f"🎟️ Événement trouvé : {event.name}\n"
+            f"✅ Places réservées : {reserved_seats}\n"
+            f"💰 Prix unitaire : {event.price} DT\n"
+            f"💳 Total : {total_price:.2f} DT"
+        )
+    
+    return render(request, "Fontoffice/agent_reservation.html", {
+        "report": report
+    })

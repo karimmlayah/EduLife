@@ -144,3 +144,53 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [BASE_DIR / 'gl' / 'static']
+
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom User Model
+AUTH_USER_MODEL = 'UserApp.CustomUser'
+
+# Auth redirects
+LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# Email Configuration
+EMAIL_BACKEND = 'offreStage.email_backend.CustomEmailBackend' #
+EMAIL_HOST = 'smtp.gmail.com'  # Pour Gmail, changez selon votre fournisseur
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'karimmlayah14@gmail.com'  # Remplacez par votre email
+EMAIL_HOST_PASSWORD = 'mooz ozdw jhzr jszp'  # Remplacez par votre mot de passe d'application
+DEFAULT_FROM_EMAIL = 'karimmlayah14@gmail.com'  # Remplacez par votre email
+
+MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiaGFvYXVzMDEiLCJhIjoiY21hOHhqcGttMWJ5NjJtczg3eGJxazM0MiJ9.lm0YeqM7TkpDT4r6_Pf6aw'
+
+# 🔹 Dossier où Django cherchera les fichiers CSS, JS, images
+STATICFILES_DIRS = [
+    BASE_DIR / 'gl' / 'static',
+]
+
+# -----------------------
+# FICHIERS MEDIA (upload utilisateurs)
+# -----------------------
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ============================================
+# UTILISATEUR STATIQUE POUR TESTS (SANS AUTH)
+# ============================================
+# Changez cette valeur pour utiliser un autre utilisateur
+# Par défaut: ID 1 (admin)
+STATIC_USER_ID = 1 # Changez ce nombre pour utiliser un autre utilisateur

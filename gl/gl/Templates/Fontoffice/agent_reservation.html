@@ -1,0 +1,191 @@
+{% extends 'Fontoffice/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white py-4 rounded-top-4">
+          <h2 class="mb-0 text-center">Agent IA – Réservation vocale</h2>
+          <p class="text-center mb-0 opacity-75">Utilisez votre voix pour effectuer des réservations</p>
+        </div>
+        
+        <div class="card-body p-5">
+          <!-- Enregistrement vocal -->
+          <div class="text-center mb-5">
+            <button type="button" onclick="startRecording()" class="btn btn-primary btn-lg px-5 py-3 rounded-pill">
+              <i class="bi bi-mic me-2"></i> 🎤 Parler (5 secondes)
+            </button>
+            <p class="text-muted mt-3">Cliquez et parlez pendant 5 secondes pour enregistrer votre demande</p>
+          </div>
+
+          <!-- Formulaire d'envoi -->
+          <form method="post" action="{% url 'agent_reservation' %}" enctype="multipart/form-data" class="text-center">
+            {% csrf_token %}
+            
+            <!-- Champ caché pour envoyer l'audio -->
+            <input type="file" name="audio" id="audioInput" hidden>
+            
+            <div class="alert alert-info mb-4">
+              <h5><i class="bi bi-info-circle me-2"></i> Comment ça marche ?</h5>
+              <ol class="mb-0 text-start">
+                <li>Cliquez sur "Parler" et donnez votre commande vocale (ex: "Je veux réserver 2 places pour l'événement du 15 mars")</li>
+                <li>Attendez la fin de l'enregistrement (5 secondes)</li>
+                <li>Cliquez sur "Envoyer le vocal" pour traiter votre demande</li>
+              </ol>
+            </div>
+            
+            <button type="submit" class="btn btn-success btn-lg px-5 py-3 rounded-pill">
+              <i class="bi bi-send me-2"></i> 📤 Envoyer le vocal
+            </button>
+          </form>
+
+          <!-- Résultats de transcription -->
+          {% if transcribed_text %}
+          <div class="mt-5">
+            <div class="alert alert-info">
+              <h5><i class="bi bi-text-paragraph me-2"></i> Texte transcrit :</h5>
+              <p class="mb-0 fs-5">{{ transcribed_text }}</p>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Rapport de traitement -->
+          {% if report %}
+          <div class="mt-4">
+            <div class="alert alert-{% if 'Erreur' in report or 'non trouvé' in report %}danger{% else %}success{% endif %}">
+              <h5><i class="bi bi-{% if 'Erreur' in report or 'non trouvé' in report %}exclamation-triangle{% else %}check-circle{% endif %} me-2"></i> Résultat :</h5>
+              <div class="mt-2">
+                {{ report|linebreaks }}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <div class="card-footer bg-light py-3 rounded-bottom-4 text-center">
+          <small class="text-muted">
+            <i class="bi bi-shield-check me-1"></i> Votre audio est traité de manière sécurisée et supprimé après traitement
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let mediaRecorder;
+let audioChunks = [];
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const file = new File([blob], "voice.webm", { type: 'audio/webm' });
+
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById("audioInput").files = dt.files;
+
+      // Afficher un toast de confirmation
+      showToast("🎧 Vocal enregistré avec succès ! Cliquez sur 'Envoyer le vocal' pour traiter.", "success");
+    };
+
+    mediaRecorder.start();
+    
+    // Mettre à jour le bouton pendant l'enregistrement
+    const btn = document.querySelector('button[onclick="startRecording()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-mic-fill me-2"></i> 🎤 Enregistrement...';
+    btn.disabled = true;
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-warning');
+
+    setTimeout(() => {
+      if (mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Restaurer le bouton
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-primary');
+      }
+    }, 5000);
+
+  } catch (error) {
+    showToast("❌ Erreur d'accès au microphone. Vérifiez vos permissions.", "danger");
+    console.error("Erreur d'enregistrement:", error);
+  }
+}
+
+// Fonction pour afficher les toasts
+function showToast(message, type = "info") {
+  const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+  const toastId = 'toast-' + Date.now();
+  
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-bg-${type} border-0`;
+  toast.id = toastId;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  
+  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+  bsToast.show();
+  
+  toast.addEventListener('hidden.bs.toast', function () {
+    toast.remove();
+  });
+}
+
+function createToastContainer() {
+  const container = document.createElement('div');
+  container.className = 'toast-container position-fixed top-0 end-0 p-3';
+  document.body.appendChild(container);
+  return container;
+}
+</script>
+
+<style>
+.card {
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border: none;
+}
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  border: none;
+}
+.btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  border: none;
+}
+</style>
+{% endblock %}

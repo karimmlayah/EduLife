@@ -93,7 +93,7 @@
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/dashboard/internship/' %}active{% endif %}" href="http://127.0.0.1:8000/dashboard/internship/">
+          <a class="nav-link {% if request.path == '/dashboard/internship/' %}active{% endif %}" href="http://localhost:8000/dashboard/internship/">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-chart-pie-35 text-dark text-sm opacity-10"></i>
             </div>
@@ -161,7 +161,7 @@
               <i class="ni ni-single-02 me-1"></i>
               <span>User</span>
             </a>
-            <a href="http://127.0.0.1:8000/dashboard/internship/" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
+            <a href="http://localhost:8000/dashboard/internship/" class="nav-link-top {% if request.resolver_match.url_name == 'offres_stage' or request.resolver_match.url_name == 'postulations' or request.resolver_match.url_name == 'entretiens' %}active{% endif %}">
               <i class="ni ni-briefcase-24 me-1"></i>
               <span>Internship</span>
             </a>
@@ -169,7 +169,7 @@
               <i class="ni ni-building me-1"></i>
               <span>Startup</span>
             </a>
-            <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'housing' %}active{% endif %}">
+            <a href="{% url 'dashboard_logements' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_logements' or request.resolver_match.url_name == 'housing' or '/admin/logements/' in request.path %}active{% endif %}">
               <i class="fas fa-home me-1"></i>
               <span>Housing</span>
             </a>
@@ -177,7 +177,7 @@
               <i class="ni ni-delivery-fast me-1"></i>
               <span>Ride sharing</span>
             </a>
-            <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+            <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' or 'events' in request.path %}active{% endif %}">
               <i class="ni ni-calendar-grid-58 me-1"></i>
               <span>Events</span>
             </a>

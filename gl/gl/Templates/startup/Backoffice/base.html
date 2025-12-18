@@ -307,7 +307,7 @@
                   <i class="ni ni-delivery-fast me-1"></i>
                   <span>Ride sharing</span>
                 </a>
-              <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+              <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' or 'events' in request.path %}active{% endif %}">
                 <i class="ni ni-calendar-grid-58 me-1"></i>
                 <span>Events</span>
               </a>

@@ -18,4 +18,8 @@ urlpatterns = [
     path('binome/<int:request_id>/delete/', views.binome_delete, name='binome_delete'),
     path('binome/<int:request_id>/contact/', views.binome_contact, name='binome_contact'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('predict-price/', views.predict_price_api, name='predict_price_api'),
+    path('<int:logement_id>/summarize/', views.summarize_description, name='summarize_description'),
+    path('generate-ai/', views.logement_generate_ai, name='logement_generate_ai'),
+    path('upload-temp-image/', views.upload_temp_image, name='upload_temp_image'),
 ]

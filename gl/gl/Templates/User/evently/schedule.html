@@ -1103,11 +1103,21 @@
           </div>
           <div class="create-post-input">
             <textarea name="content" class="create-post-textarea" placeholder="Partagez quelque chose avec la communauté..." required></textarea>
+            <div id="image-preview-container" style="display: none; margin-top: 10px; margin-bottom: 10px;">
+              <img id="image-preview" src="" alt="Aperçu" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: block;">
+              <button type="button" onclick="removeImagePreview()" style="margin-top: 5px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="bi bi-x-circle"></i> Retirer l'image
+              </button>
+            </div>
             <div class="create-post-actions">
-              <label for="post-media" class="create-post-media-btn">
-                <i class="bi bi-image"></i> Photo/Video
+              <label for="post-image" class="create-post-media-btn">
+                <i class="bi bi-image"></i> Photo
               </label>
-              <input type="file" id="post-media" name="media" accept="image/*,video/*" style="display: none;">
+              <input type="file" id="post-image" name="image" accept="image/*" style="display: none;" onchange="previewImage(this)">
+              <label for="post-media" class="create-post-media-btn">
+                <i class="bi bi-camera-video"></i> Vidéo
+              </label>
+              <input type="file" id="post-media" name="media" accept="video/*" style="display: none;">
               <button type="submit" class="create-post-submit">Publier</button>
             </div>
           </div>
@@ -1191,6 +1201,7 @@
                         type="button"
                         data-post-id="{{ post.id }}"
                         data-post-content="{{ post.content|escapejs }}"
+                        data-post-image="{% if post.get_image_url %}{{ post.get_image_url|escapejs }}{% else %}{% endif %}"
                         data-post-media="{% if post.get_media_url %}{{ post.get_media_url|escapejs }}{% else %}{% endif %}"
                         onclick="openEditPostModalFromButton(this)">
                   <i class="bi bi-pencil"></i> Modifier
@@ -1208,17 +1219,16 @@
           
           <div class="post-content">{{ post.content }}</div>
           
-          {% if post.get_media_url %}
-          <div class="post-media">
-            {% with media_url=post.get_media_url %}
-              {% if media_url|slice:"-4:" == ".jpg" or media_url|slice:"-4:" == ".png" or media_url|slice:"-5:" == ".jpeg" or media_url|slice:"-4:" == ".gif" or media_url|slice:"-4:" == ".webp" %}
-                <img src="{{ media_url }}" alt="Post media" />
-              {% else %}
-                <video controls>
-                  <source src="{{ media_url }}" type="video/mp4">
-                </video>
-              {% endif %}
-            {% endwith %}
+          {% if post.get_image_url %}
+          <div class="post-media" style="margin-top: 1rem;">
+            <img src="{{ post.get_image_url }}" alt="Post image" style="width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; cursor: pointer;" onclick="openImageModal('{{ post.get_image_url }}')" />
+          </div>
+          {% elif post.get_media_url %}
+          <div class="post-media" style="margin-top: 1rem;">
+            <video controls style="width: 100%; max-height: 500px; border-radius: 8px;">
+              <source src="{{ post.get_media_url }}" type="video/mp4">
+              Votre navigateur ne supporte pas la lecture de vidéos.
+            </video>
           </div>
           {% endif %}
 
@@ -1415,9 +1425,15 @@
           <textarea name="content" id="edit-post-content" class="create-post-textarea" rows="5" required></textarea>
         </div>
         <div style="margin-bottom: 1rem;">
-          <label for="edit-post-media" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Média (optionnel)</label>
-          <input type="file" name="media" id="edit-post-media" class="form-control" accept="image/*,video/*">
-          <small style="color: #64748b; font-size: 0.85rem;">Laissez vide pour conserver le média actuel, ou sélectionnez un nouveau fichier pour le remplacer.</small>
+          <label for="edit-post-image" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Image (optionnel)</label>
+          <input type="file" name="image" id="edit-post-image" class="form-control" accept="image/*" onchange="previewEditImage(this)">
+          <small style="color: #64748b; font-size: 0.85rem;">Laissez vide pour conserver l'image actuelle, ou sélectionnez une nouvelle image pour la remplacer.</small>
+          <div id="edit-post-image-preview" style="margin-top: 10px;"></div>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="edit-post-media" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Vidéo (optionnel)</label>
+          <input type="file" name="media" id="edit-post-media" class="form-control" accept="video/*">
+          <small style="color: #64748b; font-size: 0.85rem;">Laissez vide pour conserver la vidéo actuelle, ou sélectionnez un nouveau fichier pour la remplacer.</small>
           <div id="edit-post-media-preview" style="margin-top: 10px;"></div>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
@@ -1535,6 +1551,83 @@
         btn.disabled = false;
       });
     }
+
+    // Image preview functionality
+    function previewImage(input) {
+      const container = document.getElementById('image-preview-container');
+      const preview = document.getElementById('image-preview');
+      const file = input.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          container.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function removeImagePreview() {
+      const container = document.getElementById('image-preview-container');
+      const preview = document.getElementById('image-preview');
+      const input = document.getElementById('post-image');
+      
+      container.style.display = 'none';
+      preview.src = '';
+      if (input) {
+        input.value = '';
+      }
+    }
+
+    // Image modal functionality
+    function openImageModal(imageUrl) {
+      // Create modal if it doesn't exist
+      let modal = document.getElementById('image-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'image-modal';
+        modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer;';
+        modal.onclick = closeImageModal;
+        
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.cssText = 'margin: auto; display: block; width: auto; max-width: 90%; max-height: 90%; margin-top: 5%; object-fit: contain;';
+        img.onclick = function(e) { e.stopPropagation(); };
+        
+        const closeBtn = document.createElement('span');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.cssText = 'position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 10001;';
+        closeBtn.onclick = closeImageModal;
+        
+        modal.appendChild(closeBtn);
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+      } else {
+        const img = modal.querySelector('img');
+        if (img) img.src = imageUrl;
+      }
+      
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('image-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      }
+    });
 
     // Toggle Comment Form
     function toggleCommentForm(postId) {
@@ -1895,24 +1988,29 @@
     function openEditPostModalFromButton(button) {
       const postId = button.getAttribute('data-post-id');
       const content = button.getAttribute('data-post-content');
+      const imageUrl = button.getAttribute('data-post-image');
       const mediaUrl = button.getAttribute('data-post-media');
-      openEditPostModal(postId, content, mediaUrl);
+      openEditPostModal(postId, content, imageUrl, mediaUrl);
     }
 
-    function openEditPostModal(postId, content, mediaUrl) {
+    function openEditPostModal(postId, content, imageUrl, mediaUrl) {
       const form = document.getElementById('edit-post-form');
       form.action = '/profile/post/' + postId + '/update/';
       
       document.getElementById('edit-post-content').value = content || '';
       
-      const preview = document.getElementById('edit-post-media-preview');
-      preview.innerHTML = '';
+      // Afficher l'image actuelle si elle existe
+      const imagePreview = document.getElementById('edit-post-image-preview');
+      imagePreview.innerHTML = '';
+      if (imageUrl && imageUrl !== '') {
+        imagePreview.innerHTML = `<img src="${imageUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" alt="Image actuelle">`;
+      }
+      
+      // Afficher la vidéo actuelle si elle existe
+      const mediaPreview = document.getElementById('edit-post-media-preview');
+      mediaPreview.innerHTML = '';
       if (mediaUrl && mediaUrl !== '') {
-        if (mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          preview.innerHTML = `<img src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" alt="Média actuel">`;
-        } else {
-          preview.innerHTML = `<video src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" controls></video>`;
-        }
+        mediaPreview.innerHTML = `<video src="${mediaUrl}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" controls></video>`;
       }
       
       document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
@@ -1920,6 +2018,19 @@
       });
       
       document.getElementById('edit-post-modal').style.display = 'block';
+    }
+
+    function previewEditImage(input) {
+      const preview = document.getElementById('edit-post-image-preview');
+      const file = input.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;" alt="Nouvelle image">`;
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
     function togglePostMenu(postId) {

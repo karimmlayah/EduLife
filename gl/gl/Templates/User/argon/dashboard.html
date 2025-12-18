@@ -369,7 +369,7 @@
                 <i class="ni ni-building me-1"></i>
                 <span>Startup</span>
               </a>
-              <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if '/admin/logements/' in request.path %}active{% endif %}">
+              <a href="{% url 'dashboard_logements' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_logements' or request.resolver_match.url_name == 'housing' or '/admin/logements/' in request.path %}active{% endif %}">
                 <i class="fas fa-home me-1"></i>
                 <span>Housing</span>
               </a>
@@ -377,10 +377,9 @@
                   <i class="ni ni-delivery-fast me-1"></i>
                   <span>Ride sharing</span>
                 </a>
-              <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+              <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' or 'events' in request.path %}active{% endif %}">
                 <i class="ni ni-calendar-grid-58 me-1"></i>
                 <span>Events</span>
-              </a>
               </a>
             </div>
             

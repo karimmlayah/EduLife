@@ -173,11 +173,17 @@ class Post(models.Model):
     content = models.TextField(
         verbose_name="Contenu"
     )
+    image = models.ImageField(
+        upload_to='posts/images/',
+        blank=True,
+        null=True,
+        verbose_name="Image"
+    )
     media = models.FileField(
         upload_to='posts/media/',
         blank=True,
         null=True,
-        verbose_name="Média"
+        verbose_name="Média (vidéo)"
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -187,6 +193,15 @@ class Post(models.Model):
         auto_now=True,
         verbose_name="Date de modification"
     )
+    
+    def get_image_url(self):
+        """Retourne l'URL de l'image si disponible, sinon None"""
+        try:
+            if self.image and self.image.name:
+                return self.image.url
+        except (ValueError, AttributeError):
+            pass
+        return None
     
     def get_media_url(self):
         """Retourne l'URL du média si disponible, sinon None"""

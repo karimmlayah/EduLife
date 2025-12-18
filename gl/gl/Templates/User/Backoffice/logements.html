@@ -342,7 +342,7 @@
                 <i class="ni ni-building me-1"></i>
                 <span>Startup</span>
               </a>
-              <a href="http://127.0.0.1:8000/admin/logements/dashboard/" class="nav-link-top {% if '/admin/logements/' in request.path %}active{% endif %}">
+              <a href="{% url 'dashboard_logements' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_logements' or request.resolver_match.url_name == 'housing' or '/admin/logements/' in request.path %}active{% endif %}">
                 <i class="fas fa-home me-1"></i>
                 <span>Housing</span>
               </a>
@@ -350,7 +350,7 @@
                 <i class="ni ni-delivery-fast me-1"></i>
                 <span>Ride sharing</span>
               </a>
-              <a href="http://127.0.0.1:8000/dashboard/" class="nav-link-top {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+              <a href="{% url 'dashboard_events' %}" class="nav-link-top {% if request.resolver_match.url_name == 'dashboard_events' or 'events' in request.path %}active{% endif %}">
                 <i class="ni ni-calendar-grid-58 me-1"></i>
                 <span>Events</span>
               </a>
@@ -732,6 +732,106 @@
 
   <!-- Toast Notifications -->
   {% include 'includes/toast_notifications.html' %}
+
+  <!-- Script pour convertir les messages Django en toast notifications -->
+  <script>
+    (function() {
+      let messagesDisplayed = false;
+      
+      function displayDjangoMessages() {
+        if (messagesDisplayed) return;
+        messagesDisplayed = true;
+        
+        {% if messages %}
+        {% for message in messages %}
+        (function() {
+          const msgText = '{{ message|escapejs }}';
+          const msgLevel = '{{ message.tags|default:"info" }}';
+          let toastType = 'info';
+          
+          if (msgLevel === 'error' || msgLevel === 'danger') {
+            toastType = 'error';
+          } else if (msgLevel === 'warning') {
+            toastType = 'warning';
+          } else if (msgLevel === 'success') {
+            toastType = 'success';
+          }
+          
+          // Fonction pour créer le toast
+          function createToast(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+              const newContainer = document.createElement('div');
+              newContainer.id = 'toast-container';
+              newContainer.className = 'toast-container';
+              document.body.appendChild(newContainer);
+              return createToast(message, type);
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification ' + type;
+            
+            const iconMap = {
+              'success': '<i class="fas fa-check-circle toast-icon"></i>',
+              'error': '<i class="fas fa-times-circle toast-icon"></i>',
+              'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+              'info': '<i class="fas fa-info-circle toast-icon"></i>'
+            };
+            
+            const icon = iconMap[type] || iconMap['info'];
+            
+            toast.innerHTML = `
+              ${icon}
+              <span class="toast-content">${message}</span>
+              <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(function() {
+              toast.classList.add('hiding');
+              setTimeout(function() {
+                if (toast.parentElement) {
+                  toast.remove();
+                }
+              }, 300);
+            }, 5000);
+          }
+          
+          // Utiliser showToast si disponible, sinon créer directement
+          if (typeof window.showToast !== 'undefined') {
+            window.showToast(msgText, toastType);
+          } else {
+            createToast(msgText, toastType);
+          }
+        })();
+        {% endfor %}
+        {% endif %}
+      }
+      
+      // Exécuter après le chargement
+      function tryDisplayMessages() {
+        if (document.getElementById('toast-container') || document.querySelector('.toast-container')) {
+          displayDjangoMessages();
+        } else {
+          setTimeout(tryDisplayMessages, 100);
+        }
+      }
+      
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(tryDisplayMessages, 300);
+        setTimeout(tryDisplayMessages, 800);
+      } else {
+        window.addEventListener('DOMContentLoaded', function() {
+          setTimeout(tryDisplayMessages, 300);
+          setTimeout(tryDisplayMessages, 800);
+        });
+        window.addEventListener('load', function() {
+          setTimeout(tryDisplayMessages, 300);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
 

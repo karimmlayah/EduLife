@@ -272,7 +272,7 @@
                   <h3 class="conversation-title">{{ conv.logement.title }}</h3>
                   <p class="conversation-subtitle">
                     {{ conv.other_user.get_full_name|default:conv.other_user.username }}
-                    • {{ conv.logement.price|floatformat:0 }} DZD
+                    • {{ conv.logement.price|floatformat:0 }} DT
                   </p>
                   {% if conv.last_message %}
                     <p class="conversation-preview">

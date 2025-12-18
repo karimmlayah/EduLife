@@ -21,6 +21,9 @@ from .models import CustomUser, Post, Comment, Like, Connection, Message, Passwo
 from django.core.mail import send_mail
 from datetime import timedelta
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Fonction pour envoyer un SMS avec le code de vérification
 def send_sms_code(phone_number, code, user):
@@ -203,6 +206,13 @@ def login_view(request):
     Vue pour la page de login/signup
     """
     if request.user.is_authenticated:
+        # Si l'utilisateur est déjà connecté, rediriger selon son rôle
+        if request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN'):
+            # Vérifier s'il y a un paramètre 'next' pour rediriger vers la page demandée
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect('/admin/')  # Rediriger vers le dashboard admin
         return redirect('index')
     
     login_form = LoginForm()
@@ -1199,20 +1209,31 @@ def create_post_view(request):
     content = request.POST.get('content', '').strip()
     if not content:
         messages.error(request, 'Le contenu du post ne peut pas être vide.')
-        return redirect('profile')
+        # Rediriger vers la page d'origine (fil-actualite ou profile)
+        referer = request.META.get('HTTP_REFERER', '/')
+        return redirect(referer if referer else 'profile')
     
     try:
         post = Post.objects.create(
             author=request.user,
             content=content
         )
-        # Gérer le fichier média si présent
-        if 'media' in request.FILES:
+        # Gérer l'image si présente
+        if 'image' in request.FILES:
+            post.image = request.FILES['image']
+            post.save()
+        # Gérer le fichier média (vidéo) si présent
+        elif 'media' in request.FILES:
             post.media = request.FILES['media']
             post.save()
         messages.success(request, 'Post créé avec succès.')
     except Exception as e:
         messages.error(request, f"Erreur lors de la création du post: {e}")
+    
+    # Rediriger vers la page d'origine (fil-actualite ou profile)
+    referer = request.META.get('HTTP_REFERER', '/')
+    if 'fil-actualite' in referer:
+        return redirect('evently_schedule')
     return redirect('profile')
 
 
@@ -1233,16 +1254,35 @@ def update_post_view(request, post_id):
     
     try:
         post.content = content
-        # Gérer le fichier média si présent
-        if 'media' in request.FILES:
+        # Gérer l'image si présente
+        if 'image' in request.FILES:
+            # Supprimer l'ancienne image si existante
+            if post.image:
+                post.image.delete()
+            post.image = request.FILES['image']
+            # Supprimer aussi le média vidéo si présent
+            if post.media:
+                post.media.delete()
+                post.media = None
+        # Gérer le fichier média (vidéo) si présent
+        elif 'media' in request.FILES:
             # Supprimer l'ancien média si existant
             if post.media:
                 post.media.delete()
             post.media = request.FILES['media']
+            # Supprimer aussi l'image si présente
+            if post.image:
+                post.image.delete()
+                post.image = None
         post.save()
         messages.success(request, 'Post modifié avec succès.')
     except Exception as e:
         messages.error(request, f"Erreur lors de la modification du post: {e}")
+    
+    # Rediriger vers la page d'origine (fil-actualite ou profile)
+    referer = request.META.get('HTTP_REFERER', '/')
+    if 'fil-actualite' in referer:
+        return redirect('evently_schedule')
     return redirect('profile')
 
 
@@ -1501,74 +1541,52 @@ def delete_post_view(request, post_id):
 @login_required
 @require_POST
 def profile_update_view(request):
-    """
-    Met à jour les informations de base du profil (prénom, nom, téléphone).
-    """
     user = request.user
-    
-    # Récupérer l'utilisateur depuis la base de données pour éviter les problèmes de cache
-    try:
-        user = CustomUser.objects.get(id=user.id)
-    except CustomUser.DoesNotExist:
-        messages.error(request, "Utilisateur introuvable.")
-        return redirect('account_settings')
-    
-    first_name = request.POST.get('first_name', '').strip()
-    last_name = request.POST.get('last_name', '').strip()
-    phone = request.POST.get('phone', '').strip()
-    address = request.POST.get('address', '').strip()
-    city = request.POST.get('city', '').strip()
-    country = request.POST.get('country', '').strip()
-    zip_code = request.POST.get('zip', '').strip()
 
-    # Appliquer les mises à jour
-    user.first_name = first_name
-    user.last_name = last_name
-    if hasattr(user, 'phone'):
-        setattr(user, 'phone', phone)
-    if hasattr(user, 'address'):
-        setattr(user, 'address', address)
-    if hasattr(user, 'city'):
-        setattr(user, 'city', city)
-    if hasattr(user, 'country'):
-        setattr(user, 'country', country)
-    if hasattr(user, 'zip'):
-        setattr(user, 'zip', zip_code)
-    
-    # Avatar upload
+    # Rafraîchir l'utilisateur depuis la DB
+    user = CustomUser.objects.get(id=user.id)
+
+    # Champs simples
+    user.first_name = request.POST.get('first_name', '').strip()
+    user.last_name = request.POST.get('last_name', '').strip()
+
+    # ===============================
+    # 🖼️ AVATAR UPLOAD (CORRIGÉ)
+    # ===============================
     if 'avatar' in request.FILES:
-        user.avatar = request.FILES['avatar']
-    
+        avatar_file = request.FILES['avatar']
+
+        try:
+            from .image_validator import validate_avatar_image
+
+            is_valid, message, detected_object, confidence = validate_avatar_image(avatar_file)
+
+            if not is_valid:
+                messages.error(request, f"❌ {message}")
+                return redirect('account_settings')
+
+            # 🔥 OBLIGATOIRE : reset pointeur fichier
+            avatar_file.seek(0)
+
+            user.avatar = avatar_file
+            messages.success(
+                request,
+                f"✅ Avatar mis à jour ({confidence:.0%} confiance)."
+            )
+
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la validation de l'image : {e}")
+            return redirect('account_settings')
+
+    # ===============================
+    # 💾 SAUVEGARDE UNIQUE
+    # ===============================
     try:
-        # Construire la liste des champs à mettre à jour
-        update_fields = ['first_name', 'last_name']
-        
-        # Ajouter les champs optionnels s'ils existent dans le modèle
-        if hasattr(user, 'phone'):
-            update_fields.append('phone')
-        if hasattr(user, 'address'):
-            update_fields.append('address')
-        if hasattr(user, 'city'):
-            update_fields.append('city')
-        if hasattr(user, 'country'):
-            update_fields.append('country')
-        if hasattr(user, 'zip'):
-            update_fields.append('zip')
-        if 'avatar' in request.FILES:
-            update_fields.append('avatar')
-        if hasattr(user, 'updated_at'):
-            update_fields.append('updated_at')
-        
-        # Utiliser update_fields pour éviter de toucher aux champs uniques (username, email)
-        user.save(update_fields=update_fields)
-        messages.success(request, 'Profil mis à jour avec succès.')
+        user.save(update_fields=['first_name', 'last_name', 'avatar'])
+        messages.success(request, "Profil mis à jour avec succès.")
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        messages.error(request, f"Erreur lors de la mise à jour du profil: {str(e)}")
-        # Log l'erreur pour le débogage (en production, utiliser un logger)
-        print(f"Erreur profile_update: {error_details}")
-    
+        messages.error(request, f"Erreur sauvegarde profil : {e}")
+
     return redirect('account_settings')
 
 
@@ -1762,19 +1780,68 @@ def profile_update_public_view(request):
     
     # Uploads de fichiers
     if 'avatar' in request.FILES:
-        user.avatar = request.FILES['avatar']
-        messages.success(request, 'Avatar mis à jour avec succès.')
+        avatar_file = request.FILES['avatar']
+        
+        # Valider que l'image contient un être humain
+        try:
+            from .image_validator import validate_avatar_image
+            is_valid, message, detected_object, confidence = validate_avatar_image(avatar_file)
+            
+            if not is_valid:
+                messages.error(request, f"❌ {message}")
+                logger.warning(f"Tentative d'upload d'avatar invalide par {user.username}: {detected_object} (confiance: {confidence:.1%})")
+                # Réinitialiser le fichier avant de rediriger
+                avatar_file.seek(0)
+                return redirect('profile')
+            
+            # Si valide, réinitialiser le fichier et sauvegarder l'avatar
+            avatar_file.seek(0)
+            user.avatar = avatar_file
+            # Forcer la sauvegarde de l'avatar
+            user.save(update_fields=['avatar'])
+            messages.success(request, f'✅ Avatar mis à jour avec succès. {message}')
+            logger.info(f"Avatar validé et mis à jour pour {user.username}: {detected_object} (confiance: {confidence:.1%})")
+        except ImportError:
+            # Si TensorFlow n'est pas disponible, on accepte l'image sans validation
+            logger.warning("TensorFlow non disponible. Upload d'avatar sans validation.")
+            user.avatar = avatar_file
+            messages.success(request, 'Avatar mis à jour avec succès.')
+        except Exception as e:
+            logger.error(f"Erreur lors de la validation de l'avatar: {e}", exc_info=True)
+            messages.error(request, f"Erreur lors de la validation de l'image: {str(e)}")
+            return redirect('profile')
     if 'cover_photo' in request.FILES:
         user.cover_photo = request.FILES['cover_photo']
         messages.success(request, 'Photo de couverture mise à jour avec succès.')
     
-    # Sauvegarder l'utilisateur
+    # Sauvegarder l'utilisateur (seulement si l'avatar n'a pas déjà été sauvegardé)
     try:
-        user.save()
+        # Si l'avatar a été traité et sauvegardé avec update_fields=['avatar'], 
+        # on ne doit pas faire un save() complet qui pourrait écraser
+        # On sauvegarde seulement si nécessaire (autres champs modifiés)
+        if 'avatar' not in request.FILES:
+            # L'avatar n'a pas été traité dans ce bloc, donc on peut sauvegarder normalement
+            user.save()
+        elif 'cover_photo' in request.FILES or any([user.headline, user.bio, user.location]):
+            # L'avatar a été sauvegardé, mais il y a d'autres champs à sauvegarder
+            # On sauvegarde sans toucher à l'avatar
+            update_fields = []
+            if 'cover_photo' in request.FILES:
+                update_fields.append('cover_photo')
+            if hasattr(user, 'headline') and user.headline:
+                update_fields.append('headline')
+            if hasattr(user, 'bio') and user.bio:
+                update_fields.append('bio')
+            if hasattr(user, 'location') and user.location:
+                update_fields.append('location')
+            if update_fields:
+                user.save(update_fields=update_fields)
+        
         # Si aucun message de succès n'a été ajouté (pas d'upload de fichier), ajouter un message générique
         if 'avatar' not in request.FILES and 'cover_photo' not in request.FILES:
             messages.success(request, 'Profil mis à jour avec succès.')
     except Exception as e:
+        logger.error(f"Erreur lors de la sauvegarde du profil: {e}", exc_info=True)
         messages.error(request, f"Erreur lors de la mise à jour du profil: {e}")
     return redirect('profile')
 

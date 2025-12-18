@@ -83,9 +83,9 @@ class LogementForm(forms.ModelForm):
             'wifi': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
-            'video': forms.URLInput(attrs={
+            'video': forms.FileInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'https://www.youtube.com/watch?v=... ou https://vimeo.com/...'
+                'accept': 'video/*'
             }),
             'latitude': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -175,7 +175,7 @@ class BinomeRequestForm(forms.ModelForm):
             'title': 'Titre de la recherche',
             'description': 'Description',
             'city': 'Ville recherchée',
-            'budget_max': 'Budget maximum (DZD/mois)',
+            'budget_max': 'Budget maximum (DT/mois)',
             'logement': 'Logement spécifique (optionnel)',
         }
     

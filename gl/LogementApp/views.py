@@ -1,18 +1,48 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.contrib import messages
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.utils import timezone
+from django.conf import settings
+from functools import wraps
+import logging
+import json
+import requests
 from UserApp.models import CustomUser, Post, Comment, Connection, Message, AdminMessage
-from .models import Logement, LogementImage
+from .models import Logement, LogementImage, TemporaryImage
 from .forms import LogementForm
+from .ml_service import predict_price
+
+logger = logging.getLogger(__name__)
 
 # Décorateur pour vérifier si l'utilisateur est superuser ou admin
 def is_superuser_or_admin(user):
     return user.is_authenticated and (user.is_superuser or (hasattr(user, 'role') and user.role == 'ADMIN'))
+
+# Décorateur personnalisé pour les pages admin qui ne déconnecte pas
+def admin_required(view_func):
+    """
+    Décorateur qui vérifie que l'utilisateur est admin/superuser.
+    Si connecté mais pas admin → redirige vers index (pas login)
+    Si pas connecté → redirige vers login
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        
+        if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
+            messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
+            return redirect('index')
+        
+        return view_func(request, *args, **kwargs)
+    
+    return _wrapped_view
 
 # Create your views here.
 def logement_home(request):
@@ -135,18 +165,33 @@ def logement_add(request):
     if request.method == 'POST':
         form = LogementForm(request.POST, request.FILES)
         if form.is_valid():
-            logement = form.save(commit=False)
-            logement.owner = request.user
-            logement.approved = False  # Par défaut, non approuvé
-            logement.save()
-            
-            # Traiter les images multiples
-            images = request.FILES.getlist('images')
-            for image in images:
-                LogementImage.objects.create(logement=logement, image=image)
-            
-            messages.success(request, 'Logement ajouté avec succès! Il sera visible après approbation par un administrateur.')
-            return redirect('my_logements')
+            try:
+                logement = form.save(commit=False)
+                logement.owner = request.user
+                logement.approved = False  # Par défaut, non approuvé
+                logement.save()
+                
+                # Traiter les images multiples
+                images = request.FILES.getlist('images')
+                for image in images:
+                    LogementImage.objects.create(logement=logement, image=image)
+                
+                messages.success(request, '✅ Logement ajouté avec succès! ⏳ Votre logement est maintenant en attente d\'approbation par un administrateur. Il sera visible une fois approuvé.')
+                return redirect('my_logements')
+            except Exception as e:
+                error_msg = str(e)
+                messages.error(request, f'Une erreur est survenue lors de l\'ajout du logement: {error_msg}')
+                # Log l'erreur pour le débogage
+                logger.error(f'Erreur lors de l\'ajout du logement: {error_msg}', exc_info=True)
+        else:
+            # Afficher les erreurs du formulaire
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    field_label = form.fields[field].label if field in form.fields else field
+                    error_messages.append(f"{field_label}: {error}")
+            if error_messages:
+                messages.error(request, 'Veuillez corriger les erreurs suivantes: ' + ' | '.join(error_messages[:5]))  # Limiter à 5 erreurs pour éviter un message trop long
     else:
         form = LogementForm()
     
@@ -215,12 +260,9 @@ def logement_delete(request, logement_id):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def dashboard(request):
     """Dashboard principal avec statistiques sur les utilisateurs"""
-    if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
-        messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
-        return redirect('index')
     
     all_users = CustomUser.objects.all()
     
@@ -310,7 +352,7 @@ def dashboard(request):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def admin_edubot(request):
     """
     Page complète pour le chatbot EduBot dans le backoffice.
@@ -322,7 +364,7 @@ def admin_edubot(request):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def admin_edubox(request):
     """
     Interface de messagerie entre administrateurs (EduBox)
@@ -359,7 +401,7 @@ def admin_edubox(request):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def argon_page(request, page: str):
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
@@ -381,7 +423,7 @@ def argon_page(request, page: str):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def tables(request):
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
         messages.error(request, 'Vous n\'avez pas la permission d\'accéder à cette page.')
@@ -391,7 +433,7 @@ def tables(request):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def dashboard_logements(request):
     """Dashboard dédié aux logements avec statistiques"""
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
@@ -428,7 +470,7 @@ def dashboard_logements(request):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def manage_logements(request):
     """Gérer les logements dans le dashboard (approuver/rejeter)"""
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
@@ -760,7 +802,7 @@ def binome_contact(request, request_id):
         return redirect('user_profile', user_id=binome_request.user.id)
     
     # Si connecté, créer le message directement
-    initial_message = f"Bonjour, je suis intéressé(e) par votre recherche de binôme pour {binome_request.city}. Budget: {binome_request.budget_max} DZD."
+    initial_message = f"Bonjour, je suis intéressé(e) par votre recherche de binôme pour {binome_request.city}. Budget: {binome_request.budget_max} DT."
     
     message = Message.objects.create(
         sender=request.user,
@@ -824,7 +866,7 @@ def binome_delete(request, request_id):
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def approve_logement(request, logement_id):
     """Approuver un logement"""
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
@@ -835,12 +877,16 @@ def approve_logement(request, logement_id):
     logement.approved = True
     logement.rejected = False  # Enlever le statut rejeté si on approuve
     logement.save()
-    messages.success(request, f'Le logement "{logement.title}" a été approuvé avec succès!')
-    return redirect('manage_logements')
+    messages.success(request, f'✅ Le logement "{logement.title}" a été approuvé avec succès!')
+    # Rediriger vers la page d'origine ou le dashboard logements
+    referer = request.META.get('HTTP_REFERER', '')
+    if 'dashboard' in referer or 'manage' in referer:
+        return redirect(referer)
+    return redirect('dashboard_logements')
 
 
 @login_required
-@user_passes_test(is_superuser_or_admin, login_url='/login/')
+@admin_required
 def reject_logement(request, logement_id):
     """Rejeter un logement"""
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'ADMIN')):
@@ -851,5 +897,833 @@ def reject_logement(request, logement_id):
     logement.rejected = True
     logement.approved = False  # S'assurer qu'il n'est pas approuvé
     logement.save()
-    messages.success(request, f'Le logement "{logement.title}" a été rejeté.')
-    return redirect('manage_logements')
+    messages.success(request, f'❌ Le logement "{logement.title}" a été rejeté.')
+    # Rediriger vers la page d'origine ou le dashboard logements
+    referer = request.META.get('HTTP_REFERER', '')
+    if 'dashboard' in referer or 'manage' in referer:
+        return redirect(referer)
+    return redirect('dashboard_logements')
+
+# ======================================================
+# 🗺️ Mapping Ville → Région (ALIGNÉ AU MODÈLE ML)
+# ======================================================
+
+CITY_TO_REGION = {
+    # Grand Tunis
+    "Tunis": "Grand Tunis",
+    "Ariana": "Grand Tunis",
+    "Ben Arous": "Grand Tunis",
+    "Manouba": "Grand Tunis",
+
+    # Cap Bon
+    "Nabeul": "Cap Bon",
+    "Hammamet": "Cap Bon",
+    "Kelibia": "Cap Bon",
+    "Korba": "Cap Bon",
+
+    # Centre Est
+    "Sousse": "Centre Est",
+    "Monastir": "Centre Est",
+    "Mahdia": "Centre Est",
+    "Sfax": "Centre Est",
+
+    # Centre
+    "Kairouan": "Centre",
+    "Sidi Bouzid": "Centre",
+
+    # Nord
+    "Bizerte": "Nord",
+
+    # Nord Ouest
+    "Beja": "Nord Ouest",
+    "Jendouba": "Nord Ouest",
+    "Kef": "Nord Ouest",
+    "Siliana": "Nord Ouest",
+
+    # Sud Est
+    "Gabes": "Sud Est",
+    "Mednine": "Sud Est",
+    "Tataouine": "Sud Est",
+
+    # Sud Ouest
+    "Gafsa": "Sud Ouest",
+    "Tozeur": "Sud Ouest",
+    "Kebili": "Sud Ouest"
+}
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def predict_price_api(request):
+    """
+    API endpoint pour prédire le prix d'un logement
+
+    JSON attendu :
+    {
+        "city": "Tunis",
+        "surface": 95,
+        "bathrooms": 2,
+        "rooms": 3,
+        "type": "Appartement"
+    }
+    """
+
+    try:
+        # ======================================================
+        # 📥 PARSING
+        # ======================================================
+        if request.content_type == "application/json":
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        # 🔤 Normalisation ville
+        city_raw = data.get("city", "")
+        city = city_raw.strip().title()
+
+        if not city:
+            return JsonResponse(
+                {"success": False, "error": "La ville est requise"},
+                status=400
+            )
+
+        # 🗺️ Déduction région
+        region = CITY_TO_REGION.get(city)
+        if not region:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": f"Ville '{city}' non reconnue par le modèle"
+                },
+                status=400
+            )
+
+        logement_type = (
+    data.get("type") or
+    data.get("type_logement") or
+    ""
+).strip()
+
+        surface = data.get("surface")
+        bathrooms = data.get("bathrooms")
+        rooms = data.get("rooms")
+
+        # ======================================================
+        # ✅ VALIDATIONS
+        # ======================================================
+        if not logement_type:
+            return JsonResponse(
+                {"success": False, "error": "Le type de logement est requis"},
+                status=400
+            )
+
+        try:
+            surface = float(surface)
+            if surface <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "La surface doit être un nombre positif"},
+                status=400
+            )
+
+        try:
+            bathrooms = int(bathrooms)
+            if bathrooms <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "Le nombre de salles de bain doit être un entier positif"},
+                status=400
+            )
+
+        try:
+            rooms = int(rooms)
+            if rooms <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "Le nombre de pièces doit être un entier positif"},
+                status=400
+            )
+
+        # ======================================================
+        # 🔮 PRÉDICTION ML
+        # ======================================================
+        predicted_price = predict_price(
+            city=city,
+            region=region,
+            surface=surface,
+            bathrooms=bathrooms,
+            rooms=rooms,
+            logement_type=logement_type
+        )
+
+        # ======================================================
+        # 📤 RÉPONSE
+        # ======================================================
+        return JsonResponse({
+            "success": True,
+            "predicted_price": predicted_price,
+            "currency": "TND"
+        })
+
+    except Exception:
+        logger.error("Erreur lors de la prédiction du prix", exc_info=True)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Une erreur interne est survenue lors de la prédiction"
+            },
+            status=500
+        )
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def logement_generate_ai(request):
+    """
+    Système de conversation interactive avec IA pour créer un logement.
+    L'IA pose des questions pour compléter les champs manquants, puis crée le logement.
+    """
+    try:
+        # Lire les données JSON
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        conversation_history = data.get('history', [])  # Historique de la conversation
+        current_data = data.get('current_data', {})  # Données collectées jusqu'à présent
+        
+        if not user_message:
+            return JsonResponse(
+                {"success": False, "error": "Le message est requis"},
+                status=400
+            )
+        
+        # Récupérer la configuration Groq
+        api_key = getattr(settings, "EDUBOT_API_KEY", "")
+        api_base = getattr(settings, "EDUBOT_API_BASE", "https://api.groq.com/openai/v1")
+        model = getattr(settings, "EDUBOT_MODEL", "llama-3.1-8b-instant")
+        
+        if not api_key:
+            return JsonResponse(
+                {"success": False, "error": "Clé API Groq non configurée"},
+                status=500
+            )
+        
+        # Construire le prompt système avec les données déjà collectées
+        current_data_str = json.dumps(current_data, ensure_ascii=False) if current_data else "{}"
+        
+        # Définir l'ordre des questions
+        field_order = [
+            ("title", "Quel titre souhaitez-vous donner à votre annonce ?"),
+            ("type_logement", "Quel est le type de logement (APPARTEMENT, MAISON, STUDIO, VILLA, ou AUTRE) ?"),
+            ("description", "Décrivez votre logement en détail (caractéristiques, avantages, équipements, localisation, etc.)"),
+            ("address", "Quelle est l'adresse complète du logement ?"),
+            ("city", "Dans quelle ville se trouve le logement ?"),
+            ("rooms", "Combien de pièces contient le logement ?"),
+            ("bathrooms", "Combien de salles de bain y a-t-il ?"),
+            ("wifi", "Le logement dispose-t-il d'un accès WiFi (oui/non) ?"),
+            ("surface", "Quelle est la surface du logement en m² ?"),
+            ("price", "Quel est le prix mensuel du logement en DT ? (Vous pouvez répondre 'prédire' pour que l'IA estime le prix)")
+        ]
+        
+        # Trouver le prochain champ manquant dans l'ordre
+        missing_fields = []
+        for field, question in field_order:
+            if field not in current_data or not current_data[field] or current_data[field] == "":
+                missing_fields.append((field, question))
+        
+        next_question = missing_fields[0][1] if missing_fields else None
+        next_field = missing_fields[0][0] if missing_fields else None
+        
+        # Si c'est le premier message, donner des instructions spéciales pour extraire tout
+        is_first_message = len(conversation_history) == 0
+        
+        first_message_instruction = ""
+        if is_first_message:
+            first_message_instruction = """
+⚠️ C'EST LE PREMIER MESSAGE - INSTRUCTIONS SPÉCIALES :
+- L'utilisateur peut donner soit une description complète en un paragraphe, soit répondre à la première question (titre)
+- Si l'utilisateur donne une description complète : EXTRAIS TOUTES les informations possibles :
+  * Titre (génère-en un accrocheur si non mentionné)
+  * Type de logement (APPARTEMENT, MAISON, STUDIO, VILLA, AUTRE)
+  * Description complète
+  * Adresse et ville (cherche les noms de villes tunisiennes)
+  * Prix (cherche les montants en DT, DZD, ou "prix")
+  * Surface (cherche "m²", "m2", "mètres carrés")
+  * Nombre de pièces (cherche "pièces", "chambres", "chambre")
+  * Nombre de salles de bain (cherche "salle de bain", "bain")
+  * WiFi (cherche "wifi", "internet", "connexion")
+  * Modèle 3D (cherche des URLs de modèles 3D si mentionné)
+- Si l'utilisateur donne juste le titre : enregistre-le et pose la prochaine question
+- Extrais le maximum d'informations avant de poser des questions
+- Si l'utilisateur dit "prédire" ou "estimer" pour le prix, note-le comme "PREDICT_PRICE"
+- Si beaucoup d'informations sont extraites, dis "J'ai extrait les informations suivantes : [liste]. Il me manque encore : [liste des champs manquants]"
+"""
+        
+        system_prompt = f"""Tu es un assistant expert en immobilier qui aide à créer des annonces de logement.
+
+{first_message_instruction}
+
+DONNÉES DÉJÀ COLLECTÉES (ne pose JAMAIS de questions sur ces champs) :
+{current_data_str}
+
+PROCHAINE QUESTION À POSER (si nécessaire, dans cet ordre) :
+{next_question if next_question else "Aucune - tous les champs sont remplis"}
+
+TON RÔLE :
+1. Si l'utilisateur donne une description complète en un paragraphe : EXTRAIS TOUTES les informations possibles (titre, type, description, adresse, ville, prix, surface, pièces, salles de bain, wifi, modèle 3D si mentionné)
+2. Mettre à jour les données collectées avec les nouvelles informations extraites
+3. Si tous les champs obligatoires sont remplis : dire "READY_TO_CREATE" et retourner le JSON complet
+4. Si l'utilisateur dit "créer", "valider", "ok", "c'est bon", "c'est tout", "terminer", "finaliser" ou équivalent APRÈS avoir donné des informations : vérifie si tous les champs sont remplis, sinon demande les champs manquants, sinon déclenche "READY_TO_CREATE"
+5. Si des champs manquent : répondre "DATA_UPDATE:" suivi du JSON mis à jour, puis poser UNIQUEMENT la prochaine question dans l'ordre
+6. Les images sont gérées séparément via upload (ne pas demander dans les questions)
+7. Le modèle 3D et la vidéo sont optionnels (ne demander que si l'utilisateur les mentionne)
+
+CHAMPS OBLIGATOIRES (dans cet ordre) :
+1. title (titre accrocheur, max 200 caractères)
+2. type_logement (APPARTEMENT, MAISON, STUDIO, VILLA, ou AUTRE)
+3. description (description détaillée)
+4. address (adresse complète)
+5. city (ville en Tunisie)
+6. rooms (nombre de pièces, entier)
+7. bathrooms (nombre de salles de bain, entier, défaut: 1)
+8. wifi (true ou false, défaut: false)
+9. surface (surface en m², nombre)
+10. price (prix en nombre, en DT, ou "PREDICT_PRICE" si l'utilisateur veut une prédiction)
+
+RÈGLES CRITIQUES :
+- Extrais TOUTES les informations du message, même si plusieurs sont mentionnées
+- NE pose JAMAIS de questions sur les champs déjà remplis dans current_data
+- Pose UNIQUEMENT la prochaine question dans l'ordre défini ci-dessus
+- Si l'utilisateur donne plusieurs informations, enregistre-les TOUTES dans DATA_UPDATE
+- Si l'utilisateur dit "créer", "valider", "ok", "c'est bon", "c'est tout", "terminer", "finaliser", "je valide", "créer le logement" : vérifie tous les champs, si tout est rempli → "READY_TO_CREATE", sinon liste les champs manquants
+- Pour "wifi", accepte: oui/oui/non/non/true/false/wifi
+- Pour "type_logement", accepte uniquement: APPARTEMENT, MAISON, STUDIO, VILLA, AUTRE
+- Pour "surface", cherche "m²" ou "m2" dans le texte
+- Pour "rooms", cherche "pièces", "chambres", "chambre" dans le texte
+- Pour "bathrooms", cherche "salle de bain", "salles de bain", "bain" dans le texte
+- Pour "price", si l'utilisateur dit "prédire" ou "estimer", mets "PREDICT_PRICE"
+- Si l'utilisateur donne une description complète en un paragraphe, extrais TOUT ce que tu peux
+
+FORMAT DE RÉPONSE :
+Si des champs manquent :
+DATA_UPDATE: {{"field1": "value1", "field2": "value2", ...}}
+[Prochaine question dans l'ordre - UNE SEULE question]
+
+Si tout est rempli :
+READY_TO_CREATE
+{{"title": "...", "description": "...", "type_logement": "APPARTEMENT", "address": "...", "city": "...", "price": 500, "surface": 80, "rooms": 3, "bathrooms": 2, "wifi": true, "model_3d": "url_ou_vide"}}
+
+NOTE IMPORTANTE :
+- Si l'utilisateur donne une description complète en un paragraphe, extrais TOUTES les informations possibles
+- Les images sont gérées séparément via upload (ne pas demander dans les questions)
+- Le modèle 3D et la vidéo sont optionnels (ne pas demander si l'utilisateur ne les mentionne pas)
+- Pour le prix, si l'utilisateur dit "prédire" ou "estimer", utilise "PREDICT_PRICE" """
+        
+        # Construire l'historique de conversation
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Ajouter l'historique
+        for msg in conversation_history:
+            messages.append(msg)
+        
+        # Ajouter le message actuel
+        messages.append({"role": "user", "content": user_message})
+        
+        # Appel à l'API Groq avec retry en cas d'erreur 429
+        max_retries = 3
+        retry_delay = 2  # secondes
+        ai_response = None
+        
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    f"{api_base}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": model,
+                        "messages": messages,
+                        "temperature": 0.3,
+                        "max_tokens": 500
+                    },
+                    timeout=30
+                )
+                
+                if response.status_code == 429:
+                    if attempt < max_retries - 1:
+                        import time
+                        wait_time = retry_delay * (attempt + 1)
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        return JsonResponse({
+                            "success": False,
+                            "error": "Trop de requêtes. Veuillez patienter 10-15 secondes avant de réessayer.",
+                            "message": "L'API est temporairement surchargée. Veuillez patienter quelques secondes puis réessayez.",
+                            "continue": True
+                        }, status=429)
+                
+                response.raise_for_status()
+                data_response = response.json()
+                ai_response = data_response["choices"][0]["message"]["content"].strip()
+                break  # Succès, sortir de la boucle
+                
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 429:
+                    if attempt < max_retries - 1:
+                        import time
+                        wait_time = retry_delay * (attempt + 1)
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        return JsonResponse({
+                            "success": False,
+                            "error": "Trop de requêtes. Veuillez patienter 10-15 secondes avant de réessayer.",
+                            "message": "L'API est temporairement surchargée. Veuillez patienter quelques secondes puis réessayez.",
+                            "continue": True
+                        }, status=429)
+                else:
+                    raise
+        
+        # Si aucune réponse n'a été obtenue après tous les essais
+        if ai_response is None:
+            return JsonResponse({
+                "success": False,
+                "error": "Erreur lors de l'appel à l'API. Veuillez réessayer.",
+                "message": "Une erreur s'est produite. Veuillez réessayer.",
+                "continue": True
+            }, status=500)
+            
+        # Vérifier si l'utilisateur veut créer le logement (mots-clés de validation)
+        validation_keywords = ['créer', 'valider', 'ok', 'c\'est bon', 'c\'est tout', 'terminer', 'finaliser', 'je valide', 'créer le logement', 'c\'est parfait', 'parfait']
+        user_wants_to_create = any(keyword in user_message.lower() for keyword in validation_keywords)
+        
+        # Si l'utilisateur veut créer et que tous les champs sont remplis, forcer READY_TO_CREATE
+        if user_wants_to_create:
+            required_fields = ['title', 'description', 'type_logement', 'address', 'city', 'price', 'surface', 'rooms', 'bathrooms']
+            all_fields_present = all(
+                field in current_data and current_data[field] and str(current_data[field]).strip() != ""
+                for field in required_fields
+            )
+            if all_fields_present:
+                # Forcer la création
+                ai_response = "READY_TO_CREATE\n" + json.dumps(current_data, ensure_ascii=False)
+        
+        # Vérifier si l'IA a mis à jour les données
+        updated_data = current_data.copy()
+        if "DATA_UPDATE:" in ai_response:
+                # Extraire le JSON mis à jour
+                data_start = ai_response.find("DATA_UPDATE:") + len("DATA_UPDATE:")
+                json_start = ai_response.find("{", data_start)
+                json_end = ai_response.find("}", json_start) + 1
+                
+                if json_start != -1 and json_end > json_start:
+                    json_str = ai_response[json_start:json_end].strip()
+                    try:
+                        new_data = json.loads(json_str)
+                        # Nettoyer et valider les données
+                        for key, value in new_data.items():
+                            if value is not None and value != "":
+                                # Conversion spéciale pour certains champs
+                                if key == "wifi":
+                                    if isinstance(value, str):
+                                        updated_data[key] = value.lower() in ['true', '1', 'yes', 'oui', 'wifi', 'oui']
+                                    else:
+                                        updated_data[key] = bool(value)
+                                elif key in ['price', 'surface']:
+                                    try:
+                                        updated_data[key] = float(value)
+                                    except (ValueError, TypeError):
+                                        pass
+                                elif key in ['rooms', 'bathrooms']:
+                                    try:
+                                        updated_data[key] = int(float(value))
+                                    except (ValueError, TypeError):
+                                        pass
+                                elif key == "type_logement":
+                                    valid_types = ['APPARTEMENT', 'MAISON', 'STUDIO', 'VILLA', 'AUTRE']
+                                    if value.upper() in valid_types:
+                                        updated_data[key] = value.upper()
+                                elif key == "model_3d":
+                                    # Garder l'URL du modèle 3D si fournie
+                                    if value and isinstance(value, str) and (value.startswith('http') or value.startswith('https')):
+                                        updated_data[key] = value
+                                else:
+                                    updated_data[key] = str(value)
+                        # Nettoyer la réponse pour ne garder que la question
+                        ai_response = ai_response[json_end:].strip()
+                        if ai_response.startswith("\n"):
+                            ai_response = ai_response[1:].strip()
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Erreur parsing DATA_UPDATE: {json_str}", exc_info=True)
+        
+        # Vérifier si l'IA dit que tout est prêt
+        if "READY_TO_CREATE" in ai_response:
+                # Extraire le JSON
+                json_start = ai_response.find("{")
+                json_end = ai_response.rfind("}") + 1
+                
+                if json_start != -1 and json_end > json_start:
+                    json_str = ai_response[json_start:json_end]
+                    try:
+                        logement_data = json.loads(json_str)
+                        
+                        # Valider et nettoyer les données
+                        valid_types = ['APPARTEMENT', 'MAISON', 'STUDIO', 'VILLA', 'AUTRE']
+                        if logement_data.get('type_logement') not in valid_types:
+                            logement_data['type_logement'] = 'AUTRE'
+                        
+                        # Convertir les valeurs numériques
+                        for field in ['price', 'surface', 'rooms', 'bathrooms']:
+                            if field in logement_data and logement_data[field] is not None:
+                                try:
+                                    if field in ['rooms', 'bathrooms']:
+                                        logement_data[field] = int(float(logement_data[field]))
+                                    else:
+                                        logement_data[field] = float(logement_data[field])
+                                except (ValueError, TypeError):
+                                    return JsonResponse({
+                                        "success": False,
+                                        "error": f"Valeur invalide pour {field}",
+                                        "message": "Veuillez fournir une valeur valide.",
+                                        "continue": True
+                                    })
+                        
+                        # Convertir wifi
+                        if 'wifi' in logement_data:
+                            wifi_val = logement_data['wifi']
+                            if isinstance(wifi_val, str):
+                                logement_data['wifi'] = wifi_val.lower() in ['true', '1', 'yes', 'oui', 'wifi']
+                            else:
+                                logement_data['wifi'] = bool(wifi_val)
+                        else:
+                            logement_data['wifi'] = False
+                        
+                        # Gérer la prédiction de prix si demandée
+                        if logement_data.get('price') == 'PREDICT_PRICE' or (isinstance(logement_data.get('price'), str) and 'prédire' in logement_data.get('price', '').lower()):
+                            # Utiliser le service de prédiction ML
+                            try:
+                                from .ml_service import predict_price
+                                
+                                city = logement_data.get('city', 'Tunis')
+                                region = CITY_TO_REGION.get(city, 'Grand Tunis')
+                                surface = float(logement_data.get('surface', 0))
+                                bathrooms = int(logement_data.get('bathrooms', 1))
+                                rooms = int(logement_data.get('rooms', 1))
+                                logement_type = logement_data.get('type_logement', 'APPARTEMENT')
+                                
+                                predicted_price = predict_price(
+                                    city=city,
+                                    region=region,
+                                    surface=surface,
+                                    bathrooms=bathrooms,
+                                    rooms=rooms,
+                                    logement_type=logement_type
+                                )
+                                logement_data['price'] = float(predicted_price)
+                            except Exception as e:
+                                logger.error(f"Erreur lors de la prédiction du prix: {e}", exc_info=True)
+                                return JsonResponse({
+                                    "success": False,
+                                    "error": "Impossible de prédire le prix. Veuillez fournir un prix manuellement.",
+                                    "message": "Impossible de prédire le prix. Veuillez indiquer le prix mensuel en DT.",
+                                    "continue": True
+                                })
+                        
+                        # Vérifier que tous les champs obligatoires sont présents
+                        required_fields = ['title', 'description', 'type_logement', 'address', 'city', 'price', 'surface', 'rooms', 'bathrooms']
+                        missing_fields = [f for f in required_fields if not logement_data.get(f)]
+                        
+                        if missing_fields:
+                            return JsonResponse({
+                                "success": False,
+                                "error": f"Champs manquants: {', '.join(missing_fields)}",
+                                "message": f"Veuillez fournir: {', '.join(missing_fields)}",
+                                "continue": True
+                            })
+                        
+                        # Récupérer les images temporaires si elles existent
+                        image_ids = data.get('image_ids', [])
+                        
+                        # Déterminer l'image principale (première image si disponible)
+                        main_image = None
+                        if image_ids:
+                            try:
+                                from .models import TemporaryImage
+                                temp_img = TemporaryImage.objects.filter(id=image_ids[0], user=request.user).first()
+                                if temp_img:
+                                    main_image = temp_img.image
+                            except Exception:
+                                pass
+                        
+                        # Créer le logement directement dans la base de données
+                        try:
+                            logement = Logement.objects.create(
+                                owner=request.user,
+                                title=logement_data['title'],
+                                description=logement_data['description'],
+                                type_logement=logement_data['type_logement'],
+                                address=logement_data['address'],
+                                city=logement_data['city'],
+                                price=logement_data['price'],
+                                surface=logement_data['surface'],
+                                rooms=logement_data['rooms'],
+                                bathrooms=logement_data.get('bathrooms', 1),
+                                wifi=logement_data.get('wifi', False),
+                                image=main_image,  # Image principale
+                                model_3d=logement_data.get('model_3d') or None,  # Modèle 3D optionnel
+                                approved=False,  # En attente d'approbation par un administrateur
+                                rejected=False,
+                                available=True
+                            )
+                            
+                            # Associer les images secondaires au logement (sauf la première qui est l'image principale)
+                            if len(image_ids) > 1:
+                                from .models import LogementImage, TemporaryImage
+                                for img_id in image_ids[1:]:  # Sauter la première image (déjà utilisée comme principale)
+                                    try:
+                                        temp_img = TemporaryImage.objects.get(id=img_id, user=request.user)
+                                        LogementImage.objects.create(
+                                            logement=logement,
+                                            image=temp_img.image
+                                        )
+                                        temp_img.delete()  # Supprimer l'image temporaire
+                                    except TemporaryImage.DoesNotExist:
+                                        pass
+                            
+                            # Supprimer aussi la première image temporaire si elle a été utilisée
+                            if image_ids and main_image:
+                                try:
+                                    from .models import TemporaryImage
+                                    temp_img = TemporaryImage.objects.filter(id=image_ids[0], user=request.user).first()
+                                    if temp_img:
+                                        temp_img.delete()
+                                except Exception:
+                                    pass
+                            
+                            return JsonResponse({
+                                "success": True,
+                                "created": True,
+                                "logement_id": logement.id,
+                                "message": "✅ Logement créé avec succès! Il est maintenant en attente d'approbation par un administrateur."
+                            })
+                        except Exception as e:
+                            logger.error(f"Erreur lors de la création du logement: {e}", exc_info=True)
+                            return JsonResponse({
+                                "success": False,
+                                "error": f"Erreur lors de la création: {str(e)}",
+                                "continue": True
+                            })
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Erreur parsing JSON: {ai_response}", exc_info=True)
+                        return JsonResponse({
+                            "success": False,
+                            "error": "Erreur lors de l'analyse de la réponse",
+                            "message": "Veuillez réessayer.",
+                            "continue": True
+                        })
+        
+        # Si pas prêt, retourner la question de l'IA avec les données mises à jour
+        return JsonResponse({
+            "success": True,
+            "created": False,
+            "message": ai_response,
+            "current_data": updated_data,
+            "continue": True
+        })
+        
+    except requests.RequestException as e:
+            logger.error(f"Erreur API Groq: {e}", exc_info=True)
+            error_msg = str(e)
+            if "429" in error_msg or "Too Many Requests" in error_msg:
+                return JsonResponse(
+                    {"success": False, "error": "Trop de requêtes. Veuillez patienter quelques secondes avant de réessayer.", "continue": True},
+                    status=429
+                )
+            return JsonResponse(
+                {"success": False, "error": f"Erreur lors de l'appel à l'API: {error_msg}", "continue": True},
+                status=500
+            )
+    except Exception as e:
+        logger.error(f"Erreur lors de la génération: {e}", exc_info=True)
+        return JsonResponse(
+            {"success": False, "error": f"Erreur lors du traitement: {str(e)}"},
+            status=500
+        )
+            
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "error": "JSON invalide"},
+            status=400
+        )
+    except Exception as e:
+        logger.error(f"Erreur serveur: {e}", exc_info=True)
+        return JsonResponse(
+            {"success": False, "error": f"Erreur serveur : {str(e)}"},
+            status=500
+        )
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_temp_image(request):
+    """
+    Upload une image temporaire pendant la création avec IA
+    """
+    try:
+        if 'image' not in request.FILES:
+            return JsonResponse(
+                {"success": False, "error": "Aucune image fournie"},
+                status=400
+            )
+        
+        image_file = request.FILES['image']
+        
+        # Créer l'image temporaire
+        temp_image = TemporaryImage.objects.create(
+            user=request.user,
+            image=image_file
+        )
+        
+        return JsonResponse({
+            "success": True,
+            "image_id": temp_image.id,
+            "image_url": temp_image.image.url
+        })
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de l'upload d'image temporaire: {e}", exc_info=True)
+        return JsonResponse(
+            {"success": False, "error": f"Erreur lors de l'upload: {str(e)}"},
+            status=500
+        )
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def summarize_description(request, logement_id):
+    """
+    Endpoint pour résumer la description d'un logement en utilisant Groq (LLM).
+    """
+    try:
+        # Récupérer le logement
+        logement = get_object_or_404(Logement, id=logement_id)
+        
+        # Vérifier que la description existe et n'est pas vide
+        description = logement.description
+        if not description or len(description.strip()) == 0:
+            return JsonResponse(
+                {"error": "La description est vide"},
+                status=400
+            )
+        
+        # Vérifier si la description est assez longue pour justifier un résumé
+        # (optionnel, mais on peut définir un seuil, par exemple 200 caractères)
+        if len(description) < 200:
+            return JsonResponse(
+                {"error": "La description est trop courte pour être résumée"},
+                status=400
+            )
+        
+        # Récupérer la configuration Groq depuis settings
+        api_key = getattr(settings, "EDUBOT_API_KEY", "")
+        api_base = getattr(settings, "EDUBOT_API_BASE", "https://api.groq.com/openai/v1")
+        model = getattr(settings, "EDUBOT_MODEL", "llama-3.1-8b-instant")
+        
+        if not api_key:
+            return JsonResponse(
+                {"error": "Clé API Groq non configurée"},
+                status=500
+            )
+        
+        # Appel à l'API Groq pour résumer
+        try:
+            response = requests.post(
+                f"{api_base}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "Tu es un expert en synthèse de descriptions immobilières. "
+                                "Ton rôle est de créer un résumé ULTRA-CONCIS (maximum 2-3 phrases) qui capture uniquement l'essentiel. "
+                                "Élimine les répétitions et les détails superflus. "
+                                "Garde uniquement : type de logement, équipements principaux, localisation/avantages clés. "
+                                "Réponds UNIQUEMENT avec le résumé, sans introduction ni formule comme 'Voici un résumé'."
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Résume de manière ultra-concise cette description de logement (2-3 phrases maximum) :\n\n{description}"
+                        }
+                    ],
+                    "temperature": 0.2,
+                    "max_tokens": 150
+                },
+                timeout=30
+            )
+            
+            response.raise_for_status()
+            data = response.json()
+            summary = data["choices"][0]["message"]["content"].strip()
+            
+            # Nettoyer le résumé : supprimer les phrases d'introduction communes
+            phrases_intro = [
+                "Voici un résumé",
+                "Résumé :",
+                "Résumé de la description",
+                "Description résumée :",
+                "Voici le résumé",
+                "Résumé de cette description"
+            ]
+            
+            for phrase in phrases_intro:
+                if summary.startswith(phrase):
+                    # Supprimer la phrase d'introduction et les deux-points/points qui suivent
+                    summary = summary[len(phrase):].strip()
+                    if summary.startswith(":"):
+                        summary = summary[1:].strip()
+                    if summary.startswith("."):
+                        summary = summary[1:].strip()
+                    break
+            
+            # S'assurer que le résumé commence par une majuscule
+            if summary and len(summary) > 0:
+                summary = summary[0].upper() + summary[1:] if len(summary) > 1 else summary.upper()
+            
+            return JsonResponse({
+                "success": True,
+                "summary": summary,
+                "original_length": len(description)
+            })
+            
+        except requests.RequestException as e:
+            logger.error(f"Erreur API Groq lors du résumé: {e}", exc_info=True)
+            return JsonResponse(
+                {"error": f"Erreur lors de l'appel à l'API de résumé: {str(e)}"},
+                status=500
+            )
+        except Exception as e:
+            logger.error(f"Erreur lors du résumé: {e}", exc_info=True)
+            return JsonResponse(
+                {"error": f"Erreur lors du traitement: {str(e)}"},
+                status=500
+            )
+            
+    except Exception as e:
+        logger.error(f"Erreur serveur lors du résumé: {e}", exc_info=True)
+        return JsonResponse(
+            {"error": f"Erreur serveur : {str(e)}"},
+            status=500
+        )

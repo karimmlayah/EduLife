@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=200, verbose_name='Titre de la recherche')),
                 ('description', models.TextField(help_text='Décrivez ce que vous cherchez (budget, préférences, etc.)', verbose_name='Description')),
                 ('city', models.CharField(max_length=100, verbose_name='Ville recherchée')),
-                ('budget_max', models.DecimalField(decimal_places=2, help_text='Budget maximum par mois', max_digits=10, verbose_name='Budget maximum (DZD)')),
+                ('budget_max', models.DecimalField(decimal_places=2, help_text='Budget maximum par mois', max_digits=10, verbose_name='Budget maximum (DT)')),
                 ('status', models.CharField(choices=[('PENDING', 'En attente'), ('ACCEPTED', 'Accepté'), ('REJECTED', 'Rejeté'), ('COMPLETED', 'Complété')], default='PENDING', max_length=20, verbose_name='Statut')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date de création')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Date de modification')),

@@ -291,6 +291,42 @@
       white-space: pre-wrap;
     }
 
+    .btn-summarize {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-summarize:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-summarize:active {
+      transform: translateY(0);
+    }
+
+    .btn-summarize:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     .detail-owner {
       display: flex;
       align-items: center;
@@ -585,6 +621,49 @@
       width: 30px;
       border-radius: 5px;
     }
+
+    /* Styles pour la section vidéo */
+    .detail-video {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .detail-video h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-video h3 i {
+      color: #667eea;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* Ratio 16:9 */
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #000;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+    }
   </style>
 {% endblock %}
 
@@ -674,7 +753,7 @@
               </div>
             </div>
             <div class="detail-price">
-              {{ logement.price|floatformat:0 }} DZD
+              {{ logement.price|floatformat:0 }} DT
             </div>
           </div>
 
@@ -698,8 +777,39 @@
 
           <div class="detail-description">
             <h3>Description</h3>
-            <p>{{ logement.description }}</p>
+            <p id="logement-description">{{ logement.description }}</p>
+            {% if logement.description|length > 200 %}
+            <div style="margin-top: 1rem;">
+              <button id="summarize-btn" class="btn-summarize" onclick="summarizeDescription({{ logement.id }})">
+                <i class="bi bi-file-text"></i> Résumer la description
+              </button>
+            </div>
+            <div id="summary-container" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #e0f2fe; border-radius: 8px; border-left: 4px solid #667eea;">
+              <h4 style="margin-bottom: 0.5rem; color: #1f2937; font-size: 1rem; font-weight: 600;">
+                <i class="bi bi-lightbulb"></i> Résumé
+              </h4>
+              <div id="summary-content" style="color: #4b5563; line-height: 1.6;"></div>
+              <div id="summary-loading" style="display: none; text-align: center; padding: 1rem;">
+                <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i>
+                <span style="margin-left: 0.5rem;">Génération du résumé...</span>
+              </div>
+            </div>
+            {% endif %}
           </div>
+
+          {% if logement.video %}
+          <div class="detail-video">
+            <h3><i class="bi bi-play-circle"></i> Vidéo</h3>
+            <div class="video-container">
+              <video controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain;">
+                <source src="{{ logement.video.url }}" type="video/mp4">
+                <source src="{{ logement.video.url }}" type="video/webm">
+                <source src="{{ logement.video.url }}" type="video/ogg">
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
+            </div>
+          </div>
+          {% endif %}
 
           {% if logement.model_3d %}
           <div class="detail-description" style="margin-top: 2rem;">
@@ -818,6 +928,68 @@
     });
   </script>
   {% endif %}
+
+  <script>
+    function summarizeDescription(logementId) {
+      const btn = document.getElementById('summarize-btn');
+      const summaryContainer = document.getElementById('summary-container');
+      const summaryContent = document.getElementById('summary-content');
+      const summaryLoading = document.getElementById('summary-loading');
+      
+      // Désactiver le bouton et afficher le chargement
+      btn.disabled = true;
+      summaryContainer.style.display = 'block';
+      summaryContent.style.display = 'none';
+      summaryLoading.style.display = 'block';
+      
+      // Appel API
+      fetch(`/Logement/${logementId}/summarize/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({})
+      })
+      .then(response => response.json())
+      .then(data => {
+        summaryLoading.style.display = 'none';
+        
+        if (data.success) {
+          summaryContent.innerHTML = data.summary;
+          summaryContent.style.display = 'block';
+          btn.style.display = 'none'; // Cacher le bouton après succès
+        } else {
+          summaryContent.innerHTML = '<span style="color: #ef4444;">Erreur: ' + (data.error || 'Une erreur est survenue') + '</span>';
+          summaryContent.style.display = 'block';
+          btn.disabled = false; // Réactiver le bouton en cas d'erreur
+        }
+      })
+      .catch(error => {
+        summaryLoading.style.display = 'none';
+        summaryContent.innerHTML = '<span style="color: #ef4444;">Erreur de connexion: ' + error.message + '</span>';
+        summaryContent.style.display = 'block';
+        btn.disabled = false; // Réactiver le bouton en cas d'erreur
+      });
+    }
+    
+    // Fonction pour récupérer le cookie CSRF
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+
   
   <!-- Toast Notifications -->
   {% include 'includes/toast_notifications.html' %}

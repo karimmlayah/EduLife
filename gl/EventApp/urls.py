@@ -10,5 +10,5 @@ urlpatterns = [
     path("payment/success/", views.payment_success, name="payment_success"),
     path("payment/cancel/", views.payment_cancel, name="payment_cancel"),
     path('liberer_place/<uuid:seat_id>/', views.liberer_place, name='liberer_place'),
-
+    path("agent-reservation/", views.agent_reservation_view, name="agent_reservation"),
 ]

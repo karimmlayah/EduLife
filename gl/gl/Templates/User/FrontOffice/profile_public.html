@@ -856,12 +856,12 @@
             <img src="{% static 'User/evently/img/default-avatar.svg' %}" alt="{{ user_obj.get_full_name|default:user_obj.username }}" />
           {% endif %}
         </div>
-        <button class="profile-avatar-edit" onclick="document.getElementById('avatar-input').click()">
+        <button class="profile-avatar-edit" onclick="document.getElementById('avatar-input').click()" id="avatar-edit-btn">
           <i class="bi bi-camera"></i>
         </button>
-        <form method="post" action="{% url 'profile_update_public' %}" enctype="multipart/form-data" style="display: none;">
+        <form method="post" action="{% url 'profile_update_public' %}" enctype="multipart/form-data" style="display: none;" id="avatar-form">
           {% csrf_token %}
-          <input type="file" id="avatar-input" name="avatar" accept="image/*" onchange="this.form.submit()">
+          <input type="file" id="avatar-input" name="avatar" accept="image/*" onchange="handleAvatarChange(event)">
         </form>
       </div>
     </div>
@@ -1452,6 +1452,52 @@ function triggerCoverPhotoUpload() {
   }
 }
 
+// Fonction pour gérer le changement d'avatar avec validation
+function handleAvatarChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Vérifier que c'est une image
+  if (!file.type.startsWith('image/')) {
+    alert('Veuillez sélectionner un fichier image.');
+    event.target.value = '';
+    return;
+  }
+
+  // Vérifier la taille du fichier (max 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Le fichier est trop volumineux. Taille maximale : 10MB.');
+    event.target.value = '';
+    return;
+  }
+
+  // Afficher un message de chargement
+  const button = document.getElementById('avatar-edit-btn');
+  if (button) {
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Validation...';
+    button.disabled = true;
+    
+    // Soumettre le formulaire après un court délai pour permettre l'affichage du message
+    setTimeout(() => {
+      const form = document.getElementById('avatar-form');
+      if (form) {
+        form.submit();
+      } else {
+        console.error('Formulaire d\'avatar introuvable');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+      }
+    }, 100);
+  } else {
+    // Si le bouton n'existe pas, soumettre directement
+    const form = document.getElementById('avatar-form');
+    if (form) {
+      form.submit();
+    }
+  }
+}
+
 // Fonction pour gérer le changement de photo de couverture
 function handleCoverPhotoChange(event) {
   const file = event.target.files[0];
@@ -1758,6 +1804,60 @@ function confirmDeleteSubmit() {
 </script>
     </div>
   </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Script pour convertir les messages Django en toast notifications -->
+<script>
+  (function() {
+    let messagesDisplayed = false;
+    
+    function displayDjangoMessages() {
+      if (messagesDisplayed) return;
+      messagesDisplayed = true;
+      
+      {% if messages %}
+      {% for message in messages %}
+      (function() {
+        const msgText = '{{ message|escapejs }}';
+        const msgLevel = '{{ message.tags|default:"info" }}';
+        let toastType = 'info';
+        
+        if (msgLevel === 'error' || msgLevel === 'danger') {
+          toastType = 'error';
+        } else if (msgLevel === 'warning') {
+          toastType = 'warning';
+        } else if (msgLevel === 'success') {
+          toastType = 'success';
+        }
+        
+        // Attendre que showToast soit disponible
+        function showToastMessage() {
+          if (typeof window.showToast !== 'undefined') {
+            window.showToast(msgText, toastType, 6000);
+          } else {
+            // Réessayer après un court délai
+            setTimeout(showToastMessage, 100);
+          }
+        }
+        
+        // Démarrer l'affichage
+        setTimeout(showToastMessage, 200);
+      })();
+      {% endfor %}
+      {% endif %}
+    }
+    
+    // Afficher les messages au chargement de la page
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(displayDjangoMessages, 300);
+      });
+    } else {
+      setTimeout(displayDjangoMessages, 300);
+    }
+  })();
+</script>
 {% endblock %}
 
 

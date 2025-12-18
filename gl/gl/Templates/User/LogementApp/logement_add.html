@@ -298,6 +298,118 @@
       font-size: 1.1rem;
     }
 
+    /* Style pour le bouton de prédiction du prix */
+    .btn-predict-price {
+      width: 100%;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-predict-price::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-predict-price:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-predict-price:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-predict-price:active {
+      transform: translateY(0);
+    }
+
+    .btn-predict-price i {
+      font-size: 1rem;
+    }
+
+    .btn-predict-price:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Style pour le bouton de carte */
+    .btn-map-picker {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f87500 0%, #ff9500 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(248, 117, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-map-picker::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-map-picker:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-map-picker:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 117, 0, 0.5);
+      background: linear-gradient(135deg, #ff9500 0%, #f87500 100%);
+    }
+
+    .btn-map-picker:active {
+      transform: translateY(0);
+    }
+
+    .btn-map-picker i {
+      font-size: 1rem;
+    }
+
     /* Styles pour la validation */
     .form-control.error {
       border-color: #dc3545;
@@ -375,6 +487,16 @@
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          
           <div class="form-group" id="title-group">
             <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }} <span class="text-danger">*</span></label>
             {{ form.title }}
@@ -442,7 +564,7 @@
 
           <!-- Bouton pour choisir sur la carte -->
           <div class="form-group">
-            <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="openMapPicker()">
+            <button type="button" class="btn-map-picker" onclick="openMapPicker()">
               <i class="bi bi-geo-alt-fill"></i> Choisir sur la carte
             </button>
             <small class="form-text text-muted d-block mt-1">
@@ -463,33 +585,6 @@
             {% endif %}
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group" id="price-group">
-              <label for="{{ form.price.id_for_label }}" class="form-label">{{ form.price.label }} <span class="text-danger">*</span></label>
-              {{ form.price }}
-              <span class="error-message hidden" id="price-error"></span>
-              {% if form.price.errors %}
-                <ul class="errorlist">
-                  {% for error in form.price.errors %}
-                    <li>{{ error }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            </div>
-
-            <div class="form-group" id="surface-group">
-              <label for="{{ form.surface.id_for_label }}" class="form-label">{{ form.surface.label }} <span class="text-danger">*</span></label>
-              {{ form.surface }}
-              <span class="error-message hidden" id="surface-error"></span>
-              {% if form.surface.errors %}
-                <ul class="errorlist">
-                  {% for error in form.surface.errors %}
-                    <li>{{ error }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            </div>
-          </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group" id="rooms-group">
@@ -518,6 +613,38 @@
               {% endif %}
             </div>
           </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+
+            <div class="form-group" id="surface-group">
+              <label for="{{ form.surface.id_for_label }}" class="form-label">{{ form.surface.label }} <span class="text-danger">*</span></label>
+              {{ form.surface }}
+              <span class="error-message hidden" id="surface-error"></span>
+              {% if form.surface.errors %}
+                <ul class="errorlist">
+                  {% for error in form.surface.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+            <div class="form-group" id="price-group">
+              <label for="{{ form.price.id_for_label }}" class="form-label">{{ form.price.label }} <span class="text-danger">*</span></label>
+              {{ form.price }}
+              <span class="error-message hidden" id="price-error"></span>
+              {% if form.price.errors %}
+                <ul class="errorlist">
+                  {% for error in form.price.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <button type="button" id="predict-price-btn" class="btn-predict-price" onclick="predictPrice()">
+                <i class="bi bi-robot"></i> Prédire le prix avec l'IA
+              </button>
+            </div>
+          </div>
+
 
           <div class="form-group" id="image-group">
             <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
@@ -592,10 +719,8 @@
               <small class="form-text text-muted">{{ form.video.help_text }}</small>
             {% endif %}
             <small class="form-text text-muted d-block mt-1">
-              <strong>Exemples d'URLs :</strong><br>
-              • YouTube: <code>https://www.youtube.com/watch?v=...</code><br>
-              • Vimeo: <code>https://vimeo.com/...</code><br>
-              • Autre plateforme vidéo
+              <strong>Formats acceptés :</strong> MP4, WebM, OGG, MOV, AVI<br>
+              <strong>Taille maximale recommandée :</strong> 100 MB
             </small>
             {% if form.video.errors %}
               <ul class="errorlist">
@@ -628,7 +753,90 @@
       </div>
     </div>
   </section>
+  <script>
+    function predictPrice() {
+      const city = document.querySelector('[name="city"]').value;
+      const surface = document.querySelector('[name="surface"]').value;
+      const rooms = document.querySelector('[name="rooms"]').value;
+      const bathrooms = document.querySelector('[name="bathrooms"]').value;
+      const type_logement = document.querySelector('[name="type_logement"]').value;
+    
+      const missingFields = [];
 
+if (!city) missingFields.push("la ville");
+if (!type_logement) missingFields.push("le type de logement");
+if (!surface) missingFields.push("la surface");
+if (!rooms) missingFields.push("le nombre de pièces");
+if (!bathrooms) missingFields.push("le nombre de salles de bain");
+
+if (missingFields.length > 0) {
+  showToast(
+    "❌ Champs manquants : " + missingFields.join(", "),
+    "error"
+  );
+  return;
+}
+
+    
+      // 🔵 TOAST → démarrage de la prédiction
+      if (window.showToast) {
+  window.showToast("🤖 L’IA analyse le logement…", "info");
+}
+    
+      const btn = document.getElementById("predict-price-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyse en cours...';
+    
+      fetch("/Logement/predict-price/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+          city,
+          surface,
+          rooms,
+          bathrooms,
+          type_logement
+        })
+      })
+      .then(res => res.json())
+      .then(resp => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-robot"></i> Prédire le prix avec l\'IA';
+    
+        if (resp.success) {
+          document.querySelector('[name="price"]').value = resp.predicted_price;
+    
+          // 🟢 TOAST succès
+          showToast(
+            `💰 Prix estimé : ${resp.predicted_price} DT / mois`,
+            "success"
+          );
+        } else {
+          // 🔴 TOAST erreur métier
+          showToast(
+            resp.error || "La prédiction n’a pas pu être effectuée.",
+            "error"
+          );
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-robot"></i> Prédire le prix avec l\'IA';
+    
+        // 🔴 TOAST erreur serveur
+        showToast(
+          "Erreur serveur pendant la prédiction. Veuillez réessayer.",
+          "error"
+        );
+      });
+    }
+    </script>
+    
+    
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const form = document.querySelector('form[method="POST"]');
@@ -1105,6 +1313,7 @@
       });
     });
 
+
     // ========== CARTE INTERACTIVE LEAFLET (Modal) ==========
     let mapPicker, mapMarker;
     
@@ -1132,9 +1341,9 @@
       
       setTimeout(() => {
         if (!mapPicker) {
-          // Coordonnées par défaut (Alger, Algérie)
-          const defaultLat = 36.7538;
-          const defaultLng = 3.0588;
+          // Coordonnées par défaut (Tunis, Tunisie)
+          const defaultLat = 36.8065;
+          const defaultLng = 10.1815;
           
           mapPicker = L.map('mapPicker').setView([defaultLat, defaultLng], 13);
           
@@ -1276,4 +1485,104 @@
       <div id="mapPicker" style="width:100%; height:calc(100% - 60px);"></div>
     </div>
   </div>
+
+  <!-- Script pour convertir les messages Django en toast notifications -->
+  <script>
+    (function() {
+      let messagesDisplayed = false;
+      
+      function displayDjangoMessages() {
+        if (messagesDisplayed) return;
+        messagesDisplayed = true;
+        
+        {% if messages %}
+        {% for message in messages %}
+        (function() {
+          const msgText = '{{ message|escapejs }}';
+          const msgLevel = '{{ message.tags|default:"info" }}';
+          let toastType = 'info';
+          
+          if (msgLevel === 'error' || msgLevel === 'danger') {
+            toastType = 'error';
+          } else if (msgLevel === 'warning') {
+            toastType = 'warning';
+          } else if (msgLevel === 'success') {
+            toastType = 'success';
+          }
+          
+          // Fonction pour créer le toast
+          function createToast(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+              const newContainer = document.createElement('div');
+              newContainer.id = 'toast-container';
+              newContainer.className = 'toast-container';
+              document.body.appendChild(newContainer);
+              return createToast(message, type);
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification ' + type;
+            
+            const iconMap = {
+              'success': '<i class="fas fa-check-circle toast-icon"></i>',
+              'error': '<i class="fas fa-times-circle toast-icon"></i>',
+              'warning': '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+              'info': '<i class="fas fa-info-circle toast-icon"></i>'
+            };
+            
+            const icon = iconMap[type] || iconMap['info'];
+            
+            toast.innerHTML = `
+              ${icon}
+              <span class="toast-content">${message}</span>
+              <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(function() {
+              toast.classList.add('hiding');
+              setTimeout(function() {
+                if (toast.parentElement) {
+                  toast.remove();
+                }
+              }, 300);
+            }, 6000);
+          }
+          
+          // Utiliser showToast si disponible, sinon créer directement
+          if (typeof window.showToast !== 'undefined') {
+            window.showToast(msgText, toastType);
+          } else {
+            createToast(msgText, toastType);
+          }
+        })();
+        {% endfor %}
+        {% endif %}
+      }
+      
+      // Exécuter après le chargement
+      function tryDisplayMessages() {
+        if (document.getElementById('toast-container') || document.querySelector('.toast-container')) {
+          displayDjangoMessages();
+        } else {
+          setTimeout(tryDisplayMessages, 100);
+        }
+      }
+      
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(tryDisplayMessages, 300);
+        setTimeout(tryDisplayMessages, 800);
+      } else {
+        window.addEventListener('DOMContentLoaded', function() {
+          setTimeout(tryDisplayMessages, 300);
+          setTimeout(tryDisplayMessages, 800);
+        });
+        window.addEventListener('load', function() {
+          setTimeout(tryDisplayMessages, 300);
+        });
+      }
+    })();
+  </script>
 {% endblock %}
