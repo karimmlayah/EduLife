@@ -1,0 +1,143 @@
+<div id="chatbot-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: 'Segoe UI', sans-serif;">
+    <button id="chatbot-toggle" style="background: #5e72e4; color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 60px; height: 60px; font-size: 24px; display: flex; align-items: center; justify-content: center;">
+        💬
+    </button>
+    
+    <div id="chatbot-container" style="display: none; width: 350px; height: 500px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-direction: column; position: absolute; bottom: 80px; right: 0;">
+        <div style="background: #5e72e4; color: white; padding: 15px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold; font-size: 16px;">Startup Assistant</span>
+            <button id="chatbot-close" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px;">✖</button>
+        </div>
+        
+        <div id="chatbot-messages" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+            <div style="background: #f1f1f1; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 85%;">
+                Hello! I can help you manage startups and investments. You can ask me to list startups, show details, or delete them.
+            </div>
+        </div>
+        
+        <div style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px;">
+            <input type="text" id="chatbot-input" placeholder="Type a message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none;">
+            <button id="chatbot-send" style="background: #5e72e4; color: white; border: none; padding: 0 15px; border-radius: 5px; cursor: pointer;">➤</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const toggle = document.getElementById('chatbot-toggle');
+        const container = document.getElementById('chatbot-container');
+        const close = document.getElementById('chatbot-close');
+        const send = document.getElementById('chatbot-send');
+        const input = document.getElementById('chatbot-input');
+        const messages = document.getElementById('chatbot-messages');
+        
+        // We keep a local history for the session
+        let chatHistory = [];
+
+        function toggleChat() {
+            if (container.style.display === 'none') {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        toggle.addEventListener('click', toggleChat);
+        close.addEventListener('click', toggleChat);
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.style.padding = '10px';
+            div.style.borderRadius = '10px';
+            div.style.maxWidth = '85%';
+            div.style.wordWrap = 'break-word';
+            div.style.marginBottom = '5px';
+            
+            if (sender === 'user') {
+                div.style.background = '#5e72e4';
+                div.style.color = 'white';
+                div.style.alignSelf = 'flex-end';
+                div.style.borderBottomRightRadius = '0';
+            } else {
+                div.style.background = '#f1f1f1';
+                div.style.color = '#333';
+                div.style.alignSelf = 'flex-start';
+                div.style.borderBottomLeftRadius = '0';
+            }
+            
+            // Simple markdown-like rendering for bold/newlines if needed, but textContent is safer
+            div.innerText = text; 
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            
+            // Update history
+            chatHistory.push({ role: sender, parts: [text] });
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            input.value = '';
+            
+            // Show loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.textContent = 'Writing...';
+            loadingDiv.style.alignSelf = 'flex-start';
+            loadingDiv.style.color = '#888';
+            loadingDiv.style.fontSize = '12px';
+            loadingDiv.style.marginLeft = '10px';
+            loadingDiv.id = 'chatbot-loading';
+            messages.appendChild(loadingDiv);
+            messages.scrollTop = messages.scrollHeight;
+            
+            try {
+                const response = await fetch('/chatbot/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: text,
+                        history: chatHistory.slice(0, -1) // Send history excluding the message we just added? 
+                        // Actually, backend appends new message. 
+                        // The 'history' param in utils.get_chat_response expects PREVIOUS history.
+                        // So we should send chatHistory BEFORE we added the current message?
+                        // Let's send the full history including the current user message, 
+                        // but wait, my backend utils.get_chat_response calls chat.send_message(user_message).
+                        // So 'history' should be the CONTEXT.
+                        // So I should pass chatHistory EXCLUDING the last user message.
+                    })
+                });
+                
+                // Remove loading
+                const loading = document.getElementById('chatbot-loading');
+                if (loading) loading.remove();
+                
+                if (!response.ok) {
+                    throw new Error('Server error');
+                }
+
+                const data = await response.json();
+                
+                if (data.response) {
+                    addMessage(data.response, 'model');
+                } else if (data.error) {
+                    addMessage('Error: ' + data.error, 'model');
+                }
+            } catch (error) {
+                const loading = document.getElementById('chatbot-loading');
+                if (loading) loading.remove();
+                console.error(error);
+                addMessage('Sorry, something went wrong.', 'model');
+            }
+        }
+
+        send.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    })();
+</script>

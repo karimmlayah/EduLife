@@ -87,17 +87,9 @@ class OffreStageForm(forms.ModelForm):
     )
     
     etat = forms.CharField(
-        required=True,
+        required=False,
         max_length=50,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Ex: disponible, indisponible...',
-            'maxlength': '50'
-        }),
-        error_messages={
-            'required': 'L\'état est obligatoire.',
-            'max_length': 'L\'état ne peut pas dépasser 50 caractères.'
-        },
+        widget=forms.HiddenInput(),  # Par défaut caché
         initial='disponible'
     )
     
@@ -151,6 +143,50 @@ class OffreStageForm(forms.ModelForm):
                 'class': 'form-check-input'
             }),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Si c'est une nouvelle offre (pas d'instance ou pas de pk)
+        if not self.instance or not self.instance.pk:
+            # Afficher le champ mais en lecture seule avec "disponible"
+            self.fields['etat'].widget = forms.TextInput(attrs={
+                'class': 'form-control',
+                'readonly': True,
+                'value': 'disponible',
+                'style': 'background-color: #e9ecef; cursor: not-allowed;'
+            })
+            self.fields['etat'].initial = 'disponible'
+            self.fields['etat'].required = False
+        else:
+            # Si c'est une modification, permettre de changer l'état avec un select
+            self.fields['etat'].widget = forms.Select(attrs={
+                'class': 'form-control'
+            })
+            self.fields['etat'].choices = [
+                ('disponible', 'Disponible'),
+                ('indisponible', 'Indisponible'),
+            ]
+            # S'assurer que la valeur actuelle de l'offre est utilisée
+            if self.instance and self.instance.etat:
+                self.fields['etat'].initial = self.instance.etat
+            else:
+                self.fields['etat'].initial = 'disponible'
+            self.fields['etat'].required = True
+    
+    def clean_etat(self):
+        """Valide et définit l'état"""
+        etat = self.cleaned_data.get('etat')
+        
+        # Si c'est une nouvelle offre et que l'état n'est pas fourni, mettre "disponible"
+        if not self.instance or not self.instance.pk:
+            if not etat:
+                return 'disponible'
+            # Forcer à "disponible" même si une autre valeur est fournie
+            return 'disponible'
+        
+        # Pour l'édition, retourner la valeur choisie
+        return etat or 'disponible'
     
     def clean_titre(self):
         titre = self.cleaned_data.get('titre')

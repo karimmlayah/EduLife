@@ -647,6 +647,54 @@ def _detect_user_intent(message: str):
     return (None, None, None, None, None, None)
 
 
+def _detect_public_navigation(message: str):
+    """
+    Détecte l'intention de navigation pour le front-office.
+    On ne redirige QUE si un verbe d'action est présent (aller, ouvrir, voir, go, open, visit, etc.).
+    Si c'est une question informative (comment, why, etc.), on ne redirige pas.
+    """
+    import re
+    m = message.lower().strip()
+    
+    # Verbes d'action requis pour déclencher une redirection
+    action_verbs = r'(aller|ouvrir|voir|visiter|acc[ée]der|montrer|go|open|visit|show|navigate|take me to|display)'
+    
+    # Si aucun verbe d'action n'est détecté, on reste en mode conversation
+    if not re.search(action_verbs, m):
+        return None
+
+    # Mots-clés d'information qui annulent la redirection (priorité aux questions)
+    info_keywords = r'(comment|pourquoi|est-ce que|peux-tu m\'expliquer|how|why|can you explain|what is)'
+    if re.search(info_keywords, m):
+        return None
+    
+    # Logements / Housing
+    if re.search(r'(logement|appartement|maison|habiter|r[ée]serv.*chambre|housing|accommodation|apartment|house|room|living|stay)', m):
+        return "/Logement/"
+    
+    # Stages / Internships
+    if re.search(r'(stage|internship|offre.*travail|boulot|cv|entretien|job|work|career|placement|interview)', m):
+        return "/internships/"
+    
+    # Startups
+    if re.search(r'(startup|projet|entreprise|business|logo|investir|invest|company|venture|pitch)', m):
+        return "/startup/startup_list/"
+    
+    # Événements / Events
+    if re.search(r'([ée]v[ée]nement|event|f[êe]te|ticket|r[ée]serv.*place|calendar|agenda|party|festival|concert)', m):
+        return "/Event/"
+    
+    # Covoiturage / Ride sharing
+    if re.search(r'(covoiturage|trajet|voiture|voyage|partage.*route|carpooling|ride|trip|travel|drive|car share)', m):
+        return "/covoiturage/"
+        
+    # Profil / Profile
+    if re.search(r'(profil|compte|mon compte|param[èe]tre|modifier.*info|profile|account|my account|settings|edit)', m):
+        return "/profile/"
+        
+    return None
+
+
 def _edubot_core_answer(user_message: str, system_prompt: str):
     """
     Fonction interne qui envoie la requête à l'API IA et renvoie (reply, error, status_code)
@@ -1061,7 +1109,14 @@ def edubot_public_chat(request):
     reply, error, status = _edubot_core_answer(user_message, public_prompt)
     if error:
         return JsonResponse({"error": error}, status=status)
-    return JsonResponse({"reply": reply})
+        
+    # Détecter la navigation pour redirection automatique
+    redirect_url = _detect_public_navigation(user_message)
+    
+    return JsonResponse({
+        "reply": reply,
+        "redirect": redirect_url
+    })
 
 
 @login_required

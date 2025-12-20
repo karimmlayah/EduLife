@@ -23,7 +23,7 @@ class Startup(models.Model):
     logo = models.ImageField(upload_to='logos/', blank=True, null=True)
     # Optional URL for a logo generated via RapidAPI (AI logo generator)
     #generated_logo_url = models.URLField(max_length=500, blank=True, null=True)
-    founder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True,blank=True)
+    founder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nom_startup

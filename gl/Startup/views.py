@@ -636,6 +636,21 @@ def startup_chatbot(request):
 from django.shortcuts import render
 from Startup.models import Startup
 from Investissement.models import Investissement
+import os
+import pandas as pd
+import numpy as np
+import re
+from django.db import models
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import Ridge, LogisticRegression
+from sklearn.metrics.pairwise import cosine_similarity
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
+from django.conf import settings
 
 def backoffice_dashboard(request):
     total_startups = Startup.objects.count()
@@ -737,10 +752,307 @@ def dashboard_startup(request):
         "status_labels": status_labels,
         "status_values": status_values,
     })
-
-
     return render(request, "startup/Backoffice/dashboard_startup.html", context)
 
+AI_REG = None
+AI_CLF = None
+AI_PREP = None
+AI_VECT = None
+AI_TFIDF = None
+AI_REASONS = None
+AI_SCORE_MIN = None
+AI_SCORE_MAX = None
+
+def ensure_ai_models():
+    global AI_REG, AI_CLF, AI_PREP, AI_VECT, AI_TFIDF, AI_REASONS, AI_SCORE_MIN, AI_SCORE_MAX
+    if AI_REG is not None and AI_CLF is not None and AI_PREP is not None and AI_VECT is not None:
+        return
+    csv_path = os.path.join(settings.BASE_DIR, "ai", "datasets", "startup_finetune_dataset.csv")
+    df = pd.read_csv(csv_path)
+    def get_value(k, t):
+        m = re.search(rf'{k}\s*:\s*(.+)', str(t), re.I)
+        return m.group(1).strip() if m else ""
+    def parse_prompt(t):
+        cat = get_value("Category", t)
+        desired = get_value("Desired fund", t)
+        current = get_value("Current fund", t)
+        status = get_value("Status", t)
+        desc = get_value("Description", t)
+        def to_num(x):
+            try:
+                return float(str(x).replace(",", "").strip())
+            except:
+                return 0.0
+        return pd.Series({
+            "category": cat,
+            "desired_fund": to_num(desired),
+            "current_fund": to_num(current),
+            "status": status,
+            "description": desc,
+            "funding_ratio": (to_num(current) / to_num(desired)) if to_num(desired) > 0 else 0.0
+        })
+    def parse_completion(t):
+        lines = [l.strip() for l in str(t).split("\n") if l.strip()]
+        m = {k.strip().lower(): v.strip() for k, v in [tuple(s.split(":", 1)) for s in lines if ":" in s]}
+        s = m.get("attractiveness", "0")
+        r = m.get("risk", "")
+        a = m.get("reason", "")
+        try:
+            s = int(s)
+        except:
+            s = 0
+        return pd.Series({"score": s, "risk": r, "reason": a})
+    Xp = df["prompt"].apply(parse_prompt)
+    Yc = df["completion"].apply(parse_completion)
+    data = pd.concat([Xp, Yc], axis=1)
+    if len(data) < 500:
+        np.random.seed(42)
+        cats = [c for c in data["category"].fillna("").unique().tolist() if c]
+        stats = ["active", "pending", "funded", "failed", "closed"]
+        aug = []
+        target = 500 - len(data)
+        base_len = len(data)
+        for i in range(target):
+            b = data.iloc[i % base_len]
+            desired = max(10000.0, float(b["desired_fund"]) * float(np.random.uniform(0.8, 1.3)))
+            ratio = float(np.clip(np.random.uniform(0.0, 1.2), 0.0, 1.2))
+            current = float(np.clip(desired * ratio, 0.0, desired * 1.2))
+            status = stats[i % len(stats)]
+            cat = (cats[i % len(cats)]) if cats else (b["category"] or "General")
+            desc = str(b["description"] or "")
+            score = int(np.clip(45 + ratio * 35 + (1 if status == "funded" else 0) * 5 - (1 if status in ["failed", "closed"] else 0) * 10 + np.random.uniform(-8, 8), 0, 100))
+            risk = ["Low", "Medium", "High"][i % 3]
+            reason_flags = []
+            txt = desc.lower()
+            if "revenue" in txt or np.random.rand() < 0.3:
+                reason_flags.append("revenue model clarity")
+            else:
+                reason_flags.append("clarify revenue model")
+            if "partnership" in txt or np.random.rand() < 0.3:
+                reason_flags.append("strategic partnerships needed")
+            else:
+                reason_flags.append("seek partnerships")
+            if "regulatory" in txt or np.random.rand() < 0.2:
+                reason_flags.append("regulatory compliance required")
+            else:
+                reason_flags.append("reduce initial funding target")
+            reason = ", ".join(reason_flags)
+            aug.append({
+                "category": cat,
+                "desired_fund": desired,
+                "current_fund": current,
+                "status": status,
+                "description": desc,
+                "funding_ratio": (current / desired) if desired > 0 else 0.0,
+                "score": score,
+                "risk": risk,
+                "reason": reason
+            })
+        data = pd.concat([data, pd.DataFrame(aug)], ignore_index=True)
+    X = data[["category", "desired_fund", "current_fund", "status", "description", "funding_ratio"]]
+    y_score = data["score"]
+    y_risk = data["risk"]
+    AI_SCORE_MIN = float(y_score.min())
+    AI_SCORE_MAX = float(y_score.max())
+    prep = ColumnTransformer([
+        ("num", Pipeline([("scale", StandardScaler())]), ["desired_fund", "current_fund", "funding_ratio"]),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), ["category", "status"]),
+        ("txt", TfidfVectorizer(max_features=3000), "description")
+    ])
+    reg = Pipeline([("prep", prep), ("model", Ridge())])
+    clf = Pipeline([("prep", prep), ("model", LogisticRegression(max_iter=2000, solver="saga", class_weight="balanced"))])
+    reg.fit(X, y_score)
+    clf.fit(X, y_risk)
+    vect = TfidfVectorizer(max_features=3000)
+    tfidf = vect.fit_transform(data["description"])
+    reasons = list(data["reason"])
+    AI_REG = reg
+    AI_CLF = clf
+    AI_PREP = prep
+    AI_VECT = vect
+    AI_TFIDF = tfidf
+    AI_REASONS = reasons
+
+def reason_to_advices(reason):
+    txt = str(reason).lower()
+    adv = []
+    if "revenue" in txt or "monet" in txt:
+        adv.append("Clarify revenue model")
+    if "funding" in txt or "capex" in txt or "reduce" in txt:
+        adv.append("Reduce initial funding target")
+    if "partnership" in txt or "platform" in txt:
+        adv.append("Secure strategic partnerships")
+    if "regulatory" in txt or "compliance" in txt:
+        adv.append("Plan regulatory and compliance steps")
+    if "differentiation" in txt or "crowded" in txt or "competition" in txt:
+        adv.append("Strengthen differentiation strategy")
+    if "hardware" in txt:
+        adv.append("Mitigate hardware complexity and costs")
+    if "cac" in txt or "acquisition" in txt:
+        adv.append("Control customer acquisition cost")
+    if "logistic" in txt or "ops" in txt:
+        adv.append("Improve operations and logistics")
+    if "validation" in txt or "clinical" in txt:
+        adv.append("Pursue product validation")
+    if "integration" in txt:
+        adv.append("Plan integrations with partners")
+    if not adv and reason:
+        adv.append(reason)
+    return adv
+
+@require_GET
+def startup_predict(request, startup_id):
+    def fallback(startup):
+        desired = float(startup.fond_desire or 0)
+        current = float(startup.fond_actuel or 0)
+        ratio = (current / desired) if desired > 0 else 0.0
+        base = 50 + min(30, ratio * 100 * 0.3)
+        cat = (startup.category or "").lower()
+        status = (startup.statut or "").lower()
+        if "health" in cat or "fintech" in cat:
+            base += 5
+        if status == "pending":
+            base -= 5
+        risk = "Medium"
+        if base >= 75:
+            risk = "Medium"
+        if base < 60:
+            risk = "Medium-High"
+        advice = []
+        if ratio < 0.3:
+            advice.append("Reduce initial funding target")
+        if "revenue" not in (startup.description or "").lower():
+            advice.append("Clarify revenue model")
+        if not advice:
+            advice.append("Strengthen differentiation strategy")
+        return int(round(max(0, min(100, base)))), risk, advice
+    try:
+        ensure_ai_models()
+        s = get_object_or_404(Startup, id_startup=startup_id)
+        ratio = (float(s.fond_actuel) / float(s.fond_desire)) if float(s.fond_desire) > 0 else 0.0
+        row = pd.DataFrame([{
+            "category": s.category or "",
+            "desired_fund": float(s.fond_desire or 0),
+            "current_fund": float(s.fond_actuel or 0),
+            "status": s.statut or "",
+            "description": s.description or "",
+            "funding_ratio": ratio
+        }])
+        score = float(AI_REG.predict(row)[0])
+        if AI_SCORE_MIN is not None and AI_SCORE_MAX is not None and AI_SCORE_MAX > AI_SCORE_MIN:
+            score = 100.0 * (score - AI_SCORE_MIN) / (AI_SCORE_MAX - AI_SCORE_MIN)
+        status_norm = (s.statut or "").lower()
+        score = float(score)
+        score -= 25.0 * (1.0 - float(np.clip(ratio, 0.0, 1.0)))
+        if status_norm == "pending":
+            score -= 10.0
+        elif status_norm == "funded":
+            score += 10.0
+        elif status_norm in ["failed", "closed"]:
+            score -= 25.0
+        score = float(np.clip(score, 0.0, 95.0))
+        risk = AI_CLF.predict(row)[0]
+        desc_txt = s.description or ""
+        dvec = AI_VECT.transform([desc_txt])
+        vec_arr = dvec.toarray()
+        vec_norm = float(np.linalg.norm(vec_arr))
+        adv = []
+        if vec_norm < 1e-6 or len(desc_txt.strip()) < 12:
+            cat_lower = (s.category or "").lower()
+            adv.append("Provide more detailed description")
+            adv.append("Clarify revenue model")
+            if "fintech" in cat_lower or "health" in cat_lower:
+                adv.append("Plan regulatory and compliance steps")
+            elif "market" in cat_lower or "e-comm" in cat_lower:
+                adv.append("Control customer acquisition cost")
+            elif "energy" in cat_lower or "clean" in cat_lower or "env" in cat_lower:
+                adv.append("Secure strategic partnerships")
+            adv = list(dict.fromkeys(adv))[:3]
+        else:
+            sims = cosine_similarity(dvec, AI_TFIDF).flatten()
+            top_idx = np.argsort(sims)[-3:][::-1]
+            for i in top_idx:
+                adv.extend(reason_to_advices(AI_REASONS[int(i)]))
+            adv = list(dict.fromkeys(adv))[:3]
+        return JsonResponse({
+            "attractiveness": int(max(0, min(100, round(score)))),
+            "risk": str(risk),
+            "advice": adv
+        })
+    except Exception as e:
+        s = get_object_or_404(Startup, id_startup=startup_id)
+        score, risk, adv = fallback(s)
+        return JsonResponse({
+            "attractiveness": score,
+            "risk": risk,
+            "advice": adv,
+            "error": str(e)
+        })
+
+@require_POST
+def api_predict(request):
+    try:
+        ensure_ai_models()
+        payload = json.loads(request.body.decode("utf-8"))
+        category = payload.get("category") or ""
+        desired_fund = float(payload.get("desired_fund") or 0)
+        current_fund = float(payload.get("current_fund") or 0)
+        status = payload.get("status") or ""
+        description = payload.get("description") or ""
+        ratio = (current_fund / desired_fund) if desired_fund > 0 else 0.0
+        row = pd.DataFrame([{
+            "category": category,
+            "desired_fund": desired_fund,
+            "current_fund": current_fund,
+            "status": status,
+            "description": description,
+            "funding_ratio": ratio
+        }])
+        score = float(AI_REG.predict(row)[0])
+        if 'AI_SCORE_MIN' in globals() and 'AI_SCORE_MAX' in globals():
+            if AI_SCORE_MIN is not None and AI_SCORE_MAX is not None and AI_SCORE_MAX > AI_SCORE_MIN:
+                score = 100.0 * (score - AI_SCORE_MIN) / (AI_SCORE_MAX - AI_SCORE_MIN)
+        status_norm = (status or "").lower()
+        score = float(score)
+        score -= 25.0 * (1.0 - float(np.clip(ratio, 0.0, 1.0)))
+        if status_norm == "pending":
+            score -= 10.0
+        elif status_norm == "funded":
+            score += 10.0
+        elif status_norm in ["failed", "closed"]:
+            score -= 25.0
+        score = float(np.clip(score, 0.0, 95.0))
+        risk = AI_CLF.predict(row)[0]
+        dvec = AI_VECT.transform([description])
+        vec_arr = dvec.toarray()
+        vec_norm = float(np.linalg.norm(vec_arr))
+        adv = []
+        if vec_norm < 1e-6 or len(description.strip()) < 12:
+            cat_lower = (category or "").lower()
+            adv.append("Provide more detailed description")
+            adv.append("Clarify revenue model")
+            if "fintech" in cat_lower or "health" in cat_lower:
+                adv.append("Plan regulatory and compliance steps")
+            elif "market" in cat_lower or "e-comm" in cat_lower:
+                adv.append("Control customer acquisition cost")
+            elif "energy" in cat_lower or "clean" in cat_lower or "env" in cat_lower:
+                adv.append("Secure strategic partnerships")
+            adv = list(dict.fromkeys(adv))[:3]
+        else:
+            sims = cosine_similarity(dvec, AI_TFIDF).flatten()
+            top_idx = np.argsort(sims)[-3:][::-1]
+            for i in top_idx:
+                adv.extend(reason_to_advices(AI_REASONS[int(i)]))
+            adv = list(dict.fromkeys(adv))[:3]
+        return JsonResponse({
+            "attractiveness": int(max(0, min(100, round(score)))),
+            "risk": str(risk),
+            "advice": adv
+        })
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e)
+        }, status=400)
 
 # ----------------------------------------------------------
 #   STARTUP LIST PAGE

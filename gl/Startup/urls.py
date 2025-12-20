@@ -13,6 +13,8 @@ urlpatterns = [
 
     # Chatbot endpoint
     path('chatbot/', views.startup_chatbot, name='startup_chatbot'),
+    path('predict/<int:startup_id>/', views.startup_predict, name='startup_predict'),
+    path('api/predict/', views.api_predict, name='api_predict'),
 
     # BACKOFFICE
     path('dashboard_startup/', views.dashboard_startup, name='dashboard_startup'),

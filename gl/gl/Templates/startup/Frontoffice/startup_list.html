@@ -104,19 +104,15 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_applications' %}">My Applications</a></li>
               <li><a class="dropdown-item" href="{% url 'my_interviews' %}">My Interviews</a></li>
-              <li><a class="dropdown-item" href="{% url 'my_favoris' %}">My Favoris</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'generate_cv' %}"><i class="bi bi-file-earmark-pdf me-2"></i>Generate CV</a></li>
             </ul>
           </li>
           <li class="dropdown">
-            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' or request.resolver_match.url_name == 'my_investissements' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#about" class="{% if request.resolver_match.url_name == 'startup_list' or request.resolver_match.url_name == 'create_startup' or request.resolver_match.url_name == 'my_startups' %}active{% endif %}"><span><i class="bi bi-briefcase me-1"></i> Startups</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{% url 'startup_list' %}"><i class="bi bi-currency-dollar me-1"></i> Invest Now</a></li>
               <li><a href="{% url 'create_startup' %}"><i class="bi bi-plus-circle me-1"></i> Create a Startup</a></li>
               {% if request.user.is_authenticated %}
                 <li><a href="{% url 'my_startups' %}"><i class="bi bi-briefcase me-1"></i> My Startups</a></li>
-                <li><a href="{% url 'my_investissements' %}"><i class="bi bi-wallet2 me-1"></i> My Investments</a></li>
               {% endif %}
             </ul>
           </li>
@@ -159,6 +155,9 @@
           <div class="user-dropdown" id="idxUserDropdown">
             <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a>
             <a href="{% url 'account_settings' %}"><i class="bi bi-gear me-2"></i> Account Settings</a>
+            {% if request.user.is_superuser %}
+              <a href="{% url 'manage_users' %}"><i class="bi bi-people me-2"></i> Utilisateurs</a>
+            {% endif %}
             <div style="height:1px;background:rgba(255,255,255,.08);margin:6px 4px;"></div>
             <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a>
           </div>
@@ -226,11 +225,12 @@
                   <p class="speaker-summary">{{ startup.description|truncatewords:30 }}</p>
                   <div class="speaker-actions">
                     <a href="{% url 'create_investissement' startup.id_startup %}" class="profile-btn">Invest Now</a>
-                    <div class="speaker-social">
-                      <span class="badge {% if startup.statut == 'active' %}bg-success{% elif startup.statut == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
-                        {{ startup.statut|capfirst }}
-                      </span>
-                    </div>
+                    <a href="javascript:;" class="profile-btn ai-predictor-btn" data-startup-id="{{ startup.id_startup }}" data-bs-toggle="modal" data-bs-target="#aiPredictorModal">AI Predictor</a>
+                  <div class="speaker-social">
+                    <span class="badge {% if startup.statut == 'active' %}bg-success{% elif startup.statut == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                      {{ startup.statut|capfirst }}
+                    </span>
+                  </div>
                   </div>
                   <div class="startup-stats mt-3">
                     <small class="text-muted">
@@ -398,8 +398,69 @@
         if(menu.classList.contains('open')){ setTimeout(()=>document.addEventListener('click', closeAll), 0); }
       });
     })();
+
+    (function(){
+      const modal = document.getElementById('aiPredictorModal');
+      const btns = document.querySelectorAll('.ai-predictor-btn');
+      let currentId = null;
+      btns.forEach(b=>{
+        b.addEventListener('click', function(){
+          currentId = this.getAttribute('data-startup-id');
+          const scoreEl = document.getElementById('aiScore');
+          const riskEl = document.getElementById('aiRisk');
+          const advEl = document.getElementById('aiAdvices');
+          if(scoreEl) scoreEl.textContent = '...';
+          if(riskEl) riskEl.textContent = '...';
+          if(advEl) advEl.innerHTML = '';
+          fetch(`/startup/predict/${currentId}/`)
+            .then(r=>{
+              if(!r.ok) throw new Error('Network response was not ok');
+              return r.json();
+            })
+            .then(d=>{
+              if(d.attractiveness!==undefined) scoreEl.textContent = d.attractiveness + ' / 100';
+              if(d.risk!==undefined) riskEl.textContent = d.risk;
+              if(Array.isArray(d.advice)){
+                advEl.innerHTML = '';
+                d.advice.forEach(a=>{
+                  const li = document.createElement('li');
+                  li.textContent = a;
+                  advEl.appendChild(li);
+                });
+              }
+            }).catch(e=>{
+              if(riskEl) riskEl.textContent = 'Error';
+            });
+        });
+      });
+    })();
   </script>
 
-</body>
+  <div class="modal fade" id="aiPredictorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">🎯 AI Startup Success & Investment Attractiveness Predictor (Fine-Tuned)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div style="background:#f8f9fa;border:1px solid #eee;border-radius:8px;padding:12px;">
+            <div style="font-weight:600;margin-bottom:8px;">🤖 AI Analysis</div>
+            <div>• Investment Attractiveness: <span id="aiScore">...</span></div>
+            <div>• Risk Level: <span id="aiRisk">...</span></div>
+            <div>• AI Advice:</div>
+            <ul id="aiAdvices" style="margin-top:6px;margin-bottom:0;"></ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- EduBot & EduVoice Integration -->
+  {% include 'includes/edubot_eduvoice.html' %}
+</body>
 </html>
+

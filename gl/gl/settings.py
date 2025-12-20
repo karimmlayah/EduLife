@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'Startup',
     'Investissement',
     'StartupMembers',
+    'ChatbotApp',
 ]
 
 

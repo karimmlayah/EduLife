@@ -30,6 +30,11 @@ from EventApp.views import dashboard_events
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from ReservationApp.views import mes_reservations_passager
+from gl.views import predict_remuneration, predict_prix_covoiturage
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from gl.views import predict_remuneration, predict_prix_covoiturage
 
 
 
@@ -46,6 +51,7 @@ from gl.views import (
 )
 from gl import views as gl_views
 from CovoiturageApp import views as covoiturage_views
+from postulation import views as postulation_views
 
 def redirect_to_dashboard(request):
     return redirect('dashboard')
@@ -1257,6 +1263,170 @@ def check_favori(request, offre_id):
     is_favori = Favori.objects.filter(user=request.user, offre_id=offre_id).exists()
     return JsonResponse({'is_favori': is_favori})
 
+def predict_remuneration(request):
+    from django.http import JsonResponse
+    from django.views.decorators.csrf import csrf_exempt
+    from datetime import datetime
+    import traceback
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
+    
+    try:
+        from offreStage.ml_pipeline.predictor import get_predictor
+        
+        # Récupérer les données du formulaire
+        domaine = request.POST.get('domaine', '').strip()
+        lieu = request.POST.get('lieu', '').strip()
+        try:
+            duree = int(request.POST.get('duree', 0))
+        except (ValueError, TypeError):
+            duree = 0
+        description = request.POST.get('description', '').strip()
+        titre = request.POST.get('titre', '').strip()
+        has_image = request.POST.get('has_image', 'false') == 'true'
+        visibilite = request.POST.get('visibilite', 'true') == 'true'
+        date_publication = request.POST.get('date_publication', datetime.now().strftime('%Y-%m-%d'))
+        etat = request.POST.get('etat', 'disponible')
+        
+        # Validation des champs obligatoires
+        if not domaine or not lieu or not duree or not description or not titre:
+            return JsonResponse({
+                'success': False,
+                'error': 'Champs obligatoires manquants',
+                'required': ['domaine', 'lieu', 'duree', 'description', 'titre']
+            }, status=400)
+        
+        # Préparer les données pour la prédiction
+        # NOTE: nb_postulations et nb_favoris ne sont plus utilisés car ils ne sont pas disponibles
+        # lors de la création d'une nouvelle offre
+        offre_data = {
+            'domaine': domaine,
+            'lieu': lieu,
+            'duree': duree,
+            'description': description,
+            'titre': titre,
+            'has_image': has_image,
+            'visibilite': visibilite,
+            'date_publication': date_publication,
+            'etat': etat
+        }
+        
+        from offreStage.ml_pipeline.predictor import get_predictor
+# et aussi :
+        from offreStage.ml_pipeline.predictor import reload_predictor
+
+        # Faire la prédiction
+        # Recharger le prédicteur pour s'assurer d'utiliser le dernier modèle entraîné
+        from offreStage.ml_pipeline.predictor import reload_predictor
+        predictor = reload_predictor()
+        predicted_remuneration = predictor.predict(offre_data)
+        
+        return JsonResponse({
+            'success': True,
+            'predicted_remuneration': predicted_remuneration,
+            'message': f'Rémunération suggérée: {predicted_remuneration} DT'
+        })
+        
+    except ValueError as e:
+        error_msg = f"Erreur de validation: {str(e)}"
+        print(f"[ERROR] {error_msg}")
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': error_msg}, status=400)
+    except FileNotFoundError as e:
+        error_msg = f"Modèle ML non trouvé: {str(e)}"
+        print(f"[ERROR] {error_msg}")
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': 'Modèle ML non trouvé. Veuillez exécuter ml_pipeline_complete.py d\'abord.'}, status=500)
+    except Exception as e:
+        error_details = traceback.format_exc()
+        error_msg = f"Erreur lors de la prédiction: {str(e)}"
+        print(f"[ERROR] {error_msg}")
+        print(f"[ERROR] Détails: {error_details}")
+        return JsonResponse({'success': False, 'error': error_msg}, status=500)
+
+@csrf_exempt
+def predict_prix_covoiturage(request):
+    """API endpoint pour prédire le prix d'un trajet de covoiturage"""
+    from django.http import JsonResponse
+    from datetime import datetime
+    import traceback
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
+    
+    try:
+        from CovoiturageApp.ml_pipeline.predictor import reload_predictor
+        
+        # Récupérer les données du formulaire
+        depart = request.POST.get('depart', '').strip()
+        destination = request.POST.get('destination', '').strip()
+        distance_km = request.POST.get('distance_km', '0')
+        duration_min = request.POST.get('duration_min', '0')
+        climatisation = request.POST.get('climatisation', 'false') == 'true'
+        date_covoiturage = request.POST.get('date_covoiturage', '')
+        
+        # Validation des champs obligatoires
+        if not depart or not destination:
+            return JsonResponse({
+                'success': False,
+                'error': 'Départ et destination sont obligatoires'
+            }, status=400)
+        
+        try:
+            distance_km = float(distance_km)
+            duration_min = int(duration_min)
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'success': False,
+                'error': 'Distance et durée doivent être des nombres valides'
+            }, status=400)
+        
+        if distance_km <= 0 or duration_min <= 0:
+            return JsonResponse({
+                'success': False,
+                'error': 'Distance et durée doivent être supérieures à 0'
+            }, status=400)
+        
+        # Préparer les données pour la prédiction
+        offre_data = {
+            'depart': depart,
+            'destination': destination,
+            'distance_km': distance_km,
+            'duration_min': duration_min,
+            'climatisation': climatisation,
+            'date_covoiturage': date_covoiturage
+        }
+        
+        # Faire la prédiction
+        predictor = reload_predictor()
+        predicted_price = predictor.predict(offre_data)
+        
+        return JsonResponse({
+            'success': True,
+            'predicted_price': predicted_price,
+            'message': f'Prix suggéré: {predicted_price} DT'
+        })
+        
+    except FileNotFoundError as e:
+        error_msg = f"Modèle ML non trouvé: {str(e)}"
+        print(f"[ERROR] {error_msg}")
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': 'Modèle ML non trouvé. Veuillez exécuter ml_pipeline_complete.py d\'abord.'
+        }, status=500)
+    except Exception as e:
+        error_details = traceback.format_exc()
+        error_msg = f"Erreur lors de la prédiction: {str(e)}"
+        print(f"[ERROR] {error_msg}")
+        print(f"[ERROR] Détails: {error_details}")
+        return JsonResponse({'success': False, 'error': error_msg}, status=500)
+    
+    from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     # --- ADMIN ---
@@ -1349,6 +1519,11 @@ urlpatterns = [
     path('reservations/accept/<int:id>/', reservation_accept, name='res_accept'),
     path('reservations/reject/<int:id>/', reservation_reject, name='res_reject'),
     path('mes_reservations_passager/', mes_reservations_passager, name='mes_reservations_passager'),
+    path('api/predict-remuneration/', predict_remuneration, name='predict_remuneration'),
+    
+    path('api/predict-prix-covoiturage/', predict_prix_covoiturage, name='predict_prix_covoiturage'),
+    path('generate-motivation-letter/', postulation_views.generate_motivation_letter_api, name='generate_motivation_letter'),
+    path('chatbot/', include('ChatbotApp.urls')),
 ]
 
 if settings.DEBUG:

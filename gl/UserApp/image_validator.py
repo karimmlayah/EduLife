@@ -1,81 +1,38 @@
-"""
-Service de validation d'image pour vérifier si une image contient un être humain.
-Utilise MediaPipe Face Detection.
-"""
-
 import cv2
-import mediapipe as mp
 import numpy as np
-from PIL import Image
-import logging
-
-logger = logging.getLogger(__name__)
-
-# Initialisation MediaPipe
-try:
-    mp_face_detection = mp.solutions.face_detection
-    MEDIAPIPE_AVAILABLE = True
-except Exception as e:
-    MEDIAPIPE_AVAILABLE = False
-    logger.error(f"MediaPipe non disponible: {e}")
 
 
-def validate_avatar_image(image_file, min_confidence=0.6):
+def validate_avatar_image(image_file):
     """
-    Vérifie si une image contient au moins un visage humain valide.
-
-    Retourne :
-    (is_valid, message, detected_object, confidence)
+    Simple & stable human face detection using OpenCV Haar Cascade.
+    Returns: (is_valid, message, detected_object, confidence)
     """
-
-    if not MEDIAPIPE_AVAILABLE:
-        return True, "Validation ignorée (MediaPipe indisponible).", "unknown", 0.0
 
     try:
-        # 🔁 Revenir au début du fichier
-        try:
-            image_file.seek(0)
-        except Exception:
-            pass
+        # Read image from UploadedFile
+        file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
+        img = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
 
-        # Charger l'image
-        img_pil = Image.open(image_file).convert("RGB")
-        img_rgb = np.array(img_pil)
+        if img is None:
+            return False, "Image invalide.", "unknown", 0.0
 
-        with mp_face_detection.FaceDetection(
-            model_selection=1,
-            min_detection_confidence=min_confidence
-        ) as detector:
+        # Load Haar Cascade
+        face_cascade = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        )
 
-            results = detector.process(img_rgb)
+        faces = face_cascade.detectMultiScale(
+            img,
+            scaleFactor=1.3,
+            minNeighbors=5,
+            minSize=(60, 60)
+        )
 
-            # ❌ Aucun visage détecté
-            if not results.detections:
-                return (
-                    False,
-                    "Aucun visage humain détecté sur cette image.",
-                    "no_face",
-                    0.0
-                )
+        if len(faces) > 0:
+            confidence = min(0.95, 0.6 + 0.1 * len(faces))
+            return True, "Visage humain détecté.", "human", confidence
 
-            # ✅ Vérifier la confiance
-            for detection in results.detections:
-                score = detection.score[0]
-                if score >= min_confidence:
-                    return (
-                        True,
-                        "Visage humain détecté avec succès.",
-                        "human_face",
-                        score
-                    )
-
-            return (
-                False,
-                "Visage détecté mais confiance insuffisante.",
-                "low_confidence_face",
-                max(d.score[0] for d in results.detections)
-            )
+        return False, "Aucun visage humain détecté.", "non-human", 0.0
 
     except Exception as e:
-        logger.error(f"Erreur validation image: {e}", exc_info=True)
-        return False, "Erreur lors de l'analyse de l'image.", "error", 0.0
+        return False, f"Erreur validation image: {e}", "error", 0.0

@@ -1,0 +1,23 @@
+{
+  "features": {
+    "num_features": [
+      "distance_km",
+      "duration_min",
+      "climatisation"
+    ],
+    "cat_features": [
+      "depart",
+      "arrivee",
+      "jour_semaine",
+      "heure"
+    ]
+  },
+  "metrics": {
+    "mae": 1.8886100747702221,
+    "r2_score": 0.9945843048685234
+  },
+  "model_type": "RandomForestRegressor",
+  "train_size": 2400,
+  "test_size": 600,
+  "date_entrainement": "2025-12-18T17:42:01.259821"
+}

@@ -9,6 +9,16 @@ from django.conf import settings
 from CovoiturageApp.models import Offre
 from ReservationApp.models import Reservation
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def predict_remuneration(request):
+    return JsonResponse({"ok": True, "message": "predict_remuneration stub works"})
+
+@require_http_methods(["GET", "POST"])
+def predict_prix_covoiturage(request):
+    return JsonResponse({"ok": True, "message": "predict_prix_covoiturage stub works"})
 
 # ============================================
 # FONCTION HELPER POUR UTILISATEUR STATIQUE

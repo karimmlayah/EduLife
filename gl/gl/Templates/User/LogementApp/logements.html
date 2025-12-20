@@ -1914,7 +1914,63 @@
   <!-- Main Content Section -->
   <section class="logement-main-content">
     <div class="container">
+      
       <h2 class="logement-content-title">Liste des logements disponibles</h2>
+
+      <!-- Recommendations Section -->
+      {% if recommendations %}
+      <div class="mb-5">
+        <h2 class="logement-content-title text-start mb-4" style="font-size: 1.8rem;">✨ Recommandations pour vous</h2>
+        <div class="logements-grid">
+            {% for logement in recommendations %}
+            <div class="logement-card" onclick="location.href='{% url 'logement_detail' logement.id %}'">
+                {% if logement.wifi %}
+                <div class="logement-card-wifi-badge">
+                  <i class="bi bi-wifi"></i> WiFi
+                </div>
+                {% endif %}
+                
+                <div class="logement-card-image-wrapper">
+                    {% if logement.images.first %}
+                        <img src="{{ logement.images.first.image.url }}" alt="{{ logement.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <div class="logement-card-image-placeholder">
+                            <i class="bi bi-house"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="p-4">
+                    <!-- Badges for match reasons -->
+                    <div class="mb-2">
+                        {% for reason in logement.match_reasons %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill me-1 mb-1 small">
+                                {{ reason }}
+                            </span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h3 class="h5 fw-bold text-gray-900 mb-0">{{ logement.title }}</h3>
+                        <span class="fw-bold text-primary">{{ logement.price }} DT</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3 text-secondary small mb-3">
+                        <span><i class="bi bi-geo-alt me-1"></i>{{ logement.city }}</span>
+                        <span><i class="bi bi-rulers me-1"></i>{{ logement.surface }}m²</span>
+                        <span><i class="bi bi-door-open me-1"></i>{{ logement.rooms }}p.</span>
+                    </div>
+                    
+                    <p class="text-secondary small mb-0 line-clamp-2">
+                        {{ logement.description|truncatechars:100 }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <hr class="my-5">
+      </div>
+      {% endif %}
       
       <!-- Filtres avancés -->
       <div class="filters-panel collapsed" id="filtersPanel">
@@ -2014,9 +2070,9 @@
           </form>
         </div>
       </div>
-      
+
       {% if request.user.is_authenticated %}
-      <div style="text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <div style="text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
         <a href="{% url 'logement_add' %}" class="add-logement-btn">
           <i class="bi bi-plus-circle"></i>
           Ajouter un logement
@@ -2044,7 +2100,7 @@
       <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
         <div>
           <h3 style="margin: 0; color: #1f2937; font-size: 1.1rem;">
-            {{ logements_with_connection|length }} logement{{ logements_with_connection|length|pluralize }} trouvé{{ logements_with_connection|length|pluralize }}
+            {{ page_obj.paginator.count }} logement{{ page_obj.paginator.count|pluralize }} trouvé{{ page_obj.paginator.count|pluralize }}
             {% if filters.search or filters.city or filters.type or filters.price_min or filters.price_max %}
               <span class="filters-active-badge">
                 <i class="bi bi-funnel-fill"></i> Filtres actifs
@@ -2054,10 +2110,9 @@
         </div>
       </div>
 
-      {% if logements_with_connection %}
+      {% if page_obj %}
       <div class="logements-grid">
-        {% for item in logements_with_connection %}
-        {% with logement=item.logement is_connected=item.is_connected %}
+        {% for logement in page_obj %}
         <div class="logement-card">
           {% if logement.wifi %}
           <div class="logement-card-wifi-badge">
@@ -2177,7 +2232,6 @@
             </div>
           </div>
         </div>
-        {% endwith %}
         {% endfor %}
       </div>
       {% else %}

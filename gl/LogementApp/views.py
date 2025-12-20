@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404, JsonResponse
@@ -16,6 +17,8 @@ from UserApp.models import CustomUser, Post, Comment, Connection, Message, Admin
 from .models import Logement, LogementImage, TemporaryImage
 from .forms import LogementForm
 from .ml_service import predict_price
+
+from .recommendation import RecommendationEngine
 
 logger = logging.getLogger(__name__)
 
@@ -128,13 +131,24 @@ def logement_home(request):
     # Récupérer toutes les villes uniques pour le filtre
     all_cities = Logement.objects.filter(available=True, approved=True, rejected=False).values_list('city', flat=True).distinct().order_by('city')
     
-    # Pour marketplace, pas besoin de vérifier les connexions - contact direct
-    logements_with_connection = [{'logement': logement, 'is_connected': False} for logement in logements]
+    # Pagination
+    paginator = Paginator(logements, 9) # 9 logements par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Get recommendations for logged-in users
+    recommendations = []
+    if request.user.is_authenticated:
+        try:
+            engine = RecommendationEngine()
+            recommendations = engine.get_recommendations(request.user, limit=3)
+        except Exception as e:
+            logger.error(f"Error getting recommendations: {e}", exc_info=True)
     
-    return render(request, 'User/LogementApp/logements.html', {
-        'logements_with_connection': logements_with_connection,
-        'all_cities': all_cities,
-        'filters': {
+    context = {
+        'page_obj': page_obj,
+        'all_cities': all_cities, # Keep all_cities in context
+        'filters': { # Keep filters in context
             'city': city_filter,
             'type': type_filter,
             'price_min': price_min,
@@ -146,8 +160,11 @@ def logement_home(request):
             'bathrooms_min': bathrooms_min,
             'wifi': wifi_filter,
             'search': search_query,
-        }
-    })
+        },
+        'recommendations': recommendations,
+    }
+    
+    return render(request, 'User/LogementApp/logements.html', context)
 
 
 @login_required
@@ -1727,3 +1744,43 @@ def summarize_description(request, logement_id):
             {"error": f"Erreur serveur : {str(e)}"},
             status=500
         )
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def predict_price_api(request):
+    """
+    API pour prédire le prix d'un logement
+    """
+    try:
+        data = json.loads(request.body)
+        
+        # Validation des champs requis
+        required_fields = ['city', 'surface', 'rooms', 'type']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"Champ manquant : {field}"}, status=400)
+        
+        # Prédiction
+        price = predict_price(
+            city=data['city'],
+            region=data.get('region', data['city']), # Par défaut région = ville
+            surface=float(data['surface']),
+            bathrooms=int(data.get('bathrooms', 1)),
+            rooms=int(data['rooms']),
+            logement_type=data['type']
+        )
+        
+        return JsonResponse({
+            "success": True, 
+            "price": price,
+            "message": f"Estimation : {price} DT"
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON invalide"}, status=400)
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        logger.error(f"Erreur prédiction: {e}", exc_info=True)
+        return JsonResponse({"error": f"Erreur serveur : {str(e)}"}, status=500)

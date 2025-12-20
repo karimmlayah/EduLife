@@ -105,6 +105,27 @@ def offre_list(request):
         for res in reservations.filter(statut='accepted')
     )
     
+    # --- NOUVEAU : Unsupervised Clustering Insights ---
+    clustering_insights = {}
+    try:
+        from .ml_models.trip_clustering import CovoiturageClusteredInsight
+        engine = CovoiturageClusteredInsight(n_clusters=3)
+        df_raw = engine.prepare_data(offres)
+        if not df_raw.empty:
+            df_clustered = engine.train_and_predict(df_raw)
+            clustering_insights = engine.get_insights(df_clustered)
+            
+            # Formatter les insights pour le template (ex: conversion decimal en pct)
+            for segment, meta in clustering_insights.items():
+                meta['climatisation_pct'] = meta['climatisation'] * 100
+            
+            # Attacher le segment à chaque offre pour l'affichage (optionnel)
+            id_to_segment = df_clustered.set_index('id')['segment'].to_dict()
+            for o in offres:
+                o.segment_label = id_to_segment.get(o.id, "Standard")
+    except Exception as e:
+        print(f"Erreur clustering: {e}")
+
     context = {
         'offres': offres,
         'total_offres': total_offres,
@@ -113,6 +134,7 @@ def offre_list(request):
         'places_reservees': places_reservees,
         'places_disponibles': places_disponibles,
         'revenu_total': round(revenu_total, 2),
+        'clustering_insights': clustering_insights,
     }
     
     return render(request, 'covoiturage/Backoffice/pages/offre_list.html', context)

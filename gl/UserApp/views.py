@@ -1549,47 +1549,58 @@ def profile_update_view(request):
     # Champs simples
     user.first_name = request.POST.get('first_name', '').strip()
     user.last_name = request.POST.get('last_name', '').strip()
+    user.phone = request.POST.get('phone', '').strip()
+    user.address = request.POST.get('address', '').strip()
+    user.city = request.POST.get('city', '').strip()
+    user.country = request.POST.get('country', '').strip()
+    user.zip = request.POST.get('zip', '').strip()
 
-    # ===============================
-    # 🖼️ AVATAR UPLOAD (CORRIGÉ)
-    # ===============================
+    # Gestion de l'avatar (facultatif)
+    update_fields = ['first_name', 'last_name', 'phone', 'address', 'city', 'country', 'zip']
+    
     if 'avatar' in request.FILES:
         avatar_file = request.FILES['avatar']
-
+        
         try:
             from .image_validator import validate_avatar_image
-
+            
+            # Valider l'image
             is_valid, message, detected_object, confidence = validate_avatar_image(avatar_file)
-
+            
             if not is_valid:
                 messages.error(request, f"❌ {message}")
+                avatar_file.seek(0)
                 return redirect('account_settings')
-
-            # 🔥 OBLIGATOIRE : reset pointeur fichier
+            
             avatar_file.seek(0)
-
             user.avatar = avatar_file
+            update_fields.append('avatar')
+            
             messages.success(
                 request,
                 f"✅ Avatar mis à jour ({confidence:.0%} confiance)."
             )
-
+            
+        except (ImportError, AttributeError) as e:
+            # MediaPipe non disponible ou version incompatible
+            user.avatar = avatar_file
+            update_fields.append('avatar')
+            messages.success(request, "✅ Avatar mis à jour (validation non disponible).")
+            logger.warning(f"Upload d'avatar sans validation: {e}")
+        
         except Exception as e:
-            messages.error(request, f"Erreur lors de la validation de l'image : {e}")
+            logger.error(f"Erreur lors de la validation de l'avatar: {e}", exc_info=True)
+            messages.error(request, f"Erreur lors de la validation de l'image: {str(e)}")
             return redirect('account_settings')
 
-    # ===============================
-    # 💾 SAUVEGARDE UNIQUE
-    # ===============================
+    # Sauvegarder une seule fois
     try:
-        user.save(update_fields=['first_name', 'last_name', 'avatar'])
+        user.save(update_fields=update_fields)
         messages.success(request, "Profil mis à jour avec succès.")
     except Exception as e:
         messages.error(request, f"Erreur sauvegarde profil : {e}")
 
     return redirect('account_settings')
-
-
 @login_required
 @require_POST
 def profile_update_public_view(request):
@@ -1670,7 +1681,7 @@ def profile_update_public_view(request):
                         path = default_storage.save(f'education/{img_file.name}', img_file)
                         image_url = settings.MEDIA_URL + path
                     except Exception:
-                        pass
+                        image_url = None
 
                 edu_item = {
                     'degree': request.POST.get('edu_degree', '').strip(),
@@ -1779,10 +1790,11 @@ def profile_update_public_view(request):
             return redirect('profile')
     
     # Uploads de fichiers
+    update_fields = []
+    
     if 'avatar' in request.FILES:
         avatar_file = request.FILES['avatar']
         
-        # Valider que l'image contient un être humain
         try:
             from .image_validator import validate_avatar_image
             is_valid, message, detected_object, confidence = validate_avatar_image(avatar_file)
@@ -1790,61 +1802,65 @@ def profile_update_public_view(request):
             if not is_valid:
                 messages.error(request, f"❌ {message}")
                 logger.warning(f"Tentative d'upload d'avatar invalide par {user.username}: {detected_object} (confiance: {confidence:.1%})")
-                # Réinitialiser le fichier avant de rediriger
                 avatar_file.seek(0)
                 return redirect('profile')
             
-            # Si valide, réinitialiser le fichier et sauvegarder l'avatar
             avatar_file.seek(0)
             user.avatar = avatar_file
-            # Forcer la sauvegarde de l'avatar
-            user.save(update_fields=['avatar'])
+            update_fields.append('avatar')
             messages.success(request, f'✅ Avatar mis à jour avec succès. {message}')
             logger.info(f"Avatar validé et mis à jour pour {user.username}: {detected_object} (confiance: {confidence:.1%})")
-        except ImportError:
-            # Si TensorFlow n'est pas disponible, on accepte l'image sans validation
-            logger.warning("TensorFlow non disponible. Upload d'avatar sans validation.")
+            
+        except ImportError as e:
+            logger.warning(f"MediaPipe non disponible: {e}. Upload d'avatar sans validation.")
             user.avatar = avatar_file
-            messages.success(request, 'Avatar mis à jour avec succès.')
+            update_fields.append('avatar')
+            messages.success(request, '✅ Avatar mis à jour (validation non disponible).')
+            
+        except AttributeError as e:
+            logger.error(f"Erreur MediaPipe - version incompatible: {e}", exc_info=True)
+            # Accepter l'avatar sans validation en cas d'erreur de version
+            user.avatar = avatar_file
+            update_fields.append('avatar')
+            messages.success(request, "✅ Avatar mis à jour (validation non disponible).")
+            
         except Exception as e:
             logger.error(f"Erreur lors de la validation de l'avatar: {e}", exc_info=True)
             messages.error(request, f"Erreur lors de la validation de l'image: {str(e)}")
             return redirect('profile')
+    
     if 'cover_photo' in request.FILES:
         user.cover_photo = request.FILES['cover_photo']
+        update_fields.append('cover_photo')
         messages.success(request, 'Photo de couverture mise à jour avec succès.')
     
-    # Sauvegarder l'utilisateur (seulement si l'avatar n'a pas déjà été sauvegardé)
+    # Ajouter les autres champs modifiés
+    if 'headline' in request.POST:
+        update_fields.append('headline')
+    if 'bio' in request.POST:
+        update_fields.append('bio')
+    if 'location' in request.POST:
+        update_fields.append('location')
+    if 'skills' in request.POST:
+        update_fields.append('skills')
+    if 'education' in request.POST or 'edu_degree' in request.POST:
+        update_fields.append('education')
+    if 'experience' in request.POST or 'exp_position' in request.POST:
+        update_fields.append('experience')
+    
+    # Sauvegarder si des champs ont été modifiés
     try:
-        # Si l'avatar a été traité et sauvegardé avec update_fields=['avatar'], 
-        # on ne doit pas faire un save() complet qui pourrait écraser
-        # On sauvegarde seulement si nécessaire (autres champs modifiés)
-        if 'avatar' not in request.FILES:
-            # L'avatar n'a pas été traité dans ce bloc, donc on peut sauvegarder normalement
-            user.save()
-        elif 'cover_photo' in request.FILES or any([user.headline, user.bio, user.location]):
-            # L'avatar a été sauvegardé, mais il y a d'autres champs à sauvegarder
-            # On sauvegarde sans toucher à l'avatar
-            update_fields = []
-            if 'cover_photo' in request.FILES:
-                update_fields.append('cover_photo')
-            if hasattr(user, 'headline') and user.headline:
-                update_fields.append('headline')
-            if hasattr(user, 'bio') and user.bio:
-                update_fields.append('bio')
-            if hasattr(user, 'location') and user.location:
-                update_fields.append('location')
-            if update_fields:
-                user.save(update_fields=update_fields)
-        
-        # Si aucun message de succès n'a été ajouté (pas d'upload de fichier), ajouter un message générique
-        if 'avatar' not in request.FILES and 'cover_photo' not in request.FILES:
+        if update_fields:
+            user.save(update_fields=update_fields)
             messages.success(request, 'Profil mis à jour avec succès.')
+        elif not any([request.FILES.get('avatar'), request.FILES.get('cover_photo')]):
+            # Aucun fichier uploadé et aucun champ modifié
+            messages.info(request, 'Aucune modification détectée.')
     except Exception as e:
         logger.error(f"Erreur lors de la sauvegarde du profil: {e}", exc_info=True)
         messages.error(request, f"Erreur lors de la mise à jour du profil: {e}")
+    
     return redirect('profile')
-
 
 @login_required
 @require_POST
@@ -1901,6 +1917,7 @@ def manage_users_view(request):
     })
 
 @user_passes_test(lambda u: u.is_superuser)
+
 @require_POST
 def set_user_role_view(request, user_id: int):
     """

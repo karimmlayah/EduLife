@@ -22,4 +22,5 @@ urlpatterns = [
     path('<int:logement_id>/summarize/', views.summarize_description, name='summarize_description'),
     path('generate-ai/', views.logement_generate_ai, name='logement_generate_ai'),
     path('upload-temp-image/', views.upload_temp_image, name='upload_temp_image'),
+
 ]

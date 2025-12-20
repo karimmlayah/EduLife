@@ -985,8 +985,18 @@
               </div>
 
                 <div class="form-group">
-                  <label for="lettre_motivation{{ offre.id_offre }}">Motivation Letter *</label>
-                  <textarea name="lettre_motivation" id="lettre_motivation{{ offre.id_offre }}" rows="5" class="form-control" placeholder="Write your motivation letter here. Explain why you are interested in this position and how your skills match the requirements..." required minlength="50" maxlength="5000"></textarea>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="lettre_motivation{{ offre.id_offre }}" class="mb-0">Motivation Letter *</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                            onclick="generateAILetter({{ offre.id_offre }})"
+                            id="btn-ai-{{ offre.id_offre }}"
+                            style="border-color: #ff6b35; color: #ff6b35; font-size: 11px; padding: 2px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                      <i class="bi bi-magic"></i>
+                      <span id="text-ai-{{ offre.id_offre }}">Generate with AI</span>
+                      <span id="spinner-ai-{{ offre.id_offre }}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                  <textarea name="lettre_motivation" id="lettre_motivation{{ offre.id_offre }}" rows="8" class="form-control" placeholder="Write your motivation letter here. Explain why you are interested in this position and how your skills match the requirements..." required minlength="50" maxlength="5000"></textarea>
                   <small class="form-text text-muted">Minimum 50 characters. Explain your motivation and how your skills match the requirements.</small>
                 </div>
 
@@ -1285,11 +1295,57 @@
             }
         });
     })();
+
+    // Fonction pour générer une lettre de motivation avec l'IA
+    async function generateAILetter(offreId) {
+      const btn = document.getElementById(`btn-ai-${offreId}`);
+      const text = document.getElementById(`text-ai-${offreId}`);
+      const spinner = document.getElementById(`spinner-ai-${offreId}`);
+      const textarea = document.getElementById(`lettre_motivation${offreId}`);
+      
+      if (!btn || !textarea) return;
+      
+      // Désactiver le bouton et montrer le spinner
+      btn.disabled = true;
+      text.classList.add('d-none');
+      spinner.classList.remove('d-none');
+      
+      try {
+        const response = await fetch('/generate-motivation-letter/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ offre_id: offreId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          textarea.value = data.letter;
+          // Ajuster la hauteur du textarea pour accommoder le texte généré
+          textarea.style.height = 'auto';
+          textarea.style.height = (textarea.scrollHeight + 10) + 'px';
+        } else {
+          alert("Erreur lors de la génération : " + (data.error || "Inconnue"));
+        }
+      } catch (error) {
+        console.error('Error generating AI letter:', error);
+        alert("Une erreur réseau est survenue.");
+      } finally {
+        // Réactiver le bouton
+        btn.disabled = false;
+        text.classList.remove('d-none');
+        spinner.classList.add('d-none');
+      }
+    }
   </script>
 
   <!-- LinkedIn Style Messaging Widget -->
   {% include 'User/includes/messaging_widget.html' %}
 
+  <!-- EduBot & EduVoice Integration -->
+  {% include 'includes/edubot_eduvoice.html' %}
 </body>
-
 </html>

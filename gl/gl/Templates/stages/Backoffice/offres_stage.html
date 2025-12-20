@@ -218,11 +218,19 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Salary (DT) <span class="text-danger">*</span></label>
-              {{ form.remuneration }}
+              <div class="d-flex gap-2 align-items-center">
+                <div class="flex-grow-1">
+                  {{ form.remuneration }}
+                </div>
+                <button type="button" class="btn btn-outline-primary" id="suggestRemunerationBtn" onclick="suggestRemuneration()" style="white-space: nowrap; flex-shrink: 0; margin-left: 8px;">
+                  <i class="bi bi-magic"></i> Suggest
+                </button>
+              </div>
               {% if form.remuneration.errors %}
                 <div class="text-danger small">{{ form.remuneration.errors }}</div>
               {% endif %}
               <small class="form-text text-muted">Amount in DT (Tunisian Dinars) - must be greater than 0</small>
+              <div id="remunerationSuggestion" class="mt-2" style="display: none;"></div>
             </div>
           </div>
           <div class="row">
@@ -240,7 +248,11 @@
               {% if form.etat.errors %}
                 <div class="text-danger small">{{ form.etat.errors }}</div>
               {% endif %}
-              <small class="form-text text-muted">Ex: Open, Closed, In progress...</small>
+              {% if editing %}
+              <small class="form-text text-muted">Select the status of the offer</small>
+              {% else %}
+              <small class="form-text text-muted">Status is automatically set to "Available" for new offers. You can modify it when editing.</small>
+              {% endif %}
             </div>
           </div>
           <div class="row">
@@ -420,6 +432,100 @@
     // Si on n'est pas en mode édition, laisser le formulaire se soumettre normalement
     return true;
   });
+  
+  // Variable pour empêcher les clics multiples
+  let isPredicting = false;
+  
+  // Fonction pour suggérer la rémunération via ML
+  function suggestRemuneration() {
+    // Empêcher les clics multiples
+    if (isPredicting) {
+      return;
+    }
+    
+    const btn = document.getElementById('suggestRemunerationBtn');
+    const suggestionDiv = document.getElementById('remunerationSuggestion');
+    const remunerationInput = document.querySelector('input[name="remuneration"]');
+    
+    // Récupérer les valeurs du formulaire
+    const domaine = document.querySelector('input[name="domaine"]').value.trim();
+    const lieu = document.querySelector('input[name="lieu"]').value.trim();
+    const duree = document.querySelector('input[name="duree"]').value.trim();
+    const description = document.querySelector('textarea[name="description"]').value.trim();
+    const titre = document.querySelector('input[name="titre"]').value.trim();
+    const date_publication = document.querySelector('input[name="date_publication"]').value;
+    const visibilite = document.querySelector('input[name="visibilite"]').checked;
+    const has_image = document.querySelector('input[name="image"]').files.length > 0;
+    
+    // Validation des champs obligatoires
+    if (!domaine || !lieu || !duree || !description || !titre) {
+      suggestionDiv.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Please fill in all required fields (Domain, Location, Duration, Title, Description)</div>';
+      suggestionDiv.style.display = 'block';
+      return;
+    }
+    
+    // Validation de la durée
+    if (parseInt(duree) < 1 || parseInt(duree) > 104) {
+      suggestionDiv.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Duration must be between 1 and 104 weeks</div>';
+      suggestionDiv.style.display = 'block';
+      return;
+    }
+    
+    // Marquer comme en cours
+    isPredicting = true;
+    
+    // Désactiver le bouton pendant la requête
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+    suggestionDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Calculating suggestion... Please wait</div>';
+    suggestionDiv.style.display = 'block';
+    
+    // Préparer les données
+    const formData = new FormData();
+    formData.append('domaine', domaine);
+    formData.append('lieu', lieu);
+    formData.append('duree', duree);
+    formData.append('description', description);
+    formData.append('titre', titre);
+    formData.append('date_publication', date_publication || new Date().toISOString().split('T')[0]);
+    formData.append('visibilite', visibilite);
+    formData.append('has_image', has_image);
+    formData.append('nb_postulations', 0);
+    formData.append('nb_favoris', 0);
+    formData.append('etat', 'disponible');
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    // Appeler l'API
+    fetch('{% url "predict_remuneration" %}', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const predictedValue = data.predicted_remuneration;
+        remunerationInput.value = predictedValue;
+        suggestionDiv.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle"></i> <strong>Suggested: ${predictedValue} DT</strong></div>`;
+      } else {
+        suggestionDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${data.error || 'Error occurred'}</div>`;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      console.error('Error details:', error.message);
+      suggestionDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message || 'Error connecting to prediction service. Please try again.'}</div>`;
+    })
+    .finally(() => {
+      isPredicting = false;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-magic"></i> Suggest';
+    });
+  }
 </script>
 {% endblock %}
 

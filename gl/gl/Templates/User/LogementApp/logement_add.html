@@ -798,7 +798,7 @@ if (missingFields.length > 0) {
           surface,
           rooms,
           bathrooms,
-          type_logement
+          type: type_logement
         })
       })
       .then(res => res.json())
@@ -807,11 +807,11 @@ if (missingFields.length > 0) {
         btn.innerHTML = '<i class="bi bi-robot"></i> Prédire le prix avec l\'IA';
     
         if (resp.success) {
-          document.querySelector('[name="price"]').value = resp.predicted_price;
+          document.querySelector('[name="price"]').value = resp.price;
     
           // 🟢 TOAST succès
           showToast(
-            `💰 Prix estimé : ${resp.predicted_price} DT / mois`,
+            `💰 Prix estimé : ${resp.price} DT / mois`,
             "success"
           );
         } else {
